@@ -289,10 +289,10 @@
 // ── データソース設定 ──────────────────────────────────────
 // 静的JSON（watchlist/portfolio/manifest）→ GitHub Raw（push直後に反映）
 // yfinanceが必要なAPI（healthcheck）→ Render
-const GITHUB_RAW = 'https://raw.githubusercontent.com/bi-al1/kabumart-analyzer/master';
+const GITHUB_RAW = 'https://raw.githubusercontent.com/bi-al1/stock-dashboard/main';
 const RENDER_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
   ? 'http://localhost:8000'
-  : 'https://kabumart-analyzer.onrender.com';
+  : 'https://stock-dashboard.onrender.com';
 
 // GitHub Raw から JSON を取得（キャッシュバイパス付き）
 async function fetchGitHub(path) {

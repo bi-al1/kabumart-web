@@ -59,7 +59,7 @@ app.add_middleware(
 
 # ── GitHub API 設定 ────────────────────────────────────────
 GITHUB_OWNER  = "bi-al1"
-GITHUB_REPO   = "kabumart-web"
+GITHUB_REPO   = "stock-dashboard"
 GITHUB_BRANCH = "main"
 
 # GitHub上の各JSONのパス（リポジトリルートからの相対パス）
