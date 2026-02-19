@@ -427,8 +427,8 @@ async function loadPortfolio() {
       combinedKpi.className = 'kpi-val ' + gainClass(combined);
       if (combinedSubKpi) {
         const parts = [];
-        if (unrealizedTotal != null) parts.push(`含み ${unrealizedTotal >= 0 ? '¥' : '-¥'}${fmt(Math.abs(unrealizedTotal))}`);
-        if (tradeCount > 0) parts.push(`実現 ${realizedProfit >= 0 ? '¥' : '-¥'}${fmt(Math.abs(realizedProfit))}`);
+        if (unrealizedTotal != null) parts.push(`含み <span class="${gainClass(unrealizedTotal)}">${unrealizedTotal >= 0 ? '¥' : '-¥'}${fmt(Math.abs(unrealizedTotal))}</span>`);
+        if (tradeCount > 0) parts.push(`実現 <span class="${gainClass(realizedProfit)}">${realizedProfit >= 0 ? '¥' : '-¥'}${fmt(Math.abs(realizedProfit))}</span>`);
         combinedSubKpi.innerHTML = parts.join('<br>');
         combinedSubKpi.className = 'kpi-sub neutral';
       }
