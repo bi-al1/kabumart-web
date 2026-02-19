@@ -362,7 +362,7 @@ async function loadPortfolio() {
       .filter(t => t.action === 'sell' && t.profit != null)
       .reduce((sum, t) => sum + t.profit, 0);
     const realizedProfitCls = gainClass(realizedProfit);
-    const realizedProfitStr = realizedProfit >= 0 ? `+¥${fmt(realizedProfit)}` : `-¥${fmt(Math.abs(realizedProfit))}`;
+    const realizedProfitStr = realizedProfit >= 0 ? `¥${fmt(realizedProfit)}` : `-¥${fmt(Math.abs(realizedProfit))}`;
     const tradeCount = tradeHistory.filter(t => t.action === 'sell').length;
 
     el.innerHTML = `
@@ -410,7 +410,7 @@ async function loadPortfolio() {
     const glPctKpi = document.getElementById('totalGLPctKpi');
     if (glKpi && unrealizedTotal != null) {
       const pct = unrealizedCost > 0 ? unrealizedTotal / unrealizedCost * 100 : null;
-      glKpi.textContent = (unrealizedTotal >= 0 ? '+¥' : '-¥') + fmt(Math.abs(unrealizedTotal));
+      glKpi.textContent = (unrealizedTotal >= 0 ? '¥' : '-¥') + fmt(Math.abs(unrealizedTotal));
       glKpi.className = 'kpi-val ' + gainClass(unrealizedTotal);
       if (glPctKpi && pct != null) {
         glPctKpi.textContent = fmtPct(pct);
@@ -423,12 +423,12 @@ async function loadPortfolio() {
     const combinedSubKpi = document.getElementById('totalCombinedSubKpi');
     if (combinedKpi && (unrealizedTotal != null || tradeCount > 0)) {
       const combined = (unrealizedTotal ?? 0) + realizedProfit;
-      combinedKpi.textContent = (combined >= 0 ? '+¥' : '-¥') + fmt(Math.abs(combined));
+      combinedKpi.textContent = (combined >= 0 ? '¥' : '-¥') + fmt(Math.abs(combined));
       combinedKpi.className = 'kpi-val ' + gainClass(combined);
       if (combinedSubKpi) {
         const parts = [];
-        if (unrealizedTotal != null) parts.push(`含み ${unrealizedTotal >= 0 ? '+¥' : '-¥'}${fmt(Math.abs(unrealizedTotal))}`);
-        if (tradeCount > 0) parts.push(`実現 ${realizedProfit >= 0 ? '+¥' : '-¥'}${fmt(Math.abs(realizedProfit))}`);
+        if (unrealizedTotal != null) parts.push(`含み ${unrealizedTotal >= 0 ? '¥' : '-¥'}${fmt(Math.abs(unrealizedTotal))}`);
+        if (tradeCount > 0) parts.push(`実現 ${realizedProfit >= 0 ? '¥' : '-¥'}${fmt(Math.abs(realizedProfit))}`);
         combinedSubKpi.innerHTML = parts.join('<br>');
         combinedSubKpi.className = 'kpi-sub neutral';
       }
@@ -466,7 +466,7 @@ function renderHoldingsTable(holdings) {
         <td>${fmt(h.shares)} 株</td>
         <td>¥${fmt(h.avg_cost)}</td>
         <td>${h.current_price ? '¥' + fmt(h.current_price) : '<span style="color:var(--muted)">取得中</span>'}</td>
-        <td class="${gainClass(h.gain_loss)}">${h.gain_loss != null ? (h.gain_loss >= 0 ? '+' : '') + '¥' + fmt(h.gain_loss) : '—'}</td>
+        <td class="${gainClass(h.gain_loss)}">${h.gain_loss != null ? (h.gain_loss >= 0 ? '' : '-') + '¥' + fmt(Math.abs(h.gain_loss)) : '—'}</td>
         <td class="${gainClass(h.gain_loss_pct)}">${h.gain_loss_pct != null ? fmtPct(h.gain_loss_pct) : '—'}</td>
         <td>${evalAmt ? '¥' + fmt(evalAmt) : '—'}</td>
         <td>${alertBadge}</td>
@@ -507,7 +507,7 @@ function renderTradeHistory(tradeHistory) {
     let profitCell = '<span style="color:var(--muted)">—</span>';
     if (isSell && t.profit != null) {
       const cls = t.profit >= 0 ? 'positive' : 'negative';
-      const sign = t.profit >= 0 ? '+' : '-';
+      const sign = t.profit >= 0 ? '' : '-';
       profitCell = `<span class="${cls}">${sign}¥${fmt(Math.abs(t.profit))}</span>`;
     }
     return `
