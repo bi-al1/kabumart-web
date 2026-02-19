@@ -429,7 +429,7 @@ async function loadPortfolio() {
         const parts = [];
         if (unrealizedTotal != null) parts.push(`含み ${unrealizedTotal >= 0 ? '+¥' : '-¥'}${fmt(Math.abs(unrealizedTotal))}`);
         if (tradeCount > 0) parts.push(`実現 ${realizedProfit >= 0 ? '+¥' : '-¥'}${fmt(Math.abs(realizedProfit))}`);
-        combinedSubKpi.textContent = parts.join(' / ');
+        combinedSubKpi.innerHTML = parts.join('<br>');
         combinedSubKpi.className = 'kpi-sub neutral';
       }
     }
