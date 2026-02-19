@@ -377,7 +377,7 @@ async function loadPortfolio() {
         <div class="kpi-sub neutral">取得原価合計</div>
       </div>
       <div class="card">
-        <div class="kpi-label">含み損益（現在値）</div>
+        <div class="kpi-label">評価損益（現在値）</div>
         <div class="kpi-val neutral" id="totalGLKpi">—</div>
         <div class="kpi-sub neutral" id="totalGLPctKpi">ヘルスチェック後に更新</div>
       </div>
@@ -427,8 +427,8 @@ async function loadPortfolio() {
       combinedKpi.className = 'kpi-val ' + gainClass(combined);
       if (combinedSubKpi) {
         const parts = [];
-        if (unrealizedTotal != null) parts.push(`含み ${unrealizedTotal >= 0 ? '+' : ''}¥${fmt(unrealizedTotal)}`);
-        if (tradeCount > 0) parts.push(`実現 ${realizedProfit >= 0 ? '+' : ''}¥${fmt(realizedProfit)}`);
+        if (unrealizedTotal != null) parts.push(`含み ${unrealizedTotal >= 0 ? '+¥' : '-¥'}${fmt(Math.abs(unrealizedTotal))}`);
+        if (tradeCount > 0) parts.push(`実現 ${realizedProfit >= 0 ? '+¥' : '-¥'}${fmt(Math.abs(realizedProfit))}`);
         combinedSubKpi.textContent = parts.join(' / ');
         combinedSubKpi.className = 'kpi-sub neutral';
       }
