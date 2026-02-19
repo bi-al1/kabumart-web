@@ -7,6 +7,14 @@
       "avg_cost": 2500.0,
       "purchase_date": "2026-02-19",
       "note": ""
+    },
+    {
+      "code": "1111",
+      "name": "テスト株式会社",
+      "shares": 1000,
+      "avg_cost": 1250.0,
+      "purchase_date": "2026-02-19",
+      "note": ""
     }
   ],
   "trade_history": [
@@ -17,7 +25,15 @@
       "action": "buy",
       "shares": 100,
       "price": 2500.0
+    },
+    {
+      "date": "2026-02-19",
+      "code": "1111",
+      "name": "テスト株式会社",
+      "action": "buy",
+      "shares": 1000,
+      "price": 1250.0
     }
   ],
-  "updated_at": "2026-02-19T09:56:59.906270"
+  "updated_at": "2026-02-19T09:57:25.997587"
 }
