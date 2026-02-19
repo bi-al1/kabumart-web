@@ -47,6 +47,7 @@
   .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
   .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
   .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
 
   /* サマリーKPI */
   .kpi-val { font-size: 28px; font-weight: 800; color: #fff; line-height: 1.1; }
@@ -190,11 +191,11 @@
 
   /* レスポンシブ */
   @media (max-width: 768px) {
-    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
+    .grid-2, .grid-3, .grid-4, .grid-5 { grid-template-columns: 1fr 1fr; }
     .kpi-val { font-size: 22px; }
   }
   @media (max-width: 480px) {
-    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    .grid-2, .grid-3, .grid-4, .grid-5 { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -213,7 +214,9 @@
   <!-- ポートフォリオサマリー -->
   <div class="section">
     <div class="section-title">ポートフォリオ サマリー</div>
-    <div class="grid-3" id="portfolioSummary">
+    <div class="grid-5" id="portfolioSummary">
+      <div class="card"><div class="loading"><div class="spinner"></div></div></div>
+      <div class="card"><div class="loading"><div class="spinner"></div></div></div>
       <div class="card"><div class="loading"><div class="spinner"></div></div></div>
       <div class="card"><div class="loading"><div class="spinner"></div></div></div>
       <div class="card"><div class="loading"><div class="spinner"></div></div></div>
@@ -338,6 +341,15 @@ async function loadPortfolio() {
     let totalCost = 0;
     holdings.forEach(h => { totalCost += h.avg_cost * h.shares; });
 
+    // 実現損益（売却済みトレードのprofitを合計）
+    const tradeHistory = data.trade_history || [];
+    const realizedProfit = tradeHistory
+      .filter(t => t.action === 'sell' && t.profit != null)
+      .reduce((sum, t) => sum + t.profit, 0);
+    const realizedProfitCls = gainClass(realizedProfit);
+    const realizedProfitStr = realizedProfit >= 0 ? `+¥${fmt(realizedProfit)}` : `-¥${fmt(Math.abs(realizedProfit))}`;
+    const tradeCount = tradeHistory.filter(t => t.action === 'sell').length;
+
     el.innerHTML = `
       <div class="card">
         <div class="kpi-label">保有銘柄数</div>
@@ -350,11 +362,62 @@ async function loadPortfolio() {
         <div class="kpi-sub neutral">取得原価合計</div>
       </div>
       <div class="card">
-        <div class="kpi-label">損益（現在値）</div>
+        <div class="kpi-label">含み損益（現在値）</div>
         <div class="kpi-val neutral" id="totalGLKpi">—</div>
         <div class="kpi-sub neutral" id="totalGLPctKpi">ヘルスチェック後に更新</div>
       </div>
+      <div class="card">
+        <div class="kpi-label">実現損益（売却済み）</div>
+        <div class="kpi-val ${tradeCount === 0 ? 'neutral' : realizedProfitCls}">${tradeCount === 0 ? '—' : realizedProfitStr}</div>
+        <div class="kpi-sub neutral">${tradeCount === 0 ? '売却履歴なし' : `${tradeCount}件の売却`}</div>
+      </div>
+      <div class="card">
+        <div class="kpi-label">総合損益（含み + 実現）</div>
+        <div class="kpi-val neutral" id="totalCombinedKpi">—</div>
+        <div class="kpi-sub neutral" id="totalCombinedSubKpi">ヘルスチェック後に更新</div>
+      </div>
     `;
+
+    // 含み損益の合計（current_priceが取得できた銘柄のみ）
+    let unrealizedTotal = null;
+    let unrealizedCost = 0;
+    let hasPrice = false;
+    holdings.forEach(h => {
+      if (h.gain_loss != null) {
+        if (!hasPrice) { unrealizedTotal = 0; hasPrice = true; }
+        unrealizedTotal += h.gain_loss;
+        unrealizedCost += h.avg_cost * h.shares;
+      }
+    });
+
+    // 含み損益KPI更新
+    const glKpi = document.getElementById('totalGLKpi');
+    const glPctKpi = document.getElementById('totalGLPctKpi');
+    if (glKpi && unrealizedTotal != null) {
+      const pct = unrealizedCost > 0 ? unrealizedTotal / unrealizedCost * 100 : null;
+      glKpi.textContent = (unrealizedTotal >= 0 ? '+¥' : '-¥') + fmt(Math.abs(unrealizedTotal));
+      glKpi.className = 'kpi-val ' + gainClass(unrealizedTotal);
+      if (glPctKpi && pct != null) {
+        glPctKpi.textContent = fmtPct(pct);
+        glPctKpi.className = 'kpi-sub ' + gainClass(pct);
+      }
+    }
+
+    // 総合損益KPI更新（含み + 実現）
+    const combinedKpi = document.getElementById('totalCombinedKpi');
+    const combinedSubKpi = document.getElementById('totalCombinedSubKpi');
+    if (combinedKpi && (unrealizedTotal != null || tradeCount > 0)) {
+      const combined = (unrealizedTotal ?? 0) + realizedProfit;
+      combinedKpi.textContent = (combined >= 0 ? '+¥' : '-¥') + fmt(Math.abs(combined));
+      combinedKpi.className = 'kpi-val ' + gainClass(combined);
+      if (combinedSubKpi) {
+        const parts = [];
+        if (unrealizedTotal != null) parts.push(`含み ${unrealizedTotal >= 0 ? '+' : ''}¥${fmt(unrealizedTotal)}`);
+        if (tradeCount > 0) parts.push(`実現 ${realizedProfit >= 0 ? '+' : ''}¥${fmt(realizedProfit)}`);
+        combinedSubKpi.textContent = parts.join(' / ');
+        combinedSubKpi.className = 'kpi-sub neutral';
+      }
+    }
 
     // 保有銘柄テーブル
     renderHoldingsTable(holdings);
