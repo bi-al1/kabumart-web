@@ -37,8 +37,7 @@ from pydantic import BaseModel
 # このリポジトリ（kabumart-web）のルート
 BASE_DIR = Path(__file__).parent.parent
 
-FRONTEND_DIR    = BASE_DIR / "frontend"
-STOCKS_DATA_DIR = BASE_DIR / "data" / "stocks"  # 分析JSONデータのローカルキャッシュ
+FRONTEND_DIR = BASE_DIR / "frontend"
 
 # ── yfinance ──────────────────────────────────────────────
 try:
@@ -460,13 +459,10 @@ def healthcheck():
 @app.get("/api/stocks/{code}/data")
 def get_stock_data(code: str):
     """分析JSONデータを返す（detail.html 用）"""
-    json_file = STOCKS_DATA_DIR / f"{code.upper()}.json"
-    if not json_file.exists():
-        raise HTTPException(status_code=404, detail=f"{code} の分析データが見つかりません")
     try:
-        return json.loads(json_file.read_text(encoding="utf-8"))
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        return github_fetch_json(f"data/stocks/{code.upper()}.json")
+    except Exception:
+        raise HTTPException(status_code=404, detail=f"{code} の分析データが見つかりません")
 
 @app.get("/api/stocks/{code}")
 def get_stock(code: str):
@@ -498,11 +494,6 @@ def delete_report(code: str):
         raise HTTPException(status_code=404, detail=f"{code} の分析レポートが見つかりません")
     except RuntimeError as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-    # ローカルキャッシュも削除（あれば）
-    local_file = STOCKS_DATA_DIR / f"{code.upper()}.json"
-    if local_file.exists():
-        local_file.unlink()
 
     # Step2: manifest.json から除外
     try:
