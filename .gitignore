@@ -11,6 +11,7 @@ venv/
 .DS_Store
 Thumbs.db
 
-# データファイル（GitHub Contents APIで直接管理・ローカル不要）
-data/
-manifest.json
+# data/ と manifest.json は git 管理（detail.html が GitHub Raw から読む）
+# watchlist.json と portfolio.json は Render API → GitHub Contents API 経由で管理するため除外
+data/watchlist.json
+data/portfolio.json
