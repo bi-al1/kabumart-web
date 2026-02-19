@@ -1,0 +1,21 @@
+{
+  "stocks": [
+    {
+      "code": "402A",
+      "name": "アクセルスペースホールディングス",
+      "analyzed_date": "2026-02-18",
+      "kabumart_rank": "C",
+      "data_file": "data/stocks/402A.json",
+      "url": "/stocks/detail.html?code=402A"
+    },
+    {
+      "code": "7203",
+      "name": "トヨタ自動車（テスト用）",
+      "analyzed_date": "2026-02-19",
+      "kabumart_rank": "A",
+      "data_file": "data/stocks/7203.json",
+      "url": "/stocks/detail.html?code=7203"
+    }
+  ],
+  "updated_at": "2026-02-19T00:00:00.000000"
+}

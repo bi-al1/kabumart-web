@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>投資管理ダッシュボード</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #0f1117;
+    --card: #1a1d2e;
+    --card2: #22263a;
+    --accent: #4a9eff;
+    --accent2: #7c5cfc;
+    --green: #22c55e;
+    --red: #ef4444;
+    --yellow: #f59e0b;
+    --text: #e2e8f0;
+    --muted: #8892a4;
+    --border: #2d3252;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Hiragino Sans', 'Meiryo', sans-serif; font-size: 14px; line-height: 1.6; }
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+
+  /* ヘッダー */
+  .header-card { background: linear-gradient(135deg, #1a1d2e 0%, #0f1a3a 100%); border: 1px solid var(--border); border-radius: 16px; padding: 24px 28px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+  .header-left h1 { font-size: 22px; font-weight: 700; color: #fff; }
+  .header-left p { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .header-right { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+  .last-updated { font-size: 11px; color: var(--muted); }
+
+  /* バッジ */
+  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+  .badge-blue { background: rgba(74,158,255,0.15); color: var(--accent); border: 1px solid rgba(74,158,255,0.3); }
+  .badge-green { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
+  .badge-red { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
+  .badge-orange { background: rgba(245,158,11,0.15); color: var(--yellow); border: 1px solid rgba(245,158,11,0.3); }
+  .badge-gray { background: rgba(136,146,164,0.15); color: var(--muted); border: 1px solid rgba(136,146,164,0.3); }
+  .badge-purple { background: rgba(124,92,252,0.15); color: #a78bfa; border: 1px solid rgba(124,92,252,0.3); }
+
+  /* セクション */
+  .section { margin-bottom: 24px; }
+  .section-title { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .section-title::before { content: ''; display: block; width: 4px; height: 18px; background: var(--accent); border-radius: 2px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
+  /* サマリーKPI */
+  .kpi-val { font-size: 28px; font-weight: 800; color: #fff; line-height: 1.1; }
+  .kpi-label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .kpi-sub { font-size: 13px; font-weight: 600; margin-top: 6px; }
+  .positive { color: var(--green); }
+  .negative { color: var(--red); }
+  .neutral { color: var(--muted); }
+
+  /* ヘルスチェックサマリー */
+  .health-badge { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px 12px; border-radius: 10px; gap: 6px; }
+  .health-badge .icon { font-size: 24px; }
+  .health-badge .count { font-size: 28px; font-weight: 800; }
+  .health-badge .hlabel { font-size: 11px; color: var(--muted); }
+  .health-green { background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.2); }
+  .health-yellow { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); }
+  .health-orange { background: rgba(251,146,60,0.08); border: 1px solid rgba(251,146,60,0.2); }
+  .health-red { background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); }
+
+  /* 保有銘柄テーブル */
+  .holdings-table { width: 100%; border-collapse: collapse; }
+  .holdings-table th { font-size: 11px; color: var(--muted); padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  .holdings-table td { padding: 10px 10px; border-bottom: 1px solid rgba(45,50,82,0.5); font-size: 13px; vertical-align: middle; }
+  .holdings-table tr:last-child td { border-bottom: none; }
+  .holdings-table tr:hover td { background: rgba(74,158,255,0.04); }
+  .stock-name { font-weight: 600; color: #fff; }
+  .stock-code { font-size: 11px; color: var(--muted); }
+
+  /* ヘルスチェック詳細 */
+  .health-row { background: var(--card2); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .health-row:last-child { margin-bottom: 0; }
+  .health-row .name-block { flex: 1; min-width: 140px; }
+  .health-row .name-block .name { font-weight: 700; color: #fff; font-size: 14px; }
+  .health-row .name-block .code { font-size: 11px; color: var(--muted); }
+  .health-row .detail-block { flex: 2; min-width: 200px; }
+  .health-row .detail-block .reason { font-size: 12px; color: #94a3c8; margin-top: 4px; }
+  .health-row .metrics { display: flex; gap: 12px; flex-wrap: wrap; }
+  .metric-item { text-align: center; }
+  .metric-item .mval { font-size: 14px; font-weight: 700; color: #fff; }
+  .metric-item .mlabel { font-size: 10px; color: var(--muted); }
+
+  /* ウォッチリスト */
+  .watchlist-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+  .watch-card { background: var(--card2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; transition: border-color 0.2s; }
+  .watch-card:hover { border-color: var(--accent); }
+  .watch-card.status-watching  { border-left: 3px solid var(--accent); }
+  .watch-card.status-interested { border-left: 3px solid var(--yellow); }
+  .watch-card.status-pending   { border-left: 3px solid var(--muted); }
+  .watch-card .wname { font-weight: 700; color: #fff; font-size: 14px; margin-bottom: 4px; }
+  .watch-card .wcode { font-size: 11px; color: var(--accent); margin-bottom: 6px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .watch-card .wnote { font-size: 11px; color: var(--muted); line-height: 1.5; margin-bottom: 8px; }
+  .watch-card .wmeta { font-size: 10px; color: var(--muted); }
+  .watch-card .wrank { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 11px; font-weight: 700; background: rgba(124,92,252,0.15); color: #a78bfa; border: 1px solid rgba(124,92,252,0.3); }
+  /* ステータスセレクター（インライン） */
+  .wstatus-wrap { position: relative; display: inline-block; }
+  .wstatus { display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 700; cursor: pointer; user-select: none; }
+  .wstatus:hover { opacity: 0.8; }
+  .wstatus-watching   { background: rgba(74,158,255,0.12); color: var(--accent); border: 1px solid rgba(74,158,255,0.25); }
+  .wstatus-interested { background: rgba(245,158,11,0.12); color: var(--yellow); border: 1px solid rgba(245,158,11,0.25); }
+  .wstatus-pending    { background: rgba(136,146,164,0.12); color: var(--muted); border: 1px solid rgba(136,146,164,0.25); }
+  .wstatus-dropdown { position: absolute; top: calc(100% + 4px); left: 0; background: #1a1d2e; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; min-width: 130px; box-shadow: 0 6px 20px rgba(0,0,0,0.5); display: none; z-index: 300; }
+  .wstatus-dropdown.open { display: block; }
+  .wstatus-option { padding: 8px 12px; font-size: 11px; font-weight: 600; cursor: pointer; transition: background 0.15s; white-space: nowrap; }
+  .wstatus-option:hover { background: rgba(255,255,255,0.06); }
+  .wstatus-option.active { background: rgba(74,158,255,0.1); }
+  .wstatus-saving { font-size: 10px; color: var(--muted); padding: 2px 6px; }
+  /* PER表示 */
+  .wper      { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; background: rgba(34,197,94,0.08);  color: #86efac;        border: 1px solid rgba(34,197,94,0.2); }
+  .wper-red  { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; background: rgba(239,68,68,0.08);  color: var(--red);     border: 1px solid rgba(239,68,68,0.2); }
+  .wper-null { display: inline-flex; align-items: center; gap: 3px; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; background: rgba(136,146,164,0.08); color: var(--muted);   border: 1px solid rgba(136,146,164,0.2); }
+  /* PER矢印 */
+  .arrow-good { color: var(--green);  font-weight: 900; }
+  .arrow-bad  { color: var(--red);    font-weight: 900; }
+  .arrow-flat { color: var(--muted);  font-weight: 700; }
+
+  /* 個別分析ページ一覧 */
+  .manifest-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+  .manifest-card { background: var(--card2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; text-decoration: none; color: var(--text); transition: border-color 0.2s, transform 0.1s; display: block; position: relative; }
+  .manifest-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .manifest-card .mname { font-weight: 700; color: #fff; font-size: 14px; margin-bottom: 4px; padding-right: 24px; }
+  .manifest-card .mcode { font-size: 11px; color: var(--accent); margin-bottom: 6px; }
+  .manifest-card .mdate { font-size: 10px; color: var(--muted); }
+
+  /* 削除ボタン（カード右上） */
+  .card-del-btn { position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--muted); font-size: 14px; cursor: pointer; padding: 2px 4px; border-radius: 4px; line-height: 1; opacity: 0.5; transition: opacity 0.15s, color 0.15s; }
+  .card-del-btn:hover { opacity: 1; color: var(--red); }
+  .watch-card { position: relative; }
+  .watch-card .wname { padding-right: 24px; }
+
+  /* 削除確認モーダル */
+  .del-modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 1000; display: flex; align-items: center; justify-content: center; }
+  .del-modal { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 28px 24px; max-width: 360px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+  .del-modal h3 { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 10px; }
+  .del-modal p { font-size: 13px; color: #94a3c8; line-height: 1.6; margin-bottom: 20px; }
+  .del-modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
+  .del-btn-cancel { padding: 8px 18px; border-radius: 8px; border: 1px solid var(--border); background: none; color: var(--muted); font-size: 13px; cursor: pointer; }
+  .del-btn-cancel:hover { background: rgba(255,255,255,0.05); }
+  .del-btn-ok { padding: 8px 18px; border-radius: 8px; border: none; background: var(--red); color: #fff; font-size: 13px; font-weight: 700; cursor: pointer; }
+  .del-btn-ok:hover { opacity: 0.85; }
+
+  /* ローディング・エラー */
+  .loading { text-align: center; padding: 40px; color: var(--muted); }
+  .loading .spinner { width: 32px; height: 32px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .error-msg { color: var(--red); font-size: 12px; padding: 12px; background: rgba(239,68,68,0.08); border-radius: 8px; border: 1px solid rgba(239,68,68,0.2); }
+  .empty-msg { color: var(--muted); font-size: 13px; text-align: center; padding: 24px; }
+
+  /* リフレッシュボタン */
+  .refresh-btn { background: rgba(74,158,255,0.15); color: var(--accent); border: 1px solid rgba(74,158,255,0.3); border-radius: 8px; padding: 6px 14px; font-size: 12px; cursor: pointer; transition: all 0.2s; }
+  .refresh-btn:hover { background: rgba(74,158,255,0.25); }
+  .refresh-btn.loading-btn { opacity: 0.6; cursor: not-allowed; }
+
+  /* フッター */
+  .footer { text-align: center; padding: 20px; color: var(--muted); font-size: 11px; border-top: 1px solid var(--border); margin-top: 32px; line-height: 1.8; }
+
+  /* レスポンシブ */
+  @media (max-width: 768px) {
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
+    .kpi-val { font-size: 22px; }
+  }
+  @media (max-width: 480px) {
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ヘッダー -->
+  <div class="header-card">
+    <div class="header-left">
+      <h1>📊 投資管理ダッシュボード</h1>
+      <p id="lastUpdated" class="last-updated">読み込み中...</p>
+    </div>
+    <div class="header-right">
+      <button class="refresh-btn" id="refreshBtn" onclick="loadAll()">🔄 更新</button>
+    </div>
+  </div>
+
+  <!-- ポートフォリオサマリー -->
+  <div class="section">
+    <div class="section-title">ポートフォリオ サマリー</div>
+    <div class="grid-3" id="portfolioSummary">
+      <div class="card"><div class="loading"><div class="spinner"></div></div></div>
+      <div class="card"><div class="loading"><div class="spinner"></div></div></div>
+      <div class="card"><div class="loading"><div class="spinner"></div></div></div>
+    </div>
+  </div>
+
+  <!-- ヘルスチェック サマリー -->
+  <div class="section">
+    <div class="section-title">ヘルスチェック サマリー</div>
+    <div class="grid-2">
+      <div class="grid-4" id="healthSummaryBadges">
+        <div class="card"><div class="loading"><div class="spinner"></div></div></div>
+      </div>
+      <div class="card" id="healthDetailList">
+        <div class="loading"><div class="spinner"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 保有銘柄一覧 -->
+  <div class="section">
+    <div class="section-title">保有銘柄一覧</div>
+    <div class="card" id="holdingsTable">
+      <div class="loading"><div class="spinner"></div></div>
+    </div>
+  </div>
+
+  <!-- ウォッチリスト -->
+  <div class="section">
+    <div class="section-title">ウォッチリスト <span id="watchlistCount" style="font-size:12px; color:var(--muted); font-weight:400;"></span></div>
+    <div class="watchlist-grid" id="watchlistGrid">
+      <div class="card"><div class="loading"><div class="spinner"></div></div></div>
+    </div>
+  </div>
+
+  <!-- 個別銘柄分析ページ -->
+  <div class="section">
+    <div class="section-title">個別銘柄 分析レポート</div>
+    <div class="manifest-list" id="manifestList">
+      <div class="card"><div class="loading"><div class="spinner"></div></div></div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>⚠️ このダッシュボードは投資助言ではありません。情報は参考目的に限り、売買の最終判断はご自身でお願いします。</p>
+    <p>データソース：yfinance（遅延データの可能性あり）/ watchlist.json / portfolio.json</p>
+  </div>
+
+</div><!-- /container -->
+
+<script>
+// ── データソース設定 ──────────────────────────────────────
+// 静的JSON（watchlist/portfolio/manifest）→ GitHub Raw（push直後に反映）
+// yfinanceが必要なAPI（healthcheck）→ Render
+const GITHUB_RAW = 'https://raw.githubusercontent.com/bi-al1/kabumart-analyzer/master';
+const RENDER_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? 'http://localhost:8000'
+  : 'https://kabumart-analyzer.onrender.com';
+
+// GitHub Raw から JSON を取得（キャッシュバイパス付き）
+async function fetchGitHub(path) {
+  const url = `${GITHUB_RAW}${path}?_=${Date.now()}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`GitHub fetch error: ${res.status} ${path}`);
+  return res.json();
+}
+
+// Render API から JSON を取得（yfinance系のみ）
+async function fetchRender(path) {
+  const res = await fetch(RENDER_BASE + path);
+  if (!res.ok) throw new Error(`API error: ${res.status}`);
+  return res.json();
+}
+
+// ── ユーティリティ ────────────────────────────────────────
+function fmt(n, digits=0) {
+  if (n == null) return '—';
+  return Number(n).toLocaleString('ja-JP', { minimumFractionDigits: digits, maximumFractionDigits: digits });
+}
+function fmtPct(n) {
+  if (n == null) return '—';
+  const sign = n >= 0 ? '+' : '';
+  return `${sign}${Number(n).toFixed(1)}%`;
+}
+function gainClass(n) {
+  if (n == null) return 'neutral';
+  return n >= 0 ? 'positive' : 'negative';
+}
+function rankBadgeColor(rank) {
+  const map = { S:'badge-green', 'A+':'badge-green', A:'badge-green', 'B+':'badge-blue', B:'badge-blue', C:'badge-orange', D:'badge-red', E:'badge-red', F:'badge-red' };
+  return map[rank] || 'badge-gray';
+}
+
+// ── メインロード ──────────────────────────────────────────
+let healthData = null;
+
+async function loadAll() {
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('loading-btn');
+  btn.textContent = '⏳ 更新中...';
+
+  document.getElementById('lastUpdated').textContent = `更新中... ${new Date().toLocaleString('ja-JP')}`;
+
+  // manifest を先に読んでURLマップを構築してからウォッチリストを描画
+  await loadManifest();
+  await Promise.all([
+    loadPortfolio(),
+    loadHealthCheck(),
+    loadWatchlist(),
+  ]);
+
+  document.getElementById('lastUpdated').textContent = `最終更新: ${new Date().toLocaleString('ja-JP')}`;
+  btn.classList.remove('loading-btn');
+  btn.textContent = '🔄 更新';
+}
+
+// ── ポートフォリオ ─────────────────────────────────────────
+async function loadPortfolio() {
+  const el = document.getElementById('portfolioSummary');
+  try {
+    const data = await fetchGitHub('/portfolio-health/data/portfolio.json');
+    const holdings = data.holdings || [];
+
+    // 取得原価ベースで合計（現在値はhealthcheckで後から更新）
+    let totalCost = 0;
+    holdings.forEach(h => { totalCost += h.avg_cost * h.shares; });
+
+    el.innerHTML = `
+      <div class="card">
+        <div class="kpi-label">保有銘柄数</div>
+        <div class="kpi-val">${holdings.length} 銘柄</div>
+        <div class="kpi-sub neutral">現在保有中</div>
+      </div>
+      <div class="card">
+        <div class="kpi-label">合計投資額（取得原価）</div>
+        <div class="kpi-val">¥${fmt(totalCost)}</div>
+        <div class="kpi-sub neutral">取得原価合計</div>
+      </div>
+      <div class="card">
+        <div class="kpi-label">損益（現在値）</div>
+        <div class="kpi-val neutral" id="totalGLKpi">—</div>
+        <div class="kpi-sub neutral" id="totalGLPctKpi">ヘルスチェック後に更新</div>
+      </div>
+    `;
+
+    // 保有銘柄テーブル
+    renderHoldingsTable(holdings);
+  } catch(e) {
+    el.innerHTML = `<div class="card"><div class="error-msg">⚠️ ポートフォリオの読み込みに失敗しました。<br><small>${e.message}</small></div></div>`;
+    document.getElementById('holdingsTable').innerHTML = '';
+  }
+}
+
+function renderHoldingsTable(holdings) {
+  const el = document.getElementById('holdingsTable');
+  if (!holdings.length) {
+    el.innerHTML = '<div class="empty-msg">📭 保有銘柄はありません。<br>「〇〇を△株買った」とClaudeに伝えると記録されます。</div>';
+    return;
+  }
+
+  const rows = holdings.map(h => {
+    const evalAmt = h.current_price ? h.current_price * h.shares : null;
+    const alertLevel = healthData?.results?.find(r => r.code === h.code)?.alert;
+    const alertBadge = alertLevel
+      ? `<span class="badge badge-${alertLevel.level === 'green' ? 'green' : alertLevel.level === 'yellow' ? 'orange' : alertLevel.level === 'orange' ? 'orange' : 'red'}" style="font-size:10px;">${alertLevel.label}</span>`
+      : '';
+
+    return `
+      <tr>
+        <td>
+          <div class="stock-name">${h.name}</div>
+          <div class="stock-code">${h.code}</div>
+        </td>
+        <td>${fmt(h.shares)} 株</td>
+        <td>¥${fmt(h.avg_cost)}</td>
+        <td>${h.current_price ? '¥' + fmt(h.current_price) : '<span style="color:var(--muted)">取得中</span>'}</td>
+        <td class="${gainClass(h.gain_loss)}">${h.gain_loss != null ? (h.gain_loss >= 0 ? '+' : '') + '¥' + fmt(h.gain_loss) : '—'}</td>
+        <td class="${gainClass(h.gain_loss_pct)}">${h.gain_loss_pct != null ? fmtPct(h.gain_loss_pct) : '—'}</td>
+        <td>${evalAmt ? '¥' + fmt(evalAmt) : '—'}</td>
+        <td>${alertBadge}</td>
+      </tr>`;
+  }).join('');
+
+  el.innerHTML = `
+    <table class="holdings-table">
+      <thead>
+        <tr>
+          <th>銘柄</th><th>株数</th><th>取得単価</th><th>現在値</th>
+          <th>損益額</th><th>損益率</th><th>評価額</th><th>ステータス</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+// ── ヘルスチェック ─────────────────────────────────────────
+async function loadHealthCheck() {
+  const badgesEl = document.getElementById('healthSummaryBadges');
+  const listEl = document.getElementById('healthDetailList');
+  try {
+    const data = await fetchRender('/api/healthcheck');
+    healthData = data;
+    const s = data.summary || {};
+
+    badgesEl.innerHTML = `
+      <div class="health-badge health-green"><div class="icon">✅</div><div class="count" style="color:var(--green)">${s.green ?? 0}</div><div class="hlabel">問題なし</div></div>
+      <div class="health-badge health-yellow"><div class="icon">🟡</div><div class="count" style="color:var(--yellow)">${s.yellow ?? 0}</div><div class="hlabel">早期警告</div></div>
+      <div class="health-badge health-orange"><div class="icon">🟠</div><div class="count" style="color:#fb923c">${s.orange ?? 0}</div><div class="hlabel">注意</div></div>
+      <div class="health-badge health-red"><div class="icon">🔴</div><div class="count" style="color:var(--red)">${s.red ?? 0}</div><div class="hlabel">撤退検討</div></div>
+    `;
+
+    if (!data.results?.length) {
+      listEl.innerHTML = '<div class="empty-msg">保有銘柄がありません</div>';
+      return;
+    }
+
+    const items = data.results.map(r => {
+      const tech = r.technical || {};
+      const rsiVal = tech.rsi != null ? `RSI ${tech.rsi}` : 'RSI —';
+      const smaVal = tech.death_cross ? '💀 デッドクロス' : tech.golden_cross ? '✨ ゴールデンクロス' : 'SMA 判定中';
+      const price = r.current_price ? `¥${fmt(r.current_price)}` : '—';
+      const alertColors = { green:'var(--green)', yellow:'var(--yellow)', orange:'#fb923c', red:'var(--red)' };
+      const col = alertColors[r.alert?.level] || 'var(--muted)';
+
+      return `
+        <div class="health-row">
+          <div class="name-block">
+            <div class="name">${r.name}</div>
+            <div class="code">${r.code}</div>
+          </div>
+          <div class="detail-block">
+            <span style="font-weight:700; color:${col};">${r.alert?.label ?? '—'}</span>
+            <div class="reason">${r.alert?.reason ?? ''}</div>
+          </div>
+          <div class="metrics">
+            <div class="metric-item"><div class="mval">${price}</div><div class="mlabel">現在値</div></div>
+            <div class="metric-item"><div class="mval">${rsiVal}</div><div class="mlabel">テクニカル</div></div>
+            <div class="metric-item"><div class="mval" style="font-size:11px;">${smaVal}</div><div class="mlabel">SMA</div></div>
+          </div>
+        </div>`;
+    }).join('');
+
+    listEl.innerHTML = items;
+
+    // テーブルのアラートバッジを再描画（healthDataが揃ったので）
+    const portfolioData = document.querySelector('.holdings-table');
+    if (portfolioData) {
+      // 保有銘柄のテーブルを再取得して再描画
+      loadPortfolio();
+    }
+
+  } catch(e) {
+    badgesEl.innerHTML = `<div class="error-msg">⚠️ ヘルスチェック失敗<br><small>${e.message}</small></div>`;
+    listEl.innerHTML = '';
+  }
+}
+
+// ── ウォッチリスト ─────────────────────────────────────────
+// manifest の stocks を code → url で引けるようにキャッシュ
+let manifestUrlMap = {};
+// ウォッチリストのcodeセット（onDeleteReportで即時参照するためのキャッシュ）
+let watchlistCodesSet = new Set();
+
+async function loadWatchlist() {
+  const el = document.getElementById('watchlistGrid');
+  const countEl = document.getElementById('watchlistCount');
+  try {
+    const data = await fetchRender('/api/watchlist');
+    const rawList = data.watchlist || [];
+    // 削除済みcodeは除外してから描画
+    const list = rawList.filter(w => !_deletedCodes.has(w.code));
+    // onDeleteReportで即時参照できるようcodeをキャッシュ
+    watchlistCodesSet = new Set(list.map(w => w.code));
+    countEl.textContent = `（${list.length} 銘柄）`;
+
+    if (!list.length) {
+      el.innerHTML = '<div class="card"><div class="empty-msg">📭 ウォッチリストは空です。<br>分析後に「ウォッチリストに追加して」とClaudeに伝えると追加されます。</div></div>';
+      return;
+    }
+
+    const STATUS_MAP = {
+      interested: { label: '💛 積極検討', cls: 'wstatus-interested' },
+      watching:   { label: '👀 要観察',   cls: 'wstatus-watching'   },
+      pending:    { label: '⏳ 見送り中', cls: 'wstatus-pending'    },
+    };
+
+    el.innerHTML = list.map(w => {
+      const reportUrl = manifestUrlMap[w.code];
+      const tag = reportUrl ? 'a' : 'div';
+      const hrefAttr = reportUrl ? `href="${reportUrl}" target="_blank"` : '';
+      const reportBadge = reportUrl
+        ? `<div class="wmeta" style="color:var(--accent); margin-top:6px; font-size:11px;">📊 分析レポートあり →</div>`
+        : '';
+
+      // ステータスセレクター（クリックで変更可能）
+      const st = STATUS_MAP[w.status] ?? STATUS_MAP['watching'];
+      const statusOptions = Object.entries(STATUS_MAP).map(([val, info]) =>
+        `<div class="wstatus-option${val === (w.status||'watching') ? ' active' : ''}" data-code="${w.code}" data-status="${val}" onclick="event.preventDefault();event.stopPropagation();onWatchlistStatusClick(this)">${info.label}</div>`
+      ).join('');
+      const statusBadge = `
+        <span class="wstatus-wrap" id="wstwrap-${w.code}">
+          <span class="wstatus ${st.cls}" id="wst-${w.code}" onclick="event.preventDefault();event.stopPropagation();toggleWatchlistStatusDropdown('${w.code}')">${st.label} ▾</span>
+          <div class="wstatus-dropdown" id="wstd-${w.code}">${statusOptions}</div>
+        </span>`;
+
+      // 予想PER バッジ（数値表示 + per_history 2件比較で矢印）
+      let perBadge = '';
+      if (w.per == null) {
+        perBadge = `<span class="wper-null">PER —</span>`;
+      } else {
+        const perVal = w.per;
+        const isRed = perVal < 0;
+        const dispVal = `${perVal > 0 ? '' : ''}${perVal}倍`;
+
+        // 矢印判定（per_history が2件以上ある場合）
+        const hist = w.per_history || [];
+        let arrow = '', arrowCls = '';
+        if (hist.length >= 2) {
+          const prev = hist[hist.length - 2].per;
+          const curr = hist[hist.length - 1].per;
+          if (prev != null && curr != null) {
+            if (isRed || prev < 0) {
+              // 赤字同士 or 前回赤字：絶対値で判定（小さい方が改善）
+              const absPrev = Math.abs(prev), absCurr = Math.abs(curr);
+              if (absCurr < absPrev - 0.05)      { arrow = ' ↑'; arrowCls = 'arrow-good'; }
+              else if (absCurr > absPrev + 0.05) { arrow = ' ↓'; arrowCls = 'arrow-bad'; }
+              else                                { arrow = ' →'; arrowCls = 'arrow-flat'; }
+            } else {
+              // 黒字同士：PER小さいほど割安
+              if (curr < prev - 0.05)      { arrow = ' ↓'; arrowCls = 'arrow-good'; } // 下がった=割安化
+              else if (curr > prev + 0.05) { arrow = ' ↑'; arrowCls = 'arrow-bad'; }  // 上がった=割高化
+              else                          { arrow = ' →'; arrowCls = 'arrow-flat'; }
+            }
+          }
+        }
+
+        const baseCls = isRed ? 'wper-red' : 'wper';
+        perBadge = `<span class="${baseCls}">PER ${dispVal}<span class="${arrowCls}">${arrow}</span></span>`;
+      }
+
+      return `
+        <${tag} class="watch-card status-${w.status ?? 'watching'}" ${hrefAttr} data-code="${w.code}" style="${reportUrl ? 'text-decoration:none;' : ''}">
+          <button class="card-del-btn" title="ウォッチリストから削除" onclick="event.preventDefault();event.stopPropagation();onDeleteWatchlist('${w.code}','${w.name.replace(/'/g,"\\'")}',${!!reportUrl})">🗑️</button>
+          <div class="wname">${w.name}</div>
+          <div class="wcode">
+            ${w.code}
+            ${w.kabumart_rank ? `<span class="wrank">${w.kabumart_rank}</span>` : ''}
+            ${statusBadge}
+            ${perBadge}
+          </div>
+          ${w.note ? `<div class="wnote">${w.note}</div>` : ''}
+          <div class="wmeta">追加日: ${w.added_date ?? '—'}</div>
+          ${reportBadge}
+        </${tag}>`;
+    }).join('');
+  } catch(e) {
+    el.innerHTML = `<div class="card"><div class="error-msg">⚠️ ウォッチリスト読み込み失敗<br><small>${e.message}</small></div>`;
+  }
+}
+
+// ── manifest（個別分析ページ一覧） ───────────────────────
+async function loadManifest() {
+  const el = document.getElementById('manifestList');
+  try {
+    // GitHub Raw ではなく Render API 経由で取得する。
+    // 理由: delete_report が manifest.json を更新した直後に loadAll() が走ると、
+    //       GitHub Raw CDN のキャッシュ（数十秒〜数分）により古いデータが返り
+    //       削除したカードが復活してしまう問題を根本解決するため。
+    // Render はローカルの manifest.json を save_json() で更新済みなので常に最新を返す。
+    const data = await fetchRender('/api/manifest');
+    const stocks = data.stocks || [];
+
+    // ウォッチリストカードのリンク用に code → url をキャッシュ
+    manifestUrlMap = {};
+    stocks.forEach(s => {
+      if (s.url || s.file) manifestUrlMap[s.code] = s.url ?? s.file;
+    });
+
+    if (!stocks.length) {
+      el.innerHTML = '<div class="card"><div class="empty-msg">📭 まだ分析レポートがありません。<br>KabuMartのスクショをClaudeに貼り付けると分析レポートが生成されます。</div></div>';
+      return;
+    }
+
+    // 新しい順に並べ替え（削除済みcodeは除外）
+    const sorted = [...stocks]
+      .filter(s => !_deletedCodes.has(s.code))
+      .sort((a, b) => (b.analyzed_date ?? '').localeCompare(a.analyzed_date ?? ''));
+    el.innerHTML = sorted.map(s => {
+      const inWatchlist = !!manifestUrlMap && Object.keys(manifestUrlMap).includes(s.code); // manifestUrlMapはwatchlistとは別
+      // ウォッチリストに登録済みかはwatchlist側で管理。ここではシンプルにコードだけ渡す
+      return `
+      <a class="manifest-card" href="${s.url ?? s.file}" target="_blank" data-code="${s.code}">
+        <button class="card-del-btn" title="分析レポートを削除" onclick="event.preventDefault();event.stopPropagation();onDeleteReport('${s.code}','${(s.name||'').replace(/'/g,"\\'")}')">🗑️</button>
+        <div class="mname">${s.name}</div>
+        <div class="mcode">${s.code} ${s.kabumart_rank ? `<span class="badge ${rankBadgeColor(s.kabumart_rank)}" style="font-size:10px;">${s.kabumart_rank}</span>` : ''}</div>
+        <div class="mdate">📅 分析日: ${s.analyzed_date ?? '—'}</div>
+      </a>`;
+    }).join('');
+  } catch(e) {
+    el.innerHTML = `<div class="card"><div class="error-msg">⚠️ 分析レポート一覧の読み込み失敗<br><small>${e.message}</small></div>`;
+  }
+}
+
+// ── ウォッチリスト ステータス変更 ──────────────────────────
+const IDX_STATUS_MAP = {
+  interested: { label: '💛 積極検討', cls: 'wstatus-interested' },
+  watching:   { label: '👀 要観察',   cls: 'wstatus-watching'   },
+  pending:    { label: '⏳ 見送り中', cls: 'wstatus-pending'    },
+};
+
+function toggleWatchlistStatusDropdown(code) {
+  const dd = document.getElementById(`wstd-${code}`);
+  if (!dd) return;
+  const isOpen = dd.classList.contains('open');
+  // 他を全部閉じる
+  document.querySelectorAll('.wstatus-dropdown.open').forEach(el => el.classList.remove('open'));
+  if (!isOpen) dd.classList.add('open');
+}
+
+// ドロップダウン外クリックで閉じる
+document.addEventListener('click', e => {
+  // wstatus-wrap の内側クリックは無視（wstatus と wstatus-option は各自 stopPropagation 済み）
+  if (!e.target.closest('.wstatus-wrap')) {
+    document.querySelectorAll('.wstatus-dropdown.open').forEach(el => el.classList.remove('open'));
+  }
+});
+
+// ステータスオプションクリック（直接 onclick から呼ばれる）
+async function onWatchlistStatusClick(opt) {
+  const code = opt.dataset.code;
+  const newStatus = opt.dataset.status;
+  const badgeEl = document.getElementById(`wst-${code}`);
+  const ddEl = document.getElementById(`wstd-${code}`);
+  if (!badgeEl || !ddEl) return;
+
+  ddEl.classList.remove('open');
+
+  const oldLabel = badgeEl.textContent;
+  badgeEl.textContent = '更新中...';
+
+  try {
+    const res = await fetch(`${RENDER_BASE}/api/watchlist/status`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, status: newStatus }),
+    });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.detail ?? json.error);
+
+    // バッジ更新
+    const info = IDX_STATUS_MAP[newStatus];
+    badgeEl.textContent = info.label + ' ▾';
+    badgeEl.className = `wstatus ${info.cls}`;
+    // カードの左ボーダー更新
+    const card = badgeEl.closest('.watch-card');
+    if (card) {
+      card.className = card.className.replace(/status-\w+/, `status-${newStatus}`);
+    }
+    // ドロップダウンのactive更新
+    ddEl.querySelectorAll('.wstatus-option').forEach(o => {
+      o.classList.toggle('active', o.dataset.status === newStatus);
+    });
+
+  } catch(err) {
+    badgeEl.textContent = oldLabel;
+    alert(`ステータス更新に失敗しました: ${err.message}`);
+  }
+}
+
+// ── 削除処理 ──────────────────────────────────────────────
+function showDelModal({ title, body, okLabel, onOk }) {
+  const overlay = document.createElement('div');
+  overlay.className = 'del-modal-overlay';
+  overlay.innerHTML = `
+    <div class="del-modal">
+      <h3>${title}</h3>
+      <p>${body}</p>
+      <div class="del-modal-btns">
+        <button class="del-btn-cancel">キャンセル</button>
+        <button class="del-btn-ok">${okLabel}</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.querySelector('.del-btn-cancel').onclick = () => overlay.remove();
+  // onOkにはoverlayを渡してチェックボックスをモーダル削除前に読める
+  overlay.querySelector('.del-btn-ok').onclick = () => { onOk(overlay); overlay.remove(); };
+}
+
+// 削除済みcodeセット（loadAll後にも再除去するためのキャッシュ）
+const _deletedCodes = new Set();
+
+// 指定codeのカードをDOMから即座に除去するヘルパー
+function removeCardByCode(code) {
+  _deletedCodes.add(code);
+  document.querySelectorAll(`[data-code="${code}"]`).forEach(el => el.remove());
+}
+
+// 削除処理中カウンター（連続削除時にloadAllが古いデータで上書きするのを防ぐ）
+let _deletingCount = 0;
+function _scheduleReload() {
+  // 全削除が完了したらloadAllを実行
+  // ただし _deletedCodes はクリアしない：
+  //   GitHub Raw CDN や Render の処理完了前にloadAllが走ることがあり、
+  //   その場合でも古いデータで復活しないようフィルタを維持し続ける必要があるため。
+  //   _deletedCodes は削除済み判定の永続キャッシュとして保持する。
+  setTimeout(async () => {
+    if (_deletingCount === 0) {
+      await loadAll();
+      // loadAll後にGitHubキャッシュ遅延で復活したカードを再除去
+      _deletedCodes.forEach(code => {
+        document.querySelectorAll(`[data-code="${code}"]`).forEach(el => el.remove());
+      });
+      // _deletedCodes.clear() はしない：次の loadAll でも引き続きフィルタするため
+    }
+  }, 300);
+}
+
+async function onDeleteWatchlist(code, name, hasReport) {
+  const body = hasReport
+    ? `<strong>${name}</strong> をウォッチリストから削除します。<br><br>` +
+      `<label style="display:flex;align-items:center;gap:8px;cursor:pointer;">` +
+      `<input type="checkbox" id="delReportToo" style="width:15px;height:15px;"> 分析レポートも一緒に削除する</label>`
+    : `<strong>${name}</strong> をウォッチリストから削除します。`;
+
+  showDelModal({
+    title: '🗑️ ウォッチリストから削除',
+    body,
+    okLabel: '削除する',
+    onOk: async (overlay) => {
+      const alsoReport = hasReport && overlay.querySelector('#delReportToo')?.checked;
+      // ボタンを押した瞬間にカードを消す（API応答を待たない）
+      removeCardByCode(code);
+      _deletingCount++;
+      try {
+        const r1 = await fetch(`${RENDER_BASE}/api/watchlist/${code}`, { method: 'DELETE' });
+        const j1 = await r1.json();
+        if (!j1.ok) throw new Error(j1.detail ?? 'ウォッチリスト削除失敗');
+        if (alsoReport) {
+          const r2 = await fetch(`${RENDER_BASE}/api/report/${code}`, { method: 'DELETE' });
+          const j2 = await r2.json();
+          if (!j2.ok) throw new Error(j2.detail ?? 'レポート削除失敗');
+        }
+      } catch(e) {
+        alert(`削除失敗: ${e.message}`);
+      } finally {
+        _deletingCount--;
+      }
+    }
+  });
+}
+
+async function onDeleteReport(code, name) {
+  // manifestUrlMapにcodeがあればウォッチリスト登録済みと判断（API不要・即時）
+  // watchlistのcodeはloadWatchlist時にwatchlistCodesSetに保持する
+  const inWatchlist = watchlistCodesSet.has(code);
+
+  const body = inWatchlist
+    ? `<strong>${name}</strong> の分析レポートを削除します。<br><br>` +
+      `<label style="display:flex;align-items:center;gap:8px;cursor:pointer;">` +
+      `<input type="checkbox" id="delWatchlistToo" style="width:15px;height:15px;"> ウォッチリストからも削除する</label>`
+    : `<strong>${name}</strong> の分析レポートを削除します。<br>この操作は取り消せません。`;
+
+  showDelModal({
+    title: '🗑️ 分析レポートを削除',
+    body,
+    okLabel: '削除する',
+    onOk: async (overlay) => {
+      const alsoWatchlist = inWatchlist && overlay.querySelector('#delWatchlistToo')?.checked;
+      // ボタンを押した瞬間にカードを消す（API応答を待たない）
+      removeCardByCode(code);
+      _deletingCount++;
+      try {
+        const r1 = await fetch(`${RENDER_BASE}/api/report/${code}`, { method: 'DELETE' });
+        const j1 = await r1.json();
+        if (!j1.ok) throw new Error(j1.detail ?? 'レポート削除失敗');
+        if (alsoWatchlist) {
+          const r2 = await fetch(`${RENDER_BASE}/api/watchlist/${code}`, { method: 'DELETE' });
+          const j2 = await r2.json();
+          if (!j2.ok) throw new Error(j2.detail ?? 'ウォッチリスト削除失敗');
+        }
+      } catch(e) {
+        alert(`削除失敗: ${e.message}`);
+      } finally {
+        _deletingCount--;
+      }
+    }
+  });
+}
+
+// ── 初回ロード ────────────────────────────────────────────
+loadAll();
+</script>
+</body>
+</html>

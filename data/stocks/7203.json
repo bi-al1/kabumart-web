@@ -1,0 +1,124 @@
+{
+  "generated_at": "2026-02-19",
+  "has_yfinance": true,
+  "has_websearch": true,
+  "has_kabumart": false,
+  "company": {
+    "code": "7203",
+    "name": "トヨタ自動車",
+    "industry": "輸送用機器 / 自動車",
+    "market": "東証プライム",
+    "extra_badge": "テストデータ",
+    "analyzed_date": "2026年2月19日"
+  },
+  "scores": {
+    "total_score": 7.5,
+    "total_rank": "A",
+    "note": "※テスト用サンプルデータ",
+    "interpretation": "テスト用のサンプルデータです。削除ボタンの動作確認にご利用ください。",
+    "axes": {
+      "growth":        { "score": 7.0, "rank": "A" },
+      "stability":     { "score": 8.5, "rank": "S" },
+      "profitability": { "score": 7.5, "rank": "A" },
+      "capacity":      { "score": 6.0, "rank": "B" },
+      "innovation":    { "score": 8.5, "rank": "S" }
+    }
+  },
+  "financials": {
+    "per": 7.8,
+    "per_note": "📊 yfinance取得値。PERは「株価÷1株利益」で、企業の利益に対して株価が何倍かを示す指標。7.8倍は割安水準。",
+    "roe": 14.2,
+    "roe_note": "📊 yfinance取得値。ROEは「株主のお金を使ってどれだけ利益を出せたか」の指標。14.2%は優良水準。",
+    "equity_ratio": 38.5,
+    "equity_ratio_note": "📊 yfinance取得値。自己資本比率38.5%。自動車メーカーとして標準的な水準。",
+    "valuation_table": [
+      { "label": "時価総額",       "value": "約34兆円",   "benchmark": "―",            "status": "",    "badge": "超大型株",  "badge_color": "blue",   "note": "日本最大級の時価総額" },
+      { "label": "PBR（株価純資産倍率）", "value": "1.1倍", "benchmark": "1倍以下で割安", "status": "good", "badge": "適正",     "badge_color": "green",  "note": "純資産とほぼ同水準で取引されている" },
+      { "label": "配当利回り",         "value": "3.2%",   "benchmark": "3%以上で高配当",  "status": "good", "badge": "高配当",   "badge_color": "green",  "note": "安定した配当実績あり" }
+    ]
+  },
+  "price": {
+    "current": 2850,
+    "week52_high": 3890,
+    "week52_low": 2400,
+    "from_high_pct": "-26.7%"
+  },
+  "price_history": [
+    {"date":"2026-01-05","close":2700},
+    {"date":"2026-01-12","close":2730},
+    {"date":"2026-01-19","close":2760},
+    {"date":"2026-01-26","close":2800},
+    {"date":"2026-02-02","close":2820},
+    {"date":"2026-02-09","close":2840},
+    {"date":"2026-02-16","close":2850},
+    {"date":"2026-02-19","close":2850}
+  ],
+  "business": {
+    "catchcopy": "🚗 世界販売台数No.1を誇る自動車の巨人。HV技術で先行し、全方位戦略でEV時代にも対応中。",
+    "paragraphs": [
+      "トヨタ自動車は、<strong style=\"color:#e2e8f0;\">世界最大の自動車メーカー</strong>のひとつ。販売台数は年間約1,000万台を超え、レクサス・ダイハツ・日野なども傘下に持つ巨大グループです。",
+      "ハイブリッド車（HV）のパイオニアとして「プリウス」を1997年に世界初量産化。その技術蓄積を活かし、現在は電気自動車（EV）・燃料電池車（FCV）・PHV・HVすべてに対応する全方位戦略を展開しています。",
+      "北米・アジアを中心にグローバルに展開し、生産・販売ともに分散されており、特定地域リスクが低いのが特徴です。"
+    ],
+    "tags": ["全方位電動化", "グローバルNo.1", "安定配当", "高い自己資本"],
+    "segments": [
+      {
+        "icon": "🚗",
+        "name": "自動車事業",
+        "description": "乗用車・SUV・トラックなどの製造販売。レクサスブランドも含む。売上の大部分を占める中核事業。",
+        "highlight": true
+      },
+      {
+        "icon": "💰",
+        "name": "金融事業（トヨタファイナンシャルサービス）",
+        "description": "自動車ローン・リースなど金融サービス。安定した利益を生む収益の柱のひとつ。",
+        "highlight": false
+      }
+    ]
+  },
+  "positives": [
+    {
+      "title": "HV技術の圧倒的な競争優位",
+      "impact": "HIGH",
+      "explain": "20年以上の開発で培ったハイブリッド技術は他社が簡単に追いつけない領域。EV移行が進む中でも、HVが「現実的な選択肢」として世界的に再評価されている。",
+      "source": "📡 WebSearch"
+    },
+    {
+      "title": "安定した高配当・自社株買い",
+      "impact": "MID",
+      "explain": "配当利回り約3%の安定した株主還元。自社株買いも継続しており、長期保有に向いた株。",
+      "source": "📊 yfinance"
+    }
+  ],
+  "negatives": [
+    {
+      "title": "EV化の波への対応の遅れ懸念",
+      "impact": "MID",
+      "explain": "全方位戦略を掲げるが、テスラや中国BYDに比べてピュアEVのラインナップが少ないと指摘される。EV市場シェアの獲得が課題。",
+      "source": "📡 WebSearch"
+    },
+    {
+      "title": "為替リスク（円高は利益を圧縮）",
+      "impact": "MID",
+      "explain": "海外売上比率が高く、円高になると円換算の利益が目減りする。1円の円高で数百億円規模の影響が出ることもある。",
+      "source": "📊 yfinance"
+    }
+  ],
+  "verdict": {
+    "strengths": [
+      { "icon": "🏆", "title": "世界トップクラスの販売規模", "text": "年間1,000万台超の販売力と、世界中に広がる販売・生産ネットワーク。特定地域への依存が低い。" },
+      { "icon": "🔋", "title": "HV技術の先行優位", "text": "プリウスから始まる20年以上の電動化技術の蓄積。全方位戦略でHV・EV・FCVをすべてカバー。" },
+      { "icon": "💴", "title": "安定した配当・株主還元", "text": "配当利回り約3%と自社株買いで、長期保有でも恩恵を受けやすい。" }
+    ],
+    "risks": [
+      { "icon": "⚡", "title": "EVシフトへの対応", "text": "純粋なEV専業メーカーとの競争激化。中国市場でのBYDの台頭が脅威。" },
+      { "icon": "💱", "title": "円高リスク", "text": "為替変動が業績に直結。円高局面では利益圧縮の懸念あり。" },
+      { "icon": "📉", "title": "景気循環の影響", "text": "自動車は景気敏感セクター。景気後退期には販売台数が落ち込みやすい。" }
+    ],
+    "summary": "これは<strong>テスト用サンプルデータ</strong>です。削除ボタンの動作確認にご利用ください。<br><br>トヨタ自動車は日本を代表するグローバル企業で、世界トップクラスの自動車メーカーです。安定した配当と堅実な財務体質が魅力ですが、EV化の波への対応が今後の焦点となります。"
+  },
+  "links": [
+    { "label": "トヨタ自動車公式", "url": "https://global.toyota/jp/" },
+    { "label": "みんかぶ 7203",   "url": "https://minkabu.jp/stock/7203" }
+  ]
+}
