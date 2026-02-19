@@ -1,49 +1,5 @@
 {
-  "holdings": [
-    {
-      "code": "1111",
-      "name": "テスト株式会社",
-      "shares": 500,
-      "avg_cost": 1250.0,
-      "purchase_date": "2026-02-19",
-      "note": ""
-    }
-  ],
-  "trade_history": [
-    {
-      "date": "2026-02-19",
-      "code": "7203",
-      "name": "トヨタ",
-      "action": "buy",
-      "shares": 100,
-      "price": 2500.0
-    },
-    {
-      "date": "2026-02-19",
-      "code": "1111",
-      "name": "テスト株式会社",
-      "action": "buy",
-      "shares": 1000,
-      "price": 1250.0
-    },
-    {
-      "date": "2026-02-19",
-      "code": "1111",
-      "name": "テスト株式会社",
-      "action": "sell",
-      "shares": 500,
-      "price": 800.0,
-      "profit": -225000.0
-    },
-    {
-      "date": "2026-02-19",
-      "code": "7203",
-      "name": "トヨタ",
-      "action": "sell",
-      "shares": 100,
-      "price": 3770.0,
-      "profit": 127000.0
-    }
-  ],
-  "updated_at": "2026-02-19T10:36:07.191204"
+  "holdings": [],
+  "trade_history": [],
+  "updated_at": "2026-02-19T10:39:04.446477"
 }
