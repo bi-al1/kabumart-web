@@ -58,6 +58,9 @@
   .neutral { color: var(--muted); }
 
   /* ヘルスチェックサマリー */
+  .health-layout { display: flex; gap: 16px; align-items: flex-start; }
+  .health-badges-grid { flex: 0 0 220px; }
+  #healthDetailList { flex: 1; min-width: 0; }
   .health-badge { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px 12px; border-radius: 10px; gap: 6px; }
   .health-badge .icon { font-size: 24px; }
   .health-badge .count { font-size: 28px; font-weight: 800; }
@@ -75,6 +78,10 @@
   .holdings-table tr:hover td { background: rgba(74,158,255,0.04); }
   .stock-name { font-weight: 600; color: #fff; }
   .stock-code { font-size: 11px; color: var(--muted); }
+
+  /* 売買履歴テーブル */
+  .trade-action-buy  { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; background: rgba(74,158,255,0.12); color: var(--accent); border: 1px solid rgba(74,158,255,0.25); }
+  .trade-action-sell { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 700; background: rgba(239,68,68,0.12); color: var(--red); border: 1px solid rgba(239,68,68,0.25); }
 
   /* ヘルスチェック詳細 */
   .health-row { background: var(--card2); border-radius: 10px; padding: 14px 16px; margin-bottom: 10px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
@@ -193,6 +200,8 @@
   @media (max-width: 768px) {
     .grid-2, .grid-3, .grid-4, .grid-5 { grid-template-columns: 1fr 1fr; }
     .kpi-val { font-size: 22px; }
+    .health-layout { flex-direction: column; }
+    .health-badges-grid { flex: none; width: 100%; }
   }
   @media (max-width: 480px) {
     .grid-2, .grid-3, .grid-4, .grid-5 { grid-template-columns: 1fr; }
@@ -226,8 +235,8 @@
   <!-- ヘルスチェック サマリー -->
   <div class="section">
     <div class="section-title">ヘルスチェック サマリー</div>
-    <div class="grid-2">
-      <div class="grid-4" id="healthSummaryBadges">
+    <div class="health-layout">
+      <div class="grid-2 health-badges-grid" id="healthSummaryBadges">
         <div class="card"><div class="loading"><div class="spinner"></div></div></div>
       </div>
       <div class="card" id="healthDetailList">
@@ -245,6 +254,12 @@
     <div class="card" id="holdingsTable">
       <div class="loading"><div class="spinner"></div></div>
     </div>
+  </div>
+
+  <!-- 売買履歴 -->
+  <div class="section" id="tradeHistorySection" style="display:none;">
+    <div class="section-title">売買履歴</div>
+    <div class="card" id="tradeHistoryTable"></div>
   </div>
 
   <!-- ウォッチリスト -->
@@ -419,8 +434,9 @@ async function loadPortfolio() {
       }
     }
 
-    // 保有銘柄テーブル
+    // 保有銘柄テーブル & 売買履歴
     renderHoldingsTable(holdings);
+    renderTradeHistory(tradeHistory);
   } catch(e) {
     el.innerHTML = `<div class="card"><div class="error-msg">⚠️ ポートフォリオの読み込みに失敗しました。<br><small>${e.message}</small></div></div>`;
     document.getElementById('holdingsTable').innerHTML = '';
@@ -464,6 +480,56 @@ function renderHoldingsTable(holdings) {
         <tr>
           <th>銘柄</th><th>株数</th><th>取得単価</th><th>現在値</th>
           <th>損益額</th><th>損益率</th><th>評価額</th><th>ステータス</th><th></th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+function renderTradeHistory(tradeHistory) {
+  const section = document.getElementById('tradeHistorySection');
+  const el = document.getElementById('tradeHistoryTable');
+  if (!tradeHistory || !tradeHistory.length) {
+    section.style.display = 'none';
+    return;
+  }
+  section.style.display = '';
+
+  // 新しい順に並べ替え
+  const sorted = [...tradeHistory].reverse();
+
+  const rows = sorted.map(t => {
+    const isSell = t.action === 'sell';
+    const actionTag = isSell
+      ? `<span class="trade-action-sell">売</span>`
+      : `<span class="trade-action-buy">買</span>`;
+    const totalAmt = `¥${fmt(t.price * t.shares)}`;
+    let profitCell = '<span style="color:var(--muted)">—</span>';
+    if (isSell && t.profit != null) {
+      const cls = t.profit >= 0 ? 'positive' : 'negative';
+      const sign = t.profit >= 0 ? '+' : '-';
+      profitCell = `<span class="${cls}">${sign}¥${fmt(Math.abs(t.profit))}</span>`;
+    }
+    return `
+      <tr>
+        <td style="color:var(--muted); font-size:12px;">${t.date}</td>
+        <td>
+          <div class="stock-name">${t.name}</div>
+          <div class="stock-code">${t.code}</div>
+        </td>
+        <td>${actionTag}</td>
+        <td>${fmt(t.shares)} 株</td>
+        <td>¥${fmt(t.price)}</td>
+        <td>${totalAmt}</td>
+        <td>${profitCell}</td>
+      </tr>`;
+  }).join('');
+
+  el.innerHTML = `
+    <table class="holdings-table">
+      <thead>
+        <tr>
+          <th>日付</th><th>銘柄</th><th>種別</th><th>株数</th><th>単価</th><th>約定金額</th><th>損益</th>
         </tr>
       </thead>
       <tbody>${rows}</tbody>
