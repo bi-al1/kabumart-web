@@ -110,11 +110,11 @@
   /* フッター */
   .footer { text-align: center; padding: 24px; color: var(--muted); font-size: 11px; border-top: 1px solid var(--border); margin-top: 32px; line-height: 1.8; }
 
-  /* ウォッチリストボタン */
-  .watchlist-bar { position: sticky; bottom: 0; background: rgba(15,17,23,0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--border); padding: 12px 20px; display: flex; justify-content: center; align-items: center; gap: 12px; z-index: 100; flex-wrap: wrap; }
-  .watchlist-btn { background: linear-gradient(135deg, #4a9eff, #7c5cfc); color: #fff; border: none; border-radius: 10px; padding: 10px 28px; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
-  .watchlist-btn:hover { opacity: 0.85; transform: translateY(-1px); }
-  .watchlist-btn.copied { background: var(--green); }
+  /* back-bar ウォッチリスト追加ボタン */
+  .wl-add-btn { display: inline-flex; align-items: center; gap: 5px; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; border: 1px solid rgba(74,158,255,0.4); background: rgba(74,158,255,0.1); color: var(--accent); transition: all 0.2s; }
+  .wl-add-btn:hover { background: rgba(74,158,255,0.2); }
+  .wl-add-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .wl-add-btn.added { background: rgba(34,197,94,0.15); color: var(--green); border-color: rgba(34,197,94,0.4); }
 
   /* ステータスセレクター */
   .status-selector { position: relative; display: inline-flex; align-items: center; }
@@ -198,10 +198,6 @@
 <!-- メインコンテンツ（JS で生成） -->
 <div id="main" style="display:none;"></div>
 
-<!-- ウォッチリストボタン（JS で表示） -->
-<div id="watchlistBar" style="display:none;" class="watchlist-bar">
-  <button class="watchlist-btn" id="watchBtn">👀 ウォッチリストに追加</button>
-</div>
 
 <script>
 // ============================================================
@@ -626,60 +622,13 @@ ${priceHistory.length > 0 ? `
   document.getElementById('loading').style.display = 'none';
   document.getElementById('main').style.display = 'block';
 
-  // ── ウォッチリストバー（追加ボタン）/ back-barステータスセレクター ──────────
-  const watchBar = document.getElementById('watchlistBar');
-
-  // ウォッチリスト追加ボタン / ステータスセレクター
+  // ── back-bar: ステータスセレクター or 追加ボタン ──────────
   if (wlEntry) {
-    // 登録済み → watchlistBar非表示、back-barにステータスセレクター表示
-    watchBar.style.display = 'none';
+    // 登録済み → back-barにステータスセレクター + 削除ボタン表示
     renderStatusSelector(wlEntry, c.code);
   } else {
-    // 未登録 → 追加ボタンを表示（APIで直接登録）
-    watchBar.style.display = 'flex';
-    document.getElementById('watchBtn').onclick = async () => {
-      const btn = document.getElementById('watchBtn');
-      btn.textContent = '⏳ 追加中...';
-      btn.disabled = true;
-      try {
-        const res = await fetch(`${RENDER_BASE}/api/watchlist`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            code: c.code,
-            name: c.name,
-            note: `KabuMartスコア${c.kabumart_rank}(${c.kabumart_score})`,
-            kabumart_rank: c.kabumart_rank ?? '',
-          }),
-        });
-        const json = await res.json();
-        if (res.status === 409) {
-          // すでに登録済み（競合）
-          btn.textContent = '✅ 登録済み';
-          setTimeout(() => {
-            watchBar.style.display = 'none';
-            renderStatusSelector({ status: 'watching' }, c.code);
-          }, 1000);
-        } else if (!res.ok) {
-          throw new Error(json.detail ?? 'エラー');
-        } else {
-          btn.textContent = '✅ ウォッチリストに追加しました';
-          btn.classList.add('copied');
-          // ステータスセレクターに切り替え（bottom bar非表示 → back-barに表示）
-          setTimeout(() => {
-            watchBar.style.display = 'none';
-            renderStatusSelector({ status: 'watching' }, c.code);
-          }, 1000);
-        }
-      } catch(e) {
-        btn.textContent = `⚠️ 失敗: ${e.message}`;
-        btn.disabled = false;
-        setTimeout(() => {
-          btn.textContent = '👀 ウォッチリストに追加';
-          btn.disabled = false;
-        }, 2500);
-      }
-    };
+    // 未登録 → back-barに追加ボタンを表示
+    renderAddButton(c);
   }
 
   // チャート描画（DOM 生成後）
@@ -688,6 +637,56 @@ ${priceHistory.length > 0 ? `
     if (priceHistory.length > 0) drawPrice(priceHistory, d.ipo_date);
     if (wlEntry?.per_history?.length >= 1) drawPerHistory(wlEntry.per_history);
   });
+}
+
+// ============================================================
+// ウォッチリスト追加ボタン（back-bar内・未登録時）
+// ============================================================
+function renderAddButton(company) {
+  const container = document.getElementById('backBarStatus');
+  const btn = document.createElement('button');
+  btn.className = 'wl-add-btn';
+  btn.textContent = '＋ ウォッチリストに追加';
+  container.appendChild(btn);
+
+  btn.onclick = async () => {
+    btn.textContent = '⏳ 追加中...';
+    btn.disabled = true;
+    try {
+      const res = await fetch(`${RENDER_BASE}/api/watchlist`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code: company.code,
+          name: company.name,
+          note: `KabuMartスコア${company.kabumart_rank}(${company.kabumart_score})`,
+          kabumart_rank: company.kabumart_rank ?? '',
+        }),
+      });
+      const json = await res.json();
+      if (res.status === 409) {
+        btn.textContent = '✅ 登録済み';
+        btn.classList.add('added');
+      } else if (!res.ok) {
+        throw new Error(json.detail ?? 'エラー');
+      } else {
+        btn.textContent = '✅ 追加しました';
+        btn.classList.add('added');
+      }
+      // ステータスセレクター+削除ボタンに切り替え
+      setTimeout(() => {
+        container.innerHTML = '';
+        renderStatusSelector({ status: 'watching' }, company.code);
+      }, 800);
+    } catch(e) {
+      btn.textContent = `⚠️ 失敗`;
+      btn.disabled = false;
+      setTimeout(() => {
+        btn.textContent = '＋ ウォッチリストに追加';
+        btn.classList.remove('added');
+      }, 2000);
+    }
+  };
 }
 
 // ============================================================
