@@ -6,6 +6,7 @@
   POST /api/watchlist
   DELETE /api/watchlist/{code}
   POST /api/watchlist/status
+  POST /api/watchlist/update-per
   GET  /api/portfolio
   POST /api/portfolio/buy
   POST /api/portfolio/sell
@@ -366,6 +367,74 @@ def update_watchlist_status(req: WatchlistStatusRequest):
     except RuntimeError as e:
         raise HTTPException(status_code=500, detail=str(e))
     return {"ok": True, "code": req.code, "status": req.status}
+
+@app.post("/api/watchlist/update-per")
+def update_watchlist_per():
+    """ウォッチリスト銘柄の予想PERをyfinanceから一括更新する（archived以外）。"""
+    if not YFINANCE_AVAILABLE:
+        raise HTTPException(status_code=503, detail="yfinanceが利用できません")
+
+    try:
+        data = github_fetch_json(GH_WATCHLIST_PATH)
+    except FileNotFoundError:
+        return {"updated": 0, "results": [], "errors": []}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    today = datetime.now().strftime("%Y-%m-%d")
+    results = []
+    errors = []
+
+    for entry in data.get("watchlist", []):
+        if entry.get("status") == "archived":
+            continue
+
+        code = entry["code"]
+        try:
+            ticker = yf.Ticker(f"{code}.T")
+            info = ticker.info
+            per = info.get("forwardPE")
+            if per is None:
+                per = info.get("trailingPE")
+            if per is not None:
+                per = round(float(per), 1)
+
+            old_per = entry.get("per")
+            entry["per"] = per
+
+            history = entry.get("per_history", [])
+            same_day = [h for h in history if h["date"] == today]
+            if same_day:
+                same_day[0]["per"] = per
+                same_day[0]["source"] = "yfinance"
+            else:
+                history.append({"date": today, "per": per, "source": "yfinance"})
+            entry["per_history"] = history
+
+            results.append({
+                "code": code,
+                "name": entry.get("name", ""),
+                "old_per": old_per,
+                "new_per": per,
+            })
+        except Exception as e:
+            errors.append({"code": code, "name": entry.get("name", ""), "error": str(e)})
+
+    if results:
+        try:
+            github_update_json(
+                GH_WATCHLIST_PATH, data,
+                f"watchlist: {len(results)}銘柄のPERを一括更新",
+            )
+        except RuntimeError as e:
+            raise HTTPException(status_code=500, detail=f"GitHub保存失敗: {e}")
+
+    return {
+        "updated": len(results),
+        "results": results,
+        "errors": errors,
+        "checked_at": datetime.now().isoformat(),
+    }
 
 
 # ── ポートフォリオ ─────────────────────────────────────────

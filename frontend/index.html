@@ -223,14 +223,18 @@
 
   <!-- ヘルスチェック サマリー -->
   <div class="section">
-    <div class="section-title">ヘルスチェック サマリー</div>
-    <div class="health-layout">
-      <div class="grid-2 health-badges-grid" id="healthSummaryBadges">
-        <div class="card"><div class="loading"><div class="spinner"></div></div></div>
-      </div>
-      <div class="card" id="healthDetailList">
-        <div class="loading"><div class="spinner"></div></div>
-      </div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+      <div class="section-title" style="margin-bottom:0;">ヘルスチェック サマリー</div>
+      <button class="add-btn" id="healthRunBtn" onclick="onRunHealthCheck()" style="background:rgba(74,158,255,0.15); color:var(--accent); border-color:rgba(74,158,255,0.3);">
+        🩺 ヘルスチェック実行
+      </button>
+    </div>
+    <div class="health-layout" id="healthLayout" style="display:none;">
+      <div class="grid-2 health-badges-grid" id="healthSummaryBadges"></div>
+      <div class="card" id="healthDetailList"></div>
+    </div>
+    <div class="card" id="healthPlaceholder">
+      <div class="empty-msg">🩺 上の「ヘルスチェック実行」ボタンで診断を開始できます。<br><span style="font-size:11px; color:var(--muted);">yfinanceから各保有銘柄のデータを取得するため、少し時間がかかります。</span></div>
     </div>
   </div>
 
@@ -253,7 +257,12 @@
 
   <!-- ウォッチリスト -->
   <div class="section">
-    <div class="section-title">ウォッチリスト <span id="watchlistCount" style="font-size:12px; color:var(--muted); font-weight:400;"></span></div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+      <div class="section-title" style="margin-bottom:0;">ウォッチリスト <span id="watchlistCount" style="font-size:12px; color:var(--muted); font-weight:400;"></span></div>
+      <button class="add-btn" id="perUpdateBtn" onclick="onUpdatePer()" style="background:rgba(124,92,252,0.15); color:#a78bfa; border-color:rgba(124,92,252,0.3);">
+        📊 PER更新
+      </button>
+    </div>
     <div class="watchlist-grid" id="watchlistGrid">
       <div class="card"><div class="loading"><div class="spinner"></div></div></div>
     </div>
@@ -327,7 +336,6 @@ async function loadAll() {
   await loadManifest();
   await Promise.all([
     loadPortfolio(),
-    loadHealthCheck(),
     loadWatchlist(),
   ]);
 
@@ -526,6 +534,40 @@ function renderTradeHistory(tradeHistory) {
 }
 
 // ── ヘルスチェック ─────────────────────────────────────────
+async function onRunHealthCheck() {
+  const btn = document.getElementById('healthRunBtn');
+  const placeholder = document.getElementById('healthPlaceholder');
+  const layout = document.getElementById('healthLayout');
+  const badgesEl = document.getElementById('healthSummaryBadges');
+  const listEl = document.getElementById('healthDetailList');
+
+  btn.disabled = true;
+  btn.textContent = '⏳ 診断中...';
+
+  placeholder.style.display = 'none';
+  layout.style.display = '';
+  badgesEl.innerHTML = '<div class="card"><div class="loading"><div class="spinner"></div></div></div>';
+  listEl.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+
+  try {
+    await loadHealthCheck();
+    btn.textContent = '✅ 診断完了';
+    btn.style.background = 'rgba(34,197,94,0.15)';
+    btn.style.color = 'var(--green)';
+    btn.style.borderColor = 'rgba(34,197,94,0.3)';
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.textContent = '🩺 再実行';
+      btn.style.background = 'rgba(74,158,255,0.15)';
+      btn.style.color = 'var(--accent)';
+      btn.style.borderColor = 'rgba(74,158,255,0.3)';
+    }, 2000);
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = '🩺 ヘルスチェック実行';
+  }
+}
+
 async function loadHealthCheck() {
   const badgesEl = document.getElementById('healthSummaryBadges');
   const listEl = document.getElementById('healthDetailList');
@@ -822,6 +864,59 @@ async function onArchiveWatchlist(code) {
     if (!json.ok) throw new Error(json.detail ?? json.error);
   } catch(e) {
     alert(`アーカイブ失敗: ${e.message}`);
+  }
+}
+
+// ── PER更新 ──────────────────────────────────────────────
+async function onUpdatePer() {
+  const btn = document.getElementById('perUpdateBtn');
+  btn.disabled = true;
+  btn.textContent = '⏳ PER取得中...';
+
+  try {
+    const res = await fetch(`${RENDER_BASE}/api/watchlist/update-per`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.detail ?? 'PER更新に失敗しました');
+
+    const errCount = json.errors?.length || 0;
+    const updCount = json.updated || 0;
+    if (errCount > 0) {
+      btn.textContent = `⚠️ ${updCount}件更新 / ${errCount}件エラー`;
+      btn.style.background = 'rgba(245,158,11,0.15)';
+      btn.style.color = 'var(--yellow)';
+      btn.style.borderColor = 'rgba(245,158,11,0.3)';
+    } else {
+      btn.textContent = `✅ ${updCount}件更新完了`;
+      btn.style.background = 'rgba(34,197,94,0.15)';
+      btn.style.color = 'var(--green)';
+      btn.style.borderColor = 'rgba(34,197,94,0.3)';
+    }
+
+    await loadWatchlist();
+
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.textContent = '📊 PER更新';
+      btn.style.background = 'rgba(124,92,252,0.15)';
+      btn.style.color = '#a78bfa';
+      btn.style.borderColor = 'rgba(124,92,252,0.3)';
+    }, 3000);
+
+  } catch(e) {
+    btn.textContent = '❌ 失敗';
+    btn.style.background = 'rgba(239,68,68,0.15)';
+    btn.style.color = 'var(--red)';
+    btn.style.borderColor = 'rgba(239,68,68,0.3)';
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.textContent = '📊 PER更新';
+      btn.style.background = 'rgba(124,92,252,0.15)';
+      btn.style.color = '#a78bfa';
+      btn.style.borderColor = 'rgba(124,92,252,0.3)';
+    }, 3000);
   }
 }
 
