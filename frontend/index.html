@@ -5,7 +5,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>投資管理ダッシュボード</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <style>
     :root {
       --bg: #0f1117;
@@ -18,753 +17,770 @@
       --yellow: #f59e0b;
       --text: #e2e8f0;
       --muted: #8892a4;
-      --border: #2d3252;
+      --border: #2d3252
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
-      padding: 0;
+      padding: 0
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow: hidden
     }
 
     body {
       background: var(--bg);
       color: var(--text);
       font-family: 'Hiragino Sans', 'Meiryo', sans-serif;
-      font-size: 14px;
-      line-height: 1.6;
+      font-size: 13px;
+      line-height: 1.5
     }
 
-    .container {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 24px 16px;
+    /* Shell */
+    .shell {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      padding: 12px 16px
     }
 
-    /* ヘッダー */
-    .header-card {
-      background: linear-gradient(135deg, #1a1d2e 0%, #0f1a3a 100%);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 24px 28px;
-      margin-bottom: 20px;
+    .shell-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
+      padding: 8px 12px;
+      flex-shrink: 0
     }
 
-    .header-left h1 {
-      font-size: 22px;
+    .shell-header h1 {
+      font-size: 16px;
+      font-weight: 700;
+      color: #fff
+    }
+
+    .shell-header .meta {
+      font-size: 10px;
+      color: var(--muted)
+    }
+
+    /* Tabs */
+    .tab-bar {
+      display: flex;
+      gap: 2px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      margin-bottom: 10px
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 18px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all .15s
+    }
+
+    .tab-btn:hover {
+      color: var(--text)
+    }
+
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent)
+    }
+
+    .tab-content {
+      display: none;
+      flex: 1;
+      min-height: 0;
+      overflow: auto
+    }
+
+    .tab-content.active {
+      display: flex;
+      flex-direction: column
+    }
+
+    /* KPI Row */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-shrink: 0
+    }
+
+    .kpi {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px
+    }
+
+    .kpi-label {
+      font-size: 10px;
+      color: var(--muted);
+      margin-bottom: 2px
+    }
+
+    .kpi-val {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.2
+    }
+
+    .kpi-sub {
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 2px
+    }
+
+    /* Split Layout */
+    .split {
+      display: flex;
+      gap: 12px;
+      flex: 1;
+      min-height: 0
+    }
+
+    .split-main {
+      flex: 3;
+      display: flex;
+      flex-direction: column;
+      min-height: 0
+    }
+
+    .split-side {
+      flex: 2;
+      display: flex;
+      flex-direction: column;
+      min-height: 0
+    }
+
+    /* Card */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      overflow: auto
+    }
+
+    .card-title {
+      font-size: 13px;
       font-weight: 700;
       color: #fff;
-    }
-
-    .header-left p {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 4px;
-    }
-
-    .header-right {
+      margin-bottom: 10px;
       display: flex;
-      gap: 10px;
       align-items: center;
-      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 8px
     }
 
-    .last-updated {
-      font-size: 11px;
+    /* Table */
+    .tbl {
+      width: 100%;
+      border-collapse: collapse
+    }
+
+    .tbl th {
+      font-size: 10px;
       color: var(--muted);
+      padding: 6px 8px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+      position: sticky;
+      top: 0;
+      background: var(--card)
     }
 
-    /* バッジ */
+    .tbl td {
+      padding: 7px 8px;
+      border-bottom: 1px solid rgba(45, 50, 82, .4);
+      font-size: 12px;
+      vertical-align: middle
+    }
+
+    .tbl tr:last-child td {
+      border-bottom: none
+    }
+
+    .tbl tr:hover td {
+      background: rgba(74, 158, 255, .03)
+    }
+
+    .stock-name {
+      font-weight: 600;
+      color: #fff;
+      font-size: 12px
+    }
+
+    .stock-code {
+      font-size: 10px;
+      color: var(--muted)
+    }
+
+    /* Badges */
     .badge {
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 16px;
+      font-size: 11px;
+      font-weight: 600
     }
 
     .badge-blue {
-      background: rgba(74, 158, 255, 0.15);
+      background: rgba(74, 158, 255, .12);
       color: var(--accent);
-      border: 1px solid rgba(74, 158, 255, 0.3);
+      border: 1px solid rgba(74, 158, 255, .25)
     }
 
     .badge-green {
-      background: rgba(34, 197, 94, 0.15);
+      background: rgba(34, 197, 94, .12);
       color: var(--green);
-      border: 1px solid rgba(34, 197, 94, 0.3);
+      border: 1px solid rgba(34, 197, 94, .25)
     }
 
     .badge-red {
-      background: rgba(239, 68, 68, 0.15);
+      background: rgba(239, 68, 68, .12);
       color: var(--red);
-      border: 1px solid rgba(239, 68, 68, 0.3);
+      border: 1px solid rgba(239, 68, 68, .25)
     }
 
     .badge-orange {
-      background: rgba(245, 158, 11, 0.15);
+      background: rgba(245, 158, 11, .12);
       color: var(--yellow);
-      border: 1px solid rgba(245, 158, 11, 0.3);
+      border: 1px solid rgba(245, 158, 11, .25)
     }
 
     .badge-gray {
-      background: rgba(136, 146, 164, 0.15);
+      background: rgba(136, 146, 164, .12);
       color: var(--muted);
-      border: 1px solid rgba(136, 146, 164, 0.3);
+      border: 1px solid rgba(136, 146, 164, .25)
     }
 
     .badge-purple {
-      background: rgba(124, 92, 252, 0.15);
+      background: rgba(124, 92, 252, .12);
       color: #a78bfa;
-      border: 1px solid rgba(124, 92, 252, 0.3);
+      border: 1px solid rgba(124, 92, 252, .25)
     }
 
-    /* セクション */
-    .section {
-      margin-bottom: 24px;
-    }
-
-    .section-title {
-      font-size: 16px;
-      font-weight: 700;
-      color: #fff;
-      margin-bottom: 14px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .section-title::before {
-      content: '';
-      display: block;
-      width: 4px;
-      height: 18px;
-      background: var(--accent);
-      border-radius: 2px;
-    }
-
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 18px;
-    }
-
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-
-    .grid-3 {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 16px;
-    }
-
-    .grid-4 {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-    }
-
-    .grid-5 {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 12px;
-    }
-
-    /* サマリーKPI */
-    .kpi-val {
-      font-size: 22px;
-      font-weight: 800;
-      color: #fff;
-      line-height: 1.1;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .kpi-label {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 4px;
-    }
-
-    .kpi-sub {
-      font-size: 13px;
-      font-weight: 600;
-      margin-top: 6px;
-    }
-
+    /* Colors */
     .positive {
-      color: var(--green);
+      color: var(--green)
     }
 
     .negative {
-      color: var(--red);
+      color: var(--red)
     }
 
     .neutral {
-      color: var(--muted);
+      color: var(--muted)
     }
 
-    /* ヘルスチェックサマリー */
-    .health-layout {
-      display: flex;
-      gap: 16px;
-      align-items: flex-start;
+    /* Buttons */
+    .btn {
+      border: none;
+      border-radius: 8px;
+      padding: 5px 14px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .15s
     }
 
-    .health-badges-grid {
-      flex: 0 0 220px;
+    .btn-accent {
+      background: rgba(74, 158, 255, .15);
+      color: var(--accent);
+      border: 1px solid rgba(74, 158, 255, .3)
     }
 
-    #healthDetailList {
-      flex: 1;
-      min-width: 0;
+    .btn-accent:hover {
+      background: rgba(74, 158, 255, .25)
+    }
+
+    .btn-green {
+      background: rgba(34, 197, 94, .15);
+      color: var(--green);
+      border: 1px solid rgba(34, 197, 94, .3)
+    }
+
+    .btn-green:hover {
+      background: rgba(34, 197, 94, .25)
+    }
+
+    .btn-purple {
+      background: rgba(124, 92, 252, .15);
+      color: #a78bfa;
+      border: 1px solid rgba(124, 92, 252, .3)
+    }
+
+    .btn-purple:hover {
+      background: rgba(124, 92, 252, .25)
+    }
+
+    .sell-btn {
+      background: none;
+      border: 1px solid rgba(239, 68, 68, .3);
+      color: var(--red);
+      border-radius: 6px;
+      padding: 2px 10px;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all .15s;
+      white-space: nowrap
+    }
+
+    .sell-btn:hover {
+      background: rgba(239, 68, 68, .1)
+    }
+
+    /* Trade actions */
+    .trade-action-buy {
+      display: inline-block;
+      padding: 1px 7px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      background: rgba(74, 158, 255, .1);
+      color: var(--accent);
+      border: 1px solid rgba(74, 158, 255, .2)
+    }
+
+    .trade-action-sell {
+      display: inline-block;
+      padding: 1px 7px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      background: rgba(239, 68, 68, .1);
+      color: var(--red);
+      border: 1px solid rgba(239, 68, 68, .2)
+    }
+
+    /* Health */
+    .health-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px
     }
 
     .health-badge {
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 16px 12px;
-      border-radius: 10px;
-      gap: 6px;
+      padding: 10px 8px;
+      border-radius: 8px;
+      gap: 2px
     }
 
     .health-badge .icon {
-      font-size: 24px;
+      font-size: 16px
     }
 
     .health-badge .count {
-      font-size: 28px;
-      font-weight: 800;
+      font-size: 20px;
+      font-weight: 800
     }
 
     .health-badge .hlabel {
-      font-size: 11px;
-      color: var(--muted);
+      font-size: 10px;
+      color: var(--muted)
     }
 
     .health-green {
-      background: rgba(34, 197, 94, 0.08);
-      border: 1px solid rgba(34, 197, 94, 0.2);
+      background: rgba(34, 197, 94, .06);
+      border: 1px solid rgba(34, 197, 94, .15)
     }
 
     .health-yellow {
-      background: rgba(245, 158, 11, 0.08);
-      border: 1px solid rgba(245, 158, 11, 0.2);
+      background: rgba(245, 158, 11, .06);
+      border: 1px solid rgba(245, 158, 11, .15)
     }
 
     .health-orange {
-      background: rgba(251, 146, 60, 0.08);
-      border: 1px solid rgba(251, 146, 60, 0.2);
+      background: rgba(251, 146, 60, .06);
+      border: 1px solid rgba(251, 146, 60, .15)
     }
 
     .health-red {
-      background: rgba(239, 68, 68, 0.08);
-      border: 1px solid rgba(239, 68, 68, 0.2);
+      background: rgba(239, 68, 68, .06);
+      border: 1px solid rgba(239, 68, 68, .15)
     }
 
-    /* 保有銘柄テーブル */
-    .holdings-table {
-      width: 100%;
-      border-collapse: collapse;
-    }
-
-    .holdings-table th {
-      font-size: 11px;
-      color: var(--muted);
-      padding: 8px 10px;
-      text-align: left;
-      border-bottom: 1px solid var(--border);
-      white-space: nowrap;
-    }
-
-    .holdings-table td {
-      padding: 10px 10px;
-      border-bottom: 1px solid rgba(45, 50, 82, 0.5);
-      font-size: 13px;
-      vertical-align: middle;
-    }
-
-    .holdings-table tr:last-child td {
-      border-bottom: none;
-    }
-
-    .holdings-table tr:hover td {
-      background: rgba(74, 158, 255, 0.04);
-    }
-
-    .stock-name {
-      font-weight: 600;
-      color: #fff;
-    }
-
-    .stock-code {
-      font-size: 11px;
-      color: var(--muted);
-    }
-
-    /* 売買履歴テーブル */
-    .trade-action-buy {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 11px;
-      font-weight: 700;
-      background: rgba(74, 158, 255, 0.12);
-      color: var(--accent);
-      border: 1px solid rgba(74, 158, 255, 0.25);
-    }
-
-    .trade-action-sell {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 11px;
-      font-weight: 700;
-      background: rgba(239, 68, 68, 0.12);
-      color: var(--red);
-      border: 1px solid rgba(239, 68, 68, 0.25);
-    }
-
-    /* ヘルスチェック詳細 */
     .health-row {
       background: var(--card2);
-      border-radius: 10px;
-      padding: 14px 16px;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      flex-wrap: wrap;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 6px;
+      font-size: 12px
     }
 
     .health-row:last-child {
-      margin-bottom: 0;
+      margin-bottom: 0
     }
 
-    .health-row .name-block {
-      flex: 1;
-      min-width: 140px;
-    }
-
-    .health-row .name-block .name {
-      font-weight: 700;
-      color: #fff;
-      font-size: 14px;
-    }
-
-    .health-row .name-block .code {
-      font-size: 11px;
+    /* Collapsible */
+    .collapse-toggle {
+      background: none;
+      border: none;
       color: var(--muted);
-    }
-
-    .health-row .detail-block {
-      flex: 2;
-      min-width: 200px;
-    }
-
-    .health-row .detail-block .reason {
       font-size: 12px;
-      color: #94a3c8;
-      margin-top: 4px;
-    }
-
-    .health-row .metrics {
+      font-weight: 600;
+      cursor: pointer;
       display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 0
     }
 
-    .metric-item {
-      text-align: center;
+    .collapse-toggle:hover {
+      color: var(--text)
     }
 
-    .metric-item .mval {
-      font-size: 14px;
-      font-weight: 700;
-      color: #fff;
+    .collapse-body {
+      display: none;
+      overflow: auto
     }
 
-    .metric-item .mlabel {
-      font-size: 10px;
-      color: var(--muted);
+    .collapse-body.open {
+      display: block
     }
 
-    /* ウォッチリスト */
-    .watchlist-grid {
+    /* Watchlist */
+    .wl-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 10px;
+      overflow: auto
     }
 
     .watch-card {
       background: var(--card2);
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 14px;
-      transition: border-color 0.2s;
+      padding: 12px;
+      transition: border-color .2s
     }
 
     .watch-card:hover {
-      border-color: var(--accent);
+      border-color: var(--accent)
     }
 
     .watch-card.status-watching {
-      border-left: 3px solid var(--accent);
+      border-left: 3px solid var(--accent)
     }
 
     .watch-card.status-interested {
-      border-left: 3px solid var(--yellow);
+      border-left: 3px solid var(--yellow)
     }
 
     .watch-card.status-archived {
-      border-left: 3px solid var(--muted);
+      border-left: 3px solid var(--muted)
     }
 
     .watch-card .wname {
       font-weight: 700;
       color: #fff;
-      font-size: 14px;
-      margin-bottom: 4px;
+      font-size: 13px;
+      margin-bottom: 3px
     }
 
     .watch-card .wcode {
-      font-size: 11px;
+      font-size: 10px;
       color: var(--accent);
-      margin-bottom: 6px;
+      margin-bottom: 4px;
       display: flex;
       align-items: center;
-      gap: 6px;
-      flex-wrap: wrap;
+      gap: 5px;
+      flex-wrap: wrap
     }
 
     .watch-card .wnote {
-      font-size: 11px;
+      font-size: 10px;
       color: var(--muted);
-      line-height: 1.5;
-      margin-bottom: 8px;
+      line-height: 1.4;
+      margin-bottom: 6px
     }
 
     .watch-card .wmeta {
-      font-size: 10px;
-      color: var(--muted);
+      font-size: 9px;
+      color: var(--muted)
     }
 
     .watch-card .wrank {
       display: inline-block;
-      padding: 1px 8px;
+      padding: 1px 7px;
       border-radius: 10px;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 700;
-      background: rgba(124, 92, 252, 0.15);
+      background: rgba(124, 92, 252, .12);
       color: #a78bfa;
-      border: 1px solid rgba(124, 92, 252, 0.3);
+      border: 1px solid rgba(124, 92, 252, .25)
     }
 
-    /* ステータスセレクター（インライン） */
+    /* Status dropdown */
     .wstatus-wrap {
       position: relative;
-      display: inline-block;
+      display: inline-block
     }
 
     .wstatus {
       display: inline-flex;
       align-items: center;
-      gap: 3px;
-      padding: 2px 8px;
+      gap: 2px;
+      padding: 1px 7px;
       border-radius: 10px;
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 700;
       cursor: pointer;
-      user-select: none;
+      user-select: none
     }
 
     .wstatus:hover {
-      opacity: 0.8;
+      opacity: .8
     }
 
     .wstatus-watching {
-      background: rgba(74, 158, 255, 0.12);
+      background: rgba(74, 158, 255, .1);
       color: var(--accent);
-      border: 1px solid rgba(74, 158, 255, 0.25);
+      border: 1px solid rgba(74, 158, 255, .2)
     }
 
     .wstatus-interested {
-      background: rgba(245, 158, 11, 0.12);
+      background: rgba(245, 158, 11, .1);
       color: var(--yellow);
-      border: 1px solid rgba(245, 158, 11, 0.25);
+      border: 1px solid rgba(245, 158, 11, .2)
     }
 
     .wstatus-archived {
-      background: rgba(136, 146, 164, 0.12);
+      background: rgba(136, 146, 164, .1);
       color: var(--muted);
-      border: 1px solid rgba(136, 146, 164, 0.25);
+      border: 1px solid rgba(136, 146, 164, .2)
     }
 
     .wstatus-dropdown {
       position: absolute;
-      top: calc(100% + 4px);
+      top: calc(100% + 3px);
       left: 0;
       background: #1a1d2e;
       border: 1px solid var(--border);
       border-radius: 8px;
       overflow: hidden;
-      min-width: 130px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+      min-width: 120px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, .5);
       display: none;
-      z-index: 300;
+      z-index: 300
     }
 
     .wstatus-dropdown.open {
-      display: block;
+      display: block
     }
 
     .wstatus-option {
-      padding: 8px 12px;
-      font-size: 11px;
+      padding: 7px 10px;
+      font-size: 10px;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.15s;
-      white-space: nowrap;
+      transition: background .15s;
+      white-space: nowrap
     }
 
     .wstatus-option:hover {
-      background: rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, .05)
     }
 
     .wstatus-option.active {
-      background: rgba(74, 158, 255, 0.1);
+      background: rgba(74, 158, 255, .08)
     }
 
-    .wstatus-saving {
-      font-size: 10px;
-      color: var(--muted);
-      padding: 2px 6px;
-    }
-
-    /* PER表示 */
+    /* PER */
     .wper {
       display: inline-flex;
       align-items: center;
-      gap: 3px;
-      font-size: 11px;
+      gap: 2px;
+      font-size: 10px;
       font-weight: 700;
-      padding: 2px 8px;
+      padding: 1px 7px;
       border-radius: 10px;
-      background: rgba(34, 197, 94, 0.08);
+      background: rgba(34, 197, 94, .06);
       color: #86efac;
-      border: 1px solid rgba(34, 197, 94, 0.2);
+      border: 1px solid rgba(34, 197, 94, .15)
     }
 
     .wper-red {
       display: inline-flex;
       align-items: center;
-      gap: 3px;
-      font-size: 11px;
+      gap: 2px;
+      font-size: 10px;
       font-weight: 700;
-      padding: 2px 8px;
+      padding: 1px 7px;
       border-radius: 10px;
-      background: rgba(239, 68, 68, 0.08);
+      background: rgba(239, 68, 68, .06);
       color: var(--red);
-      border: 1px solid rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, .15)
     }
 
     .wper-null {
       display: inline-flex;
       align-items: center;
-      gap: 3px;
-      font-size: 11px;
+      gap: 2px;
+      font-size: 10px;
       font-weight: 700;
-      padding: 2px 8px;
+      padding: 1px 7px;
       border-radius: 10px;
-      background: rgba(136, 146, 164, 0.08);
+      background: rgba(136, 146, 164, .06);
       color: var(--muted);
-      border: 1px solid rgba(136, 146, 164, 0.2);
+      border: 1px solid rgba(136, 146, 164, .15)
     }
 
-    /* PER矢印 */
     .arrow-good {
       color: var(--green);
-      font-weight: 900;
+      font-weight: 900
     }
 
     .arrow-bad {
       color: var(--red);
-      font-weight: 900;
+      font-weight: 900
     }
 
     .arrow-flat {
       color: var(--muted);
-      font-weight: 700;
+      font-weight: 700
     }
 
-    /* 個別分析ページ一覧 */
+    /* Manifest */
     .manifest-list {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 10px;
+      overflow: auto
     }
 
     .manifest-card {
       background: var(--card2);
       border: 1px solid var(--border);
       border-radius: 10px;
-      padding: 14px;
+      padding: 12px;
       text-decoration: none;
       color: var(--text);
-      transition: border-color 0.2s, transform 0.1s;
-      display: block;
-      position: relative;
+      transition: border-color .2s, transform .1s;
+      display: block
     }
 
     .manifest-card:hover {
       border-color: var(--accent);
-      transform: translateY(-2px);
+      transform: translateY(-1px)
     }
 
     .manifest-card .mname {
       font-weight: 700;
       color: #fff;
-      font-size: 14px;
-      margin-bottom: 4px;
+      font-size: 13px;
+      margin-bottom: 3px
     }
 
     .manifest-card .mcode {
-      font-size: 11px;
+      font-size: 10px;
       color: var(--accent);
-      margin-bottom: 6px;
+      margin-bottom: 4px
     }
 
     .manifest-card .mdate {
-      font-size: 10px;
-      color: var(--muted);
+      font-size: 9px;
+      color: var(--muted)
     }
 
-
-
-    /* ローディング・エラー */
+    /* Loading / Error / Empty */
     .loading {
       text-align: center;
-      padding: 40px;
-      color: var(--muted);
+      padding: 24px;
+      color: var(--muted)
     }
 
-    .loading .spinner {
-      width: 32px;
-      height: 32px;
-      border: 3px solid var(--border);
+    .spinner {
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--border);
       border-top-color: var(--accent);
       border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin: 0 auto 12px;
+      animation: spin .7s linear infinite;
+      margin: 0 auto 8px
     }
 
     @keyframes spin {
       to {
-        transform: rotate(360deg);
+        transform: rotate(360deg)
       }
     }
 
     .error-msg {
       color: var(--red);
-      font-size: 12px;
-      padding: 12px;
-      background: rgba(239, 68, 68, 0.08);
+      font-size: 11px;
+      padding: 10px;
+      background: rgba(239, 68, 68, .06);
       border-radius: 8px;
-      border: 1px solid rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, .15)
     }
 
     .empty-msg {
       color: var(--muted);
-      font-size: 13px;
-      text-align: center;
-      padding: 24px;
-    }
-
-    /* 追加・売却ボタン */
-    .add-btn {
-      background: rgba(34, 197, 94, 0.15);
-      color: var(--green);
-      border: 1px solid rgba(34, 197, 94, 0.3);
-      border-radius: 8px;
-      padding: 5px 12px;
       font-size: 12px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
+      text-align: center;
+      padding: 20px
     }
 
-    .add-btn:hover {
-      background: rgba(34, 197, 94, 0.28);
-    }
-
-    .sell-btn {
-      background: none;
-      border: 1px solid rgba(239, 68, 68, 0.35);
-      color: var(--red);
-      border-radius: 6px;
-      padding: 3px 10px;
-      font-size: 11px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s;
-      white-space: nowrap;
-    }
-
-    .sell-btn:hover {
-      background: rgba(239, 68, 68, 0.12);
-    }
-
-    /* 入力モーダル */
+    /* Modal */
     .input-modal-overlay {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.65);
+      background: rgba(0, 0, 0, .65);
       z-index: 1000;
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: center
     }
 
     .input-modal {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 28px 24px;
-      max-width: 400px;
+      border-radius: 14px;
+      padding: 24px 20px;
+      max-width: 380px;
       width: 92%;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, .5)
     }
 
     .input-modal h3 {
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 700;
       color: #fff;
-      margin-bottom: 18px;
+      margin-bottom: 16px
     }
 
     .input-modal .field {
-      margin-bottom: 14px;
+      margin-bottom: 12px
     }
 
     .input-modal label {
       display: block;
-      font-size: 11px;
+      font-size: 10px;
       color: var(--muted);
-      margin-bottom: 5px;
+      margin-bottom: 4px
     }
 
     .input-modal input {
@@ -772,670 +788,451 @@
       background: #0f1117;
       border: 1px solid var(--border);
       border-radius: 8px;
-      padding: 9px 12px;
-      font-size: 14px;
+      padding: 8px 10px;
+      font-size: 13px;
       color: var(--text);
       outline: none;
-      transition: border-color 0.15s;
+      transition: border-color .15s
     }
 
     .input-modal input:focus {
-      border-color: var(--accent);
+      border-color: var(--accent)
     }
 
     .input-modal .modal-btns {
       display: flex;
-      gap: 10px;
+      gap: 8px;
       justify-content: flex-end;
-      margin-top: 20px;
+      margin-top: 16px
     }
 
     .modal-btn-cancel {
-      padding: 8px 18px;
+      padding: 7px 16px;
       border-radius: 8px;
       border: 1px solid var(--border);
       background: none;
       color: var(--muted);
-      font-size: 13px;
-      cursor: pointer;
+      font-size: 12px;
+      cursor: pointer
     }
 
     .modal-btn-cancel:hover {
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, .04)
     }
 
     .modal-btn-ok {
-      padding: 8px 20px;
+      padding: 7px 18px;
       border-radius: 8px;
       border: none;
       background: var(--green);
       color: #fff;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
-      cursor: pointer;
+      cursor: pointer
     }
 
     .modal-btn-ok:hover {
-      opacity: 0.85;
+      opacity: .85
     }
 
     .modal-btn-ok:disabled {
-      opacity: 0.45;
-      cursor: not-allowed;
+      opacity: .4;
+      cursor: not-allowed
     }
 
     .modal-btn-danger {
-      padding: 8px 20px;
+      padding: 7px 18px;
       border-radius: 8px;
       border: none;
       background: var(--red);
       color: #fff;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
-      cursor: pointer;
+      cursor: pointer
     }
 
     .modal-btn-danger:hover {
-      opacity: 0.85;
+      opacity: .85
     }
 
     .modal-btn-gray {
-      padding: 8px 20px;
+      padding: 7px 18px;
       border-radius: 8px;
       border: none;
-      background: rgba(136, 146, 164, 0.2);
+      background: rgba(136, 146, 164, .2);
       color: var(--muted);
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
-      cursor: pointer;
+      cursor: pointer
     }
 
     .modal-btn-gray:hover {
-      background: rgba(136, 146, 164, 0.32);
+      background: rgba(136, 146, 164, .3)
     }
 
     .modal-error {
       color: var(--red);
-      font-size: 12px;
-      margin-top: 8px;
-      min-height: 16px;
+      font-size: 11px;
+      margin-top: 6px;
+      min-height: 14px
     }
 
-    /* 売却モーダルのモード選択タブ */
     .sell-mode-tabs {
       display: flex;
-      gap: 8px;
-      margin-bottom: 18px;
+      gap: 6px;
+      margin-bottom: 16px
     }
 
     .sell-tab {
       flex: 1;
-      padding: 7px;
+      padding: 6px;
       border-radius: 8px;
       border: 1px solid var(--border);
       background: none;
       color: var(--muted);
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.15s;
-      text-align: center;
+      text-align: center
     }
 
     .sell-tab.active-sell {
-      background: rgba(239, 68, 68, 0.15);
+      background: rgba(239, 68, 68, .12);
       color: var(--red);
-      border-color: rgba(239, 68, 68, 0.35);
+      border-color: rgba(239, 68, 68, .3)
     }
 
     .sell-tab.active-delete {
-      background: rgba(136, 146, 164, 0.12);
+      background: rgba(136, 146, 164, .1);
       color: var(--muted);
-      border-color: rgba(136, 146, 164, 0.3);
+      border-color: rgba(136, 146, 164, .25)
     }
 
-    /* フッター */
+    /* Footer */
     .footer {
       text-align: center;
-      padding: 20px;
+      padding: 6px;
       color: var(--muted);
-      font-size: 11px;
-      border-top: 1px solid var(--border);
-      margin-top: 32px;
-      line-height: 1.8;
+      font-size: 9px;
+      flex-shrink: 0;
+      border-top: 1px solid var(--border)
     }
 
-    /* レスポンシブ */
-    @media (max-width: 768px) {
-
-      .grid-2,
-      .grid-3,
-      .grid-4,
-      .grid-5 {
-        grid-template-columns: 1fr 1fr;
+    /* Responsive */
+    @media(max-width:768px) {
+      .kpi-row {
+        grid-template-columns: 1fr 1fr
       }
 
-      .kpi-val {
-        font-size: 18px;
+      .split {
+        flex-direction: column
       }
 
-      .health-layout {
-        flex-direction: column;
-      }
-
-      .health-badges-grid {
-        flex: none;
-        width: 100%;
+      .tab-btn {
+        padding: 8px 12px;
+        font-size: 12px
       }
     }
 
-    @media (max-width: 480px) {
-
-      .grid-2,
-      .grid-3,
-      .grid-4,
-      .grid-5 {
-        grid-template-columns: 1fr;
+    @media(max-width:480px) {
+      .kpi-row {
+        grid-template-columns: 1fr
       }
     }
   </style>
 </head>
 
 <body>
-  <div class="container">
+  <div class="shell">
 
-    <!-- ヘッダー -->
-    <div class="header-card">
-      <div class="header-left">
-        <h1>📊 投資管理ダッシュボード</h1>
-        <p id="lastUpdated" class="last-updated">読み込み中...</p>
-      </div>
-      <div class="header-right"></div>
+    <!-- Header -->
+    <div class="shell-header">
+      <h1>📊 投資管理ダッシュボード</h1>
+      <span class="meta" id="lastUpdated">読み込み中...</span>
     </div>
 
-    <!-- ポートフォリオサマリー -->
-    <div class="section">
-      <div class="section-title">ポートフォリオ サマリー</div>
-      <div class="grid-5" id="portfolioSummary">
-        <div class="card">
-          <div class="loading">
-            <div class="spinner"></div>
+    <!-- Tab Bar -->
+    <div class="tab-bar">
+      <button class="tab-btn active" data-tab="portfolio" onclick="switchTab('portfolio')">ポートフォリオ</button>
+      <button class="tab-btn" data-tab="watchlist" onclick="switchTab('watchlist')">ウォッチリスト <span id="watchlistCount"
+          style="font-size:10px;color:var(--muted)"></span></button>
+      <button class="tab-btn" data-tab="reports" onclick="switchTab('reports')">分析レポート</button>
+    </div>
+
+    <!-- TAB 1: Portfolio -->
+    <div class="tab-content active" id="tab-portfolio">
+      <!-- KPI Row -->
+      <div class="kpi-row" id="portfolioSummary">
+        <div class="kpi">
+          <div class="kpi-label">保有銘柄数</div>
+          <div class="kpi-val">—</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">合計投資額</div>
+          <div class="kpi-val">—</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">評価損益</div>
+          <div class="kpi-val">—</div>
+        </div>
+        <div class="kpi">
+          <div class="kpi-label">総合損益</div>
+          <div class="kpi-val">—</div>
+        </div>
+      </div>
+
+      <!-- Split: Holdings + HealthCheck -->
+      <div class="split">
+        <!-- Left: Holdings + Trade History -->
+        <div class="split-main">
+          <div class="card" style="flex:1;display:flex;flex-direction:column;min-height:0">
+            <div class="card-title">
+              <span>保有銘柄一覧</span>
+              <button class="btn btn-green" onclick="onOpenBuyModal()">＋ 買い追加</button>
+            </div>
+            <div id="holdingsTable" style="overflow:auto;flex:1">
+              <div class="loading">
+                <div class="spinner"></div>
+              </div>
+            </div>
+            <!-- Trade History (collapsible) -->
+            <div id="tradeHistorySection"
+              style="display:none;margin-top:8px;border-top:1px solid var(--border);padding-top:6px">
+              <button class="collapse-toggle" onclick="toggleTradeHistory()">
+                <span id="tradeToggleIcon">▶</span> <span id="tradeToggleLabel">売買履歴</span>
+              </button>
+              <div class="collapse-body" id="tradeHistoryBody">
+                <div id="tradeHistoryTable"></div>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="card">
-          <div class="loading">
-            <div class="spinner"></div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="loading">
-            <div class="spinner"></div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="loading">
-            <div class="spinner"></div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="loading">
-            <div class="spinner"></div>
+
+        <!-- Right: Health Check -->
+        <div class="split-side">
+          <div class="card" style="flex:1;display:flex;flex-direction:column;min-height:0">
+            <div class="card-title">
+              <span>ヘルスチェック</span>
+              <button class="btn btn-accent" id="healthRunBtn" onclick="onRunHealthCheck()">🩺 実行</button>
+            </div>
+            <div id="healthContent" style="overflow:auto;flex:1">
+              <div class="empty-msg" style="font-size:11px">🩺 「実行」ボタンで診断開始<br><span
+                  style="font-size:10px">yfinanceから取得するため少し時間がかかります</span></div>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- ヘルスチェック サマリー -->
-    <div class="section">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-        <div class="section-title" style="margin-bottom:0;">ヘルスチェック サマリー</div>
-        <button class="add-btn" id="healthRunBtn" onclick="onRunHealthCheck()"
-          style="background:rgba(74,158,255,0.15); color:var(--accent); border-color:rgba(74,158,255,0.3);">
-          🩺 ヘルスチェック実行
-        </button>
+    <!-- TAB 2: Watchlist -->
+    <div class="tab-content" id="tab-watchlist">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-shrink:0">
+        <span style="font-size:13px;font-weight:700;color:#fff">ウォッチリスト</span>
+        <button class="btn btn-purple" id="perUpdateBtn" onclick="onUpdatePer()">📊 PER更新</button>
       </div>
-      <div class="health-layout" id="healthLayout" style="display:none;">
-        <div class="grid-2 health-badges-grid" id="healthSummaryBadges"></div>
-        <div class="card" id="healthDetailList"></div>
-      </div>
-      <div class="card" id="healthPlaceholder">
-        <div class="empty-msg">🩺 上の「ヘルスチェック実行」ボタンで診断を開始できます。<br><span
-            style="font-size:11px; color:var(--muted);">yfinanceから各保有銘柄のデータを取得するため、少し時間がかかります。</span></div>
-      </div>
-    </div>
-
-    <!-- 保有銘柄一覧 -->
-    <div class="section">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-        <div class="section-title" style="margin-bottom:0;">保有銘柄一覧</div>
-        <button class="add-btn" onclick="onOpenBuyModal()">＋ 買い追加</button>
-      </div>
-      <div class="card" id="holdingsTable">
+      <div class="wl-grid" id="watchlistGrid">
         <div class="loading">
           <div class="spinner"></div>
         </div>
       </div>
     </div>
 
-    <!-- 売買履歴 -->
-    <div class="section" id="tradeHistorySection" style="display:none;">
-      <div class="section-title">売買履歴</div>
-      <div class="card" id="tradeHistoryTable"></div>
-    </div>
-
-    <!-- ウォッチリスト -->
-    <div class="section">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-        <div class="section-title" style="margin-bottom:0;">ウォッチリスト <span id="watchlistCount"
-            style="font-size:12px; color:var(--muted); font-weight:400;"></span></div>
-        <button class="add-btn" id="perUpdateBtn" onclick="onUpdatePer()"
-          style="background:rgba(124,92,252,0.15); color:#a78bfa; border-color:rgba(124,92,252,0.3);">
-          📊 PER更新
-        </button>
-      </div>
-      <div class="watchlist-grid" id="watchlistGrid">
-        <div class="card">
-          <div class="loading">
-            <div class="spinner"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 個別銘柄分析ページ -->
-    <div class="section">
-      <div class="section-title">個別銘柄 分析レポート</div>
+    <!-- TAB 3: Reports -->
+    <div class="tab-content" id="tab-reports">
+      <div style="margin-bottom:10px;flex-shrink:0"><span style="font-size:13px;font-weight:700;color:#fff">個別銘柄
+          分析レポート</span></div>
       <div class="manifest-list" id="manifestList">
-        <div class="card">
-          <div class="loading">
-            <div class="spinner"></div>
-          </div>
+        <div class="loading">
+          <div class="spinner"></div>
         </div>
       </div>
     </div>
 
-    <div class="footer">
-      <p>⚠️ このダッシュボードは投資助言ではありません。情報は参考目的に限り、売買の最終判断はご自身でお願いします。</p>
-      <p>データソース：yfinance（遅延データの可能性あり）/ watchlist.json / portfolio.json</p>
-    </div>
+    <!-- Footer -->
+    <div class="footer">⚠️ 投資助言ではありません。売買の最終判断はご自身で。データ: yfinance（遅延あり）</div>
 
-  </div><!-- /container -->
+  </div>
 
   <script>
-    // ── データソース設定 ──────────────────────────────────────
-    // 静的JSON（watchlist/portfolio/manifest）→ GitHub Raw（push直後に反映）
-    // yfinanceが必要なAPI（healthcheck）→ Render
-    const GITHUB_RAW = 'https://raw.githubusercontent.com/bi-al1/stock-dashboard/main';
-    const RENDER_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-      ? 'http://localhost:8000'
-      : 'https://stock-dashboard-rif1.onrender.com';
-
-    // GitHub Raw から JSON を取得（キャッシュバイパス付き）
-    async function fetchGitHub(path) {
-      const url = `${GITHUB_RAW}${path}?_=${Date.now()}`;
-      const res = await fetch(url);
-      if (!res.ok) throw new Error(`GitHub fetch error: ${res.status} ${path}`);
-      return res.json();
+    // ── Tab switching ──
+    function switchTab(name) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.toggle('active', t.id === 'tab-' + name));
+    }
+    function toggleTradeHistory() {
+      const body = document.getElementById('tradeHistoryBody');
+      const icon = document.getElementById('tradeToggleIcon');
+      body.classList.toggle('open');
+      icon.textContent = body.classList.contains('open') ? '▼' : '▶';
     }
 
-    // Render API から JSON を取得（yfinance系のみ）
+    // ── Data source config ──
+    const RENDER_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? 'http://localhost:8000' : 'https://stock-dashboard-rif1.onrender.com';
+
     async function fetchRender(path) {
       const res = await fetch(RENDER_BASE + path);
       if (!res.ok) throw new Error(`API error: ${res.status}`);
       return res.json();
     }
 
-    // ── ユーティリティ ────────────────────────────────────────
-    function fmt(n, digits = 0) {
-      if (n == null) return '—';
-      return Number(n).toLocaleString('ja-JP', { minimumFractionDigits: digits, maximumFractionDigits: digits });
-    }
-    function fmtPct(n) {
-      if (n == null) return '—';
-      const sign = n >= 0 ? '+' : '';
-      return `${sign}${Number(n).toFixed(1)}%`;
-    }
-    function gainClass(n) {
-      if (n == null) return 'neutral';
-      return n >= 0 ? 'positive' : 'negative';
-    }
-    function rankBadgeColor(rank) {
-      const map = { S: 'badge-green', 'A+': 'badge-green', A: 'badge-green', 'B+': 'badge-blue', B: 'badge-blue', C: 'badge-orange', D: 'badge-red', E: 'badge-red', F: 'badge-red' };
-      return map[rank] || 'badge-gray';
-    }
+    // ── Utilities ──
+    function fmt(n, d = 0) { return n == null ? '—' : Number(n).toLocaleString('ja-JP', { minimumFractionDigits: d, maximumFractionDigits: d }); }
+    function fmtPct(n) { return n == null ? '—' : `${n >= 0 ? '+' : ''}${Number(n).toFixed(1)}%`; }
+    function gainClass(n) { return n == null ? 'neutral' : n >= 0 ? 'positive' : 'negative'; }
+    function rankBadgeColor(r) { return { S: 'badge-green', 'A+': 'badge-green', A: 'badge-green', 'B+': 'badge-blue', B: 'badge-blue', C: 'badge-orange', D: 'badge-red', E: 'badge-red', F: 'badge-red' }[r] || 'badge-gray'; }
 
-    // ── メインロード ──────────────────────────────────────────
+    // ── Main Load ──
     let healthData = null;
+    let manifestUrlMap = {};
+    let watchlistCodesSet = new Set();
 
     async function loadAll() {
       document.getElementById('lastUpdated').textContent = `更新中... ${new Date().toLocaleString('ja-JP')}`;
-
-      // manifest を先に読んでURLマップを構築してからウォッチリストを描画
       await loadManifest();
-      await Promise.all([
-        loadPortfolio(),
-        loadWatchlist(),
-      ]);
-
+      await Promise.all([loadPortfolio(), loadWatchlist()]);
       document.getElementById('lastUpdated').textContent = `最終更新: ${new Date().toLocaleString('ja-JP')}`;
     }
 
-    // ── ポートフォリオ ─────────────────────────────────────────
+    // ── Portfolio ──
     async function loadPortfolio() {
       const el = document.getElementById('portfolioSummary');
       try {
         const data = await fetchRender('/api/portfolio');
         const holdings = data.holdings || [];
-
-        // 取得原価ベースで合計（現在値はhealthcheckで後から更新）
         let totalCost = 0;
         holdings.forEach(h => { totalCost += h.avg_cost * h.shares; });
 
-        // 実現損益（売却済みトレードのprofitを合計）
         const tradeHistory = data.trade_history || [];
-        const realizedProfit = tradeHistory
-          .filter(t => t.action === 'sell' && t.profit != null)
-          .reduce((sum, t) => sum + t.profit, 0);
-        const realizedProfitCls = gainClass(realizedProfit);
-        const realizedProfitStr = realizedProfit >= 0 ? `¥${fmt(realizedProfit)}` : `-¥${fmt(Math.abs(realizedProfit))}`;
+        const realizedProfit = tradeHistory.filter(t => t.action === 'sell' && t.profit != null).reduce((s, t) => s + t.profit, 0);
         const tradeCount = tradeHistory.filter(t => t.action === 'sell').length;
 
-        el.innerHTML = `
-      <div class="card">
-        <div class="kpi-label">保有銘柄数</div>
-        <div class="kpi-val">${holdings.length} 銘柄</div>
-        <div class="kpi-sub neutral">現在保有中</div>
-      </div>
-      <div class="card">
-        <div class="kpi-label">合計投資額（取得原価）</div>
-        <div class="kpi-val">¥${fmt(totalCost)}</div>
-        <div class="kpi-sub neutral">取得原価合計</div>
-      </div>
-      <div class="card">
-        <div class="kpi-label">評価損益（現在値）</div>
-        <div class="kpi-val neutral" id="totalGLKpi">—</div>
-        <div class="kpi-sub neutral" id="totalGLPctKpi">ヘルスチェック後に更新</div>
-      </div>
-      <div class="card">
-        <div class="kpi-label">実現損益（売却済み）</div>
-        <div class="kpi-val ${tradeCount === 0 ? 'neutral' : realizedProfitCls}">${tradeCount === 0 ? '—' : realizedProfitStr}</div>
-        <div class="kpi-sub neutral">${tradeCount === 0 ? '売却履歴なし' : `${tradeCount}件の売却`}</div>
-      </div>
-      <div class="card">
-        <div class="kpi-label">総合損益（含み + 実現）</div>
-        <div class="kpi-val neutral" id="totalCombinedKpi">—</div>
-        <div class="kpi-sub neutral" id="totalCombinedSubKpi">ヘルスチェック後に更新</div>
-      </div>
-    `;
-
-        // 含み損益の合計（current_priceが取得できた銘柄のみ）
-        let unrealizedTotal = null;
-        let unrealizedCost = 0;
-        let hasPrice = false;
+        let unrealizedTotal = null, unrealizedCost = 0;
         holdings.forEach(h => {
-          if (h.gain_loss != null) {
-            if (!hasPrice) { unrealizedTotal = 0; hasPrice = true; }
-            unrealizedTotal += h.gain_loss;
-            unrealizedCost += h.avg_cost * h.shares;
-          }
+          if (h.gain_loss != null) { unrealizedTotal = (unrealizedTotal || 0) + h.gain_loss; unrealizedCost += h.avg_cost * h.shares; }
         });
 
-        // 含み損益KPI更新
-        const glKpi = document.getElementById('totalGLKpi');
-        const glPctKpi = document.getElementById('totalGLPctKpi');
-        if (glKpi && unrealizedTotal != null) {
-          const pct = unrealizedCost > 0 ? unrealizedTotal / unrealizedCost * 100 : null;
-          glKpi.textContent = (unrealizedTotal >= 0 ? '¥' : '-¥') + fmt(Math.abs(unrealizedTotal));
-          glKpi.className = 'kpi-val ' + gainClass(unrealizedTotal);
-          if (glPctKpi && pct != null) {
-            glPctKpi.textContent = fmtPct(pct);
-            glPctKpi.className = 'kpi-sub ' + gainClass(pct);
-          }
-        }
+        const combined = (unrealizedTotal ?? 0) + realizedProfit;
+        const hasCombined = unrealizedTotal != null || tradeCount > 0;
 
-        // 総合損益KPI更新（含み + 実現）
-        const combinedKpi = document.getElementById('totalCombinedKpi');
-        const combinedSubKpi = document.getElementById('totalCombinedSubKpi');
-        if (combinedKpi && (unrealizedTotal != null || tradeCount > 0)) {
-          const combined = (unrealizedTotal ?? 0) + realizedProfit;
-          combinedKpi.textContent = (combined >= 0 ? '¥' : '-¥') + fmt(Math.abs(combined));
-          combinedKpi.className = 'kpi-val ' + gainClass(combined);
-          if (combinedSubKpi) {
-            const parts = [];
-            if (unrealizedTotal != null) parts.push(`含み <span class="${gainClass(unrealizedTotal)}">${unrealizedTotal >= 0 ? '¥' : '-¥'}${fmt(Math.abs(unrealizedTotal))}</span>`);
-            if (tradeCount > 0) parts.push(`実現 <span class="${gainClass(realizedProfit)}">${realizedProfit >= 0 ? '¥' : '-¥'}${fmt(Math.abs(realizedProfit))}</span>`);
-            combinedSubKpi.innerHTML = parts.join('<br>');
-            combinedSubKpi.className = 'kpi-sub neutral';
-          }
-        }
+        el.innerHTML = `
+      <div class="kpi"><div class="kpi-label">保有銘柄数</div><div class="kpi-val">${holdings.length} 銘柄</div></div>
+      <div class="kpi"><div class="kpi-label">合計投資額</div><div class="kpi-val">¥${fmt(totalCost)}</div></div>
+      <div class="kpi"><div class="kpi-label">評価損益</div><div class="kpi-val ${unrealizedTotal != null ? gainClass(unrealizedTotal) : 'neutral'}">${unrealizedTotal != null ? ((unrealizedTotal >= 0 ? '' : '-') + '¥' + fmt(Math.abs(unrealizedTotal))) : '—'}</div>${unrealizedTotal != null && unrealizedCost > 0 ? `<div class="kpi-sub ${gainClass(unrealizedTotal / unrealizedCost * 100)}">${fmtPct(unrealizedTotal / unrealizedCost * 100)}</div>` : ''}</div>
+      <div class="kpi"><div class="kpi-label">総合損益</div><div class="kpi-val ${hasCombined ? gainClass(combined) : 'neutral'}">${hasCombined ? ((combined >= 0 ? '' : '-') + '¥' + fmt(Math.abs(combined))) : '—'}</div></div>`;
 
-        // 保有銘柄テーブル & 売買履歴
         renderHoldingsTable(holdings);
         renderTradeHistory(tradeHistory);
       } catch (e) {
-        el.innerHTML = `<div class="card"><div class="error-msg">⚠️ ポートフォリオの読み込みに失敗しました。<br><small>${e.message}</small></div></div>`;
+        el.innerHTML = `<div class="kpi" style="grid-column:1/-1"><div class="error-msg">⚠️ ポートフォリオ読み込み失敗<br><small>${e.message}</small></div></div>`;
         document.getElementById('holdingsTable').innerHTML = '';
       }
     }
 
     function renderHoldingsTable(holdings) {
       const el = document.getElementById('holdingsTable');
-      if (!holdings.length) {
-        el.innerHTML = '<div class="empty-msg">📭 保有銘柄はありません。<br>右上の「＋ 買い追加」から記録できます。</div>';
-        return;
-      }
-
+      if (!holdings.length) { el.innerHTML = '<div class="empty-msg">📭 保有銘柄なし。「＋ 買い追加」から記録できます。</div>'; return; }
       const rows = holdings.map(h => {
         const evalAmt = h.current_price ? h.current_price * h.shares : null;
         const alertLevel = healthData?.results?.find(r => r.code === h.code)?.alert;
-        const alertBadge = alertLevel
-          ? `<span class="badge badge-${alertLevel.level === 'green' ? 'green' : alertLevel.level === 'yellow' ? 'orange' : alertLevel.level === 'orange' ? 'orange' : 'red'}" style="font-size:10px;">${alertLevel.label}</span>`
-          : '';
-
-        return `
-      <tr>
-        <td>
-          <div class="stock-name">${h.name}</div>
-          <div class="stock-code">${h.code}</div>
-        </td>
-        <td>${fmt(h.shares)} 株</td>
-        <td>¥${fmt(h.avg_cost)}</td>
-        <td>${h.current_price ? '¥' + fmt(h.current_price) : '<span style="color:var(--muted)">取得中</span>'}</td>
-        <td class="${gainClass(h.gain_loss)}">${h.gain_loss != null ? (h.gain_loss >= 0 ? '' : '-') + '¥' + fmt(Math.abs(h.gain_loss)) : '—'}</td>
-        <td class="${gainClass(h.gain_loss_pct)}">${h.gain_loss_pct != null ? fmtPct(h.gain_loss_pct) : '—'}</td>
-        <td>${evalAmt ? '¥' + fmt(evalAmt) : '—'}</td>
-        <td>${alertBadge}</td>
-        <td><button class="sell-btn" onclick="onOpenSellModal('${h.code}','${h.name}',${h.shares})">売却</button></td>
-      </tr>`;
+        const alertBadge = alertLevel ? `<span class="badge badge-${alertLevel.level === 'green' ? 'green' : alertLevel.level === 'yellow' ? 'orange' : alertLevel.level === 'orange' ? 'orange' : 'red'}" style="font-size:9px">${alertLevel.label}</span>` : '';
+        return `<tr>
+      <td><div class="stock-name">${h.name}</div><div class="stock-code">${h.code}</div></td>
+      <td>${fmt(h.shares)}株</td><td>¥${fmt(h.avg_cost)}</td>
+      <td>${h.current_price ? '¥' + fmt(h.current_price) : '<span style="color:var(--muted)">—</span>'}</td>
+      <td class="${gainClass(h.gain_loss)}">${h.gain_loss != null ? (h.gain_loss >= 0 ? '' : '-') + '¥' + fmt(Math.abs(h.gain_loss)) : '—'}</td>
+      <td class="${gainClass(h.gain_loss_pct)}">${h.gain_loss_pct != null ? fmtPct(h.gain_loss_pct) : '—'}</td>
+      <td>${alertBadge}</td>
+      <td><button class="sell-btn" onclick="onOpenSellModal('${h.code}','${h.name}',${h.shares})">売却</button></td>
+    </tr>`;
       }).join('');
-
-      el.innerHTML = `
-    <table class="holdings-table">
-      <thead>
-        <tr>
-          <th>銘柄</th><th>株数</th><th>取得単価</th><th>現在値</th>
-          <th>評価損益</th><th>評価損益率</th><th>評価額</th><th>ステータス</th><th></th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>`;
+      el.innerHTML = `<table class="tbl"><thead><tr><th>銘柄</th><th>株数</th><th>取得単価</th><th>現在値</th><th>損益</th><th>損益率</th><th>状態</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
     }
 
     function renderTradeHistory(tradeHistory) {
       const section = document.getElementById('tradeHistorySection');
       const el = document.getElementById('tradeHistoryTable');
-      if (!tradeHistory || !tradeHistory.length) {
-        section.style.display = 'none';
-        return;
-      }
+      if (!tradeHistory || !tradeHistory.length) { section.style.display = 'none'; return; }
       section.style.display = '';
-
-      // 新しい順に並べ替え（元のインデックスを保持）
+      document.getElementById('tradeToggleLabel').textContent = `売買履歴（${tradeHistory.length}件）`;
       const sorted = tradeHistory.map((t, i) => ({ ...t, _origIdx: i })).reverse();
-
       const rows = sorted.map(t => {
         const isSell = t.action === 'sell';
-        const actionTag = isSell
-          ? `<span class="trade-action-sell">売</span>`
-          : `<span class="trade-action-buy">買</span>`;
-        const totalAmt = `¥${fmt(t.price * t.shares)}`;
-        let profitCell = '<span style="color:var(--muted)">—</span>';
-        if (isSell && t.profit != null) {
-          const cls = t.profit >= 0 ? 'positive' : 'negative';
-          const sign = t.profit >= 0 ? '' : '-';
-          profitCell = `<span class="${cls}">${sign}¥${fmt(Math.abs(t.profit))}</span>`;
-        }
-        return `
-      <tr>
-        <td style="color:var(--muted); font-size:12px;">${t.date}</td>
-        <td>
-          <div class="stock-name">${t.name}</div>
-          <div class="stock-code">${t.code}</div>
-        </td>
-        <td>${actionTag}</td>
-        <td>${fmt(t.shares)} 株</td>
-        <td>¥${fmt(t.price)}</td>
-        <td>${totalAmt}</td>
-        <td>${profitCell}</td>
-        <td><button class="sell-btn" data-trade-idx="${t._origIdx}" data-trade-name="${t.name}" data-trade-action="${t.action === 'buy' ? '買' : '売'}" data-trade-shares="${t.shares}" data-trade-date="${t.date}" onclick="onDeleteTrade(this)">削除</button></td>
-      </tr>`;
+        const tag = isSell ? `<span class="trade-action-sell">売</span>` : `<span class="trade-action-buy">買</span>`;
+        let profit = '<span style="color:var(--muted)">—</span>';
+        if (isSell && t.profit != null) { const c = t.profit >= 0 ? 'positive' : 'negative'; profit = `<span class="${c}">${t.profit >= 0 ? '' : '-'}¥${fmt(Math.abs(t.profit))}</span>`; }
+        return `<tr>
+      <td style="color:var(--muted);font-size:11px">${t.date}</td>
+      <td><div class="stock-name">${t.name}</div><div class="stock-code">${t.code}</div></td>
+      <td>${tag}</td><td>${fmt(t.shares)}株</td><td>¥${fmt(t.price)}</td>
+      <td>${profit}</td>
+      <td><button class="sell-btn" data-trade-idx="${t._origIdx}" data-trade-name="${t.name}" data-trade-action="${isSell ? '売' : '買'}" data-trade-shares="${t.shares}" data-trade-date="${t.date}" onclick="onDeleteTrade(this)">削除</button></td>
+    </tr>`;
       }).join('');
-
-      el.innerHTML = `
-    <table class="holdings-table">
-      <thead>
-        <tr>
-          <th>日付</th><th>銘柄</th><th>種別</th><th>株数</th><th>単価</th><th>約定金額</th><th>損益</th><th></th>
-        </tr>
-      </thead>
-      <tbody>${rows}</tbody>
-    </table>`;
+      el.innerHTML = `<table class="tbl"><thead><tr><th>日付</th><th>銘柄</th><th>種別</th><th>株数</th><th>単価</th><th>損益</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
     }
 
     async function onDeleteTrade(btn) {
-      const idx = btn.dataset.tradeIdx;
-      const name = btn.dataset.tradeName;
-      const action = btn.dataset.tradeAction;
-      const shares = btn.dataset.tradeShares;
-      const date = btn.dataset.tradeDate;
+      const { tradeIdx: idx, tradeName: name, tradeAction: action, tradeShares: shares, tradeDate: date } = btn.dataset;
       if (!confirm(`${date} の ${name} ${action}${shares}株 を履歴から削除しますか？\n\n※ 保有銘柄は残りの履歴から自動再計算されます。`)) return;
-      btn.disabled = true;
-      btn.textContent = '...';
+      btn.disabled = true; btn.textContent = '...';
       try {
         const res = await fetch(`${RENDER_BASE}/api/portfolio/trade/${idx}`, { method: 'DELETE' });
-        if (!res.ok) {
-          const j = await res.json().catch(() => ({}));
-          throw new Error(j.detail ?? '削除に失敗しました');
-        }
+        if (!res.ok) { const j = await res.json().catch(() => ({})); throw new Error(j.detail ?? '削除失敗'); }
         await loadPortfolio();
-      } catch (e) {
-        alert(`削除失敗: ${e.message}`);
-        btn.disabled = false;
-        btn.textContent = '削除';
-      }
+      } catch (e) { alert(`削除失敗: ${e.message}`); btn.disabled = false; btn.textContent = '削除'; }
     }
 
-    // ── ヘルスチェック ─────────────────────────────────────────
+    // ── Health Check ──
     async function onRunHealthCheck() {
       const btn = document.getElementById('healthRunBtn');
-      const placeholder = document.getElementById('healthPlaceholder');
-      const layout = document.getElementById('healthLayout');
-      const badgesEl = document.getElementById('healthSummaryBadges');
-      const listEl = document.getElementById('healthDetailList');
-
-      btn.disabled = true;
-      btn.textContent = '⏳ 診断中...';
-
-      placeholder.style.display = 'none';
-      layout.style.display = '';
-      badgesEl.innerHTML = '<div class="card"><div class="loading"><div class="spinner"></div></div></div>';
-      listEl.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
-
-      try {
-        await loadHealthCheck();
-        btn.textContent = '✅ 診断完了';
-        btn.style.background = 'rgba(34,197,94,0.15)';
-        btn.style.color = 'var(--green)';
-        btn.style.borderColor = 'rgba(34,197,94,0.3)';
-        setTimeout(() => {
-          btn.disabled = false;
-          btn.textContent = '🩺 再実行';
-          btn.style.background = 'rgba(74,158,255,0.15)';
-          btn.style.color = 'var(--accent)';
-          btn.style.borderColor = 'rgba(74,158,255,0.3)';
-        }, 2000);
-      } catch (e) {
-        btn.disabled = false;
-        btn.textContent = '🩺 ヘルスチェック実行';
-      }
-    }
-
-    async function loadHealthCheck() {
-      const badgesEl = document.getElementById('healthSummaryBadges');
-      const listEl = document.getElementById('healthDetailList');
+      const el = document.getElementById('healthContent');
+      btn.disabled = true; btn.textContent = '⏳ 診断中...';
+      el.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
       try {
         const data = await fetchRender('/api/healthcheck');
         healthData = data;
         const s = data.summary || {};
-
-        badgesEl.innerHTML = `
+        let html = `<div class="health-grid">
       <div class="health-badge health-green"><div class="icon">✅</div><div class="count" style="color:var(--green)">${s.green ?? 0}</div><div class="hlabel">問題なし</div></div>
       <div class="health-badge health-yellow"><div class="icon">🟡</div><div class="count" style="color:var(--yellow)">${s.yellow ?? 0}</div><div class="hlabel">早期警告</div></div>
       <div class="health-badge health-orange"><div class="icon">🟠</div><div class="count" style="color:#fb923c">${s.orange ?? 0}</div><div class="hlabel">注意</div></div>
       <div class="health-badge health-red"><div class="icon">🔴</div><div class="count" style="color:var(--red)">${s.red ?? 0}</div><div class="hlabel">撤退検討</div></div>
-    `;
-
-        if (!data.results?.length) {
-          listEl.innerHTML = '<div class="empty-msg">保有銘柄がありません</div>';
-          return;
-        }
-
-        const items = data.results.map(r => {
-          const tech = r.technical || {};
-          const rsiVal = tech.rsi != null ? `RSI ${tech.rsi}` : 'RSI —';
-          const smaVal = tech.death_cross ? '💀 デッドクロス' : tech.golden_cross ? '✨ ゴールデンクロス' : 'SMA 判定中';
-          const price = r.current_price ? `¥${fmt(r.current_price)}` : '—';
-          const alertColors = { green: 'var(--green)', yellow: 'var(--yellow)', orange: '#fb923c', red: 'var(--red)' };
-          const col = alertColors[r.alert?.level] || 'var(--muted)';
-
-          return `
-        <div class="health-row">
-          <div class="name-block">
-            <div class="name">${r.name}</div>
-            <div class="code">${r.code}</div>
+    </div>`;
+        if (data.results?.length) {
+          html += data.results.map(r => {
+            const tech = r.technical || {};
+            const col = { green: 'var(--green)', yellow: 'var(--yellow)', orange: '#fb923c', red: 'var(--red)' }[r.alert?.level] || 'var(--muted)';
+            return `<div class="health-row">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div><strong style="color:#fff">${r.name}</strong> <span style="font-size:10px;color:var(--muted)">${r.code}</span></div>
+            <span style="font-weight:700;color:${col};font-size:11px">${r.alert?.label ?? '—'}</span>
           </div>
-          <div class="detail-block">
-            <span style="font-weight:700; color:${col};">${r.alert?.label ?? '—'}</span>
-            <div class="reason">${r.alert?.reason ?? ''}</div>
-          </div>
-          <div class="metrics">
-            <div class="metric-item"><div class="mval">${price}</div><div class="mlabel">現在値</div></div>
-            <div class="metric-item"><div class="mval">${rsiVal}</div><div class="mlabel">テクニカル</div></div>
-            <div class="metric-item"><div class="mval" style="font-size:11px;">${smaVal}</div><div class="mlabel">SMA</div></div>
+          <div style="font-size:10px;color:#94a3c8;margin-top:4px">${r.alert?.reason ?? ''}</div>
+          <div style="display:flex;gap:12px;margin-top:4px;font-size:10px">
+            <span>RSI ${tech.rsi ?? '—'}</span>
+            <span>${tech.death_cross ? '💀 DC' : tech.golden_cross ? '✨ GC' : 'SMA —'}</span>
+            <span>${r.current_price ? '¥' + fmt(r.current_price) : '—'}</span>
           </div>
         </div>`;
-        }).join('');
-
-        listEl.innerHTML = items;
-
-        // テーブルのアラートバッジを再描画（healthDataが揃ったので）
-        const portfolioData = document.querySelector('.holdings-table');
-        if (portfolioData) {
-          // 保有銘柄のテーブルを再取得して再描画
-          loadPortfolio();
-        }
-
+          }).join('');
+        } else { html += '<div class="empty-msg">保有銘柄がありません</div>'; }
+        el.innerHTML = html;
+        btn.textContent = '✅ 完了'; btn.style.background = 'rgba(34,197,94,.15)'; btn.style.color = 'var(--green)'; btn.style.borderColor = 'rgba(34,197,94,.3)';
+        setTimeout(() => { btn.disabled = false; btn.textContent = '🩺 再実行'; btn.style.background = ''; btn.style.color = ''; btn.style.borderColor = ''; }, 2000);
+        loadPortfolio();
       } catch (e) {
-        badgesEl.innerHTML = `<div class="error-msg">⚠️ ヘルスチェック失敗<br><small>${e.message}</small></div>`;
-        listEl.innerHTML = '';
+        el.innerHTML = `<div class="error-msg">⚠️ ヘルスチェック失敗<br><small>${e.message}</small></div>`;
+        btn.disabled = false; btn.textContent = '🩺 実行';
       }
     }
 
-    // ── ウォッチリスト ─────────────────────────────────────────
-    // manifest の stocks を code → url で引けるようにキャッシュ
-    let manifestUrlMap = {};
-    // ウォッチリストのcodeセット
-    let watchlistCodesSet = new Set();
+    // ── Watchlist ──
+    const IDX_STATUS_MAP = {
+      interested: { label: '💛 積極検討', cls: 'wstatus-interested' },
+      watching: { label: '👀 要観察', cls: 'wstatus-watching' },
+      archived: { label: '📦 アーカイブ', cls: 'wstatus-archived' },
+    };
 
     async function loadWatchlist() {
       const el = document.getElementById('watchlistGrid');
@@ -1443,441 +1240,179 @@
       try {
         const data = await fetchRender('/api/watchlist');
         const rawList = data.watchlist || [];
-        // アーカイブ済み・即時アーカイブ済みを除外して描画
         const list = rawList.filter(w => w.status !== 'archived');
         watchlistCodesSet = new Set(rawList.map(w => w.code));
-        countEl.textContent = `（${list.length} 銘柄）`;
-
-        if (!list.length) {
-          el.innerHTML = '<div class="card"><div class="empty-msg">📭 ウォッチリストは空です。<br>分析後に「ウォッチリストに追加して」とClaudeに伝えると追加されます。</div></div>';
-          return;
-        }
-
-        const STATUS_MAP = {
-          interested: { label: '💛 積極検討', cls: 'wstatus-interested' },
-          watching: { label: '👀 要観察', cls: 'wstatus-watching' },
-          archived: { label: '📦 アーカイブ', cls: 'wstatus-archived' },
-        };
+        countEl.textContent = `（${list.length}）`;
+        if (!list.length) { el.innerHTML = '<div class="empty-msg">📭 ウォッチリストは空です。</div>'; return; }
 
         el.innerHTML = list.map(w => {
           const reportUrl = manifestUrlMap[w.code];
           const tag = reportUrl ? 'a' : 'div';
           const hrefAttr = reportUrl ? `href="${reportUrl}" target="_blank"` : '';
-          const reportBadge = reportUrl
-            ? `<div class="wmeta" style="color:var(--accent); margin-top:6px; font-size:11px;">📊 分析レポートあり →</div>`
-            : '';
-
-          // ステータスセレクター（クリックで変更可能）
-          const st = STATUS_MAP[w.status] ?? STATUS_MAP['watching'];
-          const statusOptions = Object.entries(STATUS_MAP).map(([val, info]) =>
+          const reportBadge = reportUrl ? `<div class="wmeta" style="color:var(--accent);margin-top:4px;font-size:10px">📊 分析レポートあり →</div>` : '';
+          const st = IDX_STATUS_MAP[w.status] ?? IDX_STATUS_MAP['watching'];
+          const statusOptions = Object.entries(IDX_STATUS_MAP).map(([val, info]) =>
             `<div class="wstatus-option${val === (w.status || 'watching') ? ' active' : ''}" data-code="${w.code}" data-status="${val}" onclick="event.preventDefault();event.stopPropagation();onWatchlistStatusClick(this)">${info.label}</div>`
           ).join('');
-          const statusBadge = `
-        <span class="wstatus-wrap" id="wstwrap-${w.code}">
-          <span class="wstatus ${st.cls}" id="wst-${w.code}" onclick="event.preventDefault();event.stopPropagation();toggleWatchlistStatusDropdown('${w.code}')">${st.label} ▾</span>
-          <div class="wstatus-dropdown" id="wstd-${w.code}">${statusOptions}</div>
-        </span>`;
+          const statusBadge = `<span class="wstatus-wrap" id="wstwrap-${w.code}"><span class="wstatus ${st.cls}" id="wst-${w.code}" onclick="event.preventDefault();event.stopPropagation();toggleWatchlistStatusDropdown('${w.code}')">${st.label} ▾</span><div class="wstatus-dropdown" id="wstd-${w.code}">${statusOptions}</div></span>`;
 
-          // 予想PER バッジ（数値表示 + per_history 2件比較で矢印）
           let perBadge = '';
-          if (w.per == null) {
-            perBadge = `<span class="wper-null">PER —</span>`;
-          } else {
-            const perVal = w.per;
-            const isRed = perVal < 0;
-            const dispVal = `${perVal > 0 ? '' : ''}${perVal}倍`;
-
-            // 矢印判定（per_history が2件以上ある場合）
+          if (w.per == null) { perBadge = `<span class="wper-null">PER —</span>`; }
+          else {
+            const isRed = w.per < 0;
             const hist = w.per_history || [];
             let arrow = '', arrowCls = '';
             if (hist.length >= 2) {
-              const prev = hist[hist.length - 2].per;
-              const curr = hist[hist.length - 1].per;
+              const prev = hist[hist.length - 2].per, curr = hist[hist.length - 1].per;
               if (prev != null && curr != null) {
-                if (isRed || prev < 0) {
-                  // 赤字同士 or 前回赤字：絶対値で判定（小さい方が改善）
-                  const absPrev = Math.abs(prev), absCurr = Math.abs(curr);
-                  if (absCurr < absPrev - 0.05) { arrow = ' ↑'; arrowCls = 'arrow-good'; }
-                  else if (absCurr > absPrev + 0.05) { arrow = ' ↓'; arrowCls = 'arrow-bad'; }
-                  else { arrow = ' →'; arrowCls = 'arrow-flat'; }
-                } else {
-                  // 黒字同士：PER小さいほど割安
-                  if (curr < prev - 0.05) { arrow = ' ↓'; arrowCls = 'arrow-good'; } // 下がった=割安化
-                  else if (curr > prev + 0.05) { arrow = ' ↑'; arrowCls = 'arrow-bad'; }  // 上がった=割高化
-                  else { arrow = ' →'; arrowCls = 'arrow-flat'; }
-                }
+                if (isRed || prev < 0) { const ap = Math.abs(prev), ac = Math.abs(curr); if (ac < ap - .05) { arrow = ' ↑'; arrowCls = 'arrow-good'; } else if (ac > ap + .05) { arrow = ' ↓'; arrowCls = 'arrow-bad'; } else { arrow = ' →'; arrowCls = 'arrow-flat'; } }
+                else { if (curr < prev - .05) { arrow = ' ↓'; arrowCls = 'arrow-good'; } else if (curr > prev + .05) { arrow = ' ↑'; arrowCls = 'arrow-bad'; } else { arrow = ' →'; arrowCls = 'arrow-flat'; } }
               }
             }
-
-            const baseCls = isRed ? 'wper-red' : 'wper';
-            perBadge = `<span class="${baseCls}">PER ${dispVal}<span class="${arrowCls}">${arrow}</span></span>`;
+            perBadge = `<span class="${isRed ? 'wper-red' : 'wper'}">PER ${w.per}倍<span class="${arrowCls}">${arrow}</span></span>`;
           }
 
-          return `
-        <${tag} class="watch-card status-${w.status ?? 'watching'}" ${hrefAttr} data-code="${w.code}" style="${reportUrl ? 'text-decoration:none;' : ''}">
-
-          <div class="wname">${w.name}</div>
-          <div class="wcode">
-            ${w.code}
-            ${w.kabumart_rank ? `<span class="wrank">${w.kabumart_rank}</span>` : ''}
-            ${statusBadge}
-            ${perBadge}
-          </div>
-          ${w.note ? `<div class="wnote">${w.note}</div>` : ''}
-          <div class="wmeta">追加日: ${w.added_date ?? '—'}</div>
-          ${reportBadge}
-        </${tag}>`;
+          return `<${tag} class="watch-card status-${w.status ?? 'watching'}" ${hrefAttr} data-code="${w.code}" style="${reportUrl ? 'text-decoration:none' : ''}">
+        <div class="wname">${w.name}</div>
+        <div class="wcode">${w.code} ${w.kabumart_rank ? `<span class="wrank">${w.kabumart_rank}</span>` : ''} ${statusBadge} ${perBadge}</div>
+        ${w.note ? `<div class="wnote">${w.note}</div>` : ''}
+        <div class="wmeta">追加日: ${w.added_date ?? '—'}</div>
+        ${reportBadge}
+      </${tag}>`;
         }).join('');
-      } catch (e) {
-        el.innerHTML = `<div class="card"><div class="error-msg">⚠️ ウォッチリスト読み込み失敗<br><small>${e.message}</small></div>`;
-      }
+      } catch (e) { el.innerHTML = `<div class="error-msg">⚠️ ウォッチリスト読み込み失敗<br><small>${e.message}</small></div>`; }
     }
 
-    // ── manifest（個別分析ページ一覧） ───────────────────────
-    async function loadManifest() {
-      const el = document.getElementById('manifestList');
-      try {
-        // GitHub Raw ではなく Render API 経由で取得する。
-        // 理由: delete_report が manifest.json を更新した直後に loadAll() が走ると、
-        //       GitHub Raw CDN のキャッシュ（数十秒〜数分）により古いデータが返り
-        //       削除したカードが復活してしまう問題を根本解決するため。
-        // Render はローカルの manifest.json を save_json() で更新済みなので常に最新を返す。
-        const data = await fetchRender('/api/manifest');
-        const stocks = data.stocks || [];
-
-        // ウォッチリストカードのリンク用に code → url をキャッシュ
-        manifestUrlMap = {};
-        stocks.forEach(s => {
-          if (s.url || s.file) manifestUrlMap[s.code] = s.url ?? s.file;
-        });
-
-        if (!stocks.length) {
-          el.innerHTML = '<div class="card"><div class="empty-msg">📭 まだ分析レポートがありません。<br>KabuMartのスクショをClaudeに貼り付けると分析レポートが生成されます。</div></div>';
-          return;
-        }
-
-        // 新しい順に並べ替え（削除済みcodeは除外）
-        const sorted = [...stocks]
-          .sort((a, b) => (b.analyzed_date ?? '').localeCompare(a.analyzed_date ?? ''));
-        el.innerHTML = sorted.map(s => {
-          return `
-      <a class="manifest-card" href="${s.url ?? s.file}" target="_blank" data-code="${s.code}">
-        <div class="mname">${s.name}</div>
-        <div class="mcode">${s.code} ${s.kabumart_rank ? `<span class="badge ${rankBadgeColor(s.kabumart_rank)}" style="font-size:10px;">${s.kabumart_rank}</span>` : ''}</div>
-        <div class="mdate">📅 分析日: ${s.analyzed_date ?? '—'}</div>
-      </a>`;
-        }).join('');
-      } catch (e) {
-        el.innerHTML = `<div class="card"><div class="error-msg">⚠️ 分析レポート一覧の読み込み失敗<br><small>${e.message}</small></div>`;
-      }
-    }
-
-    // ── ウォッチリスト ステータス変更 ──────────────────────────
-    const IDX_STATUS_MAP = {
-      interested: { label: '💛 積極検討', cls: 'wstatus-interested' },
-      watching: { label: '👀 要観察', cls: 'wstatus-watching' },
-      archived: { label: '📦 アーカイブ', cls: 'wstatus-archived' },
-    };
-
+    // ── Watchlist Status ──
     function toggleWatchlistStatusDropdown(code) {
-      const dd = document.getElementById(`wstd-${code}`);
-      if (!dd) return;
+      const dd = document.getElementById(`wstd-${code}`); if (!dd) return;
       const isOpen = dd.classList.contains('open');
-      // 他を全部閉じる
       document.querySelectorAll('.wstatus-dropdown.open').forEach(el => el.classList.remove('open'));
       if (!isOpen) dd.classList.add('open');
     }
+    document.addEventListener('click', e => { if (!e.target.closest('.wstatus-wrap')) document.querySelectorAll('.wstatus-dropdown.open').forEach(el => el.classList.remove('open')); });
 
-    // ドロップダウン外クリックで閉じる
-    document.addEventListener('click', e => {
-      // wstatus-wrap の内側クリックは無視（wstatus と wstatus-option は各自 stopPropagation 済み）
-      if (!e.target.closest('.wstatus-wrap')) {
-        document.querySelectorAll('.wstatus-dropdown.open').forEach(el => el.classList.remove('open'));
-      }
-    });
-
-    // ステータスオプションクリック（直接 onclick から呼ばれる）
     async function onWatchlistStatusClick(opt) {
-      const code = opt.dataset.code;
-      const newStatus = opt.dataset.status;
-      const badgeEl = document.getElementById(`wst-${code}`);
-      const ddEl = document.getElementById(`wstd-${code}`);
+      const code = opt.dataset.code, newStatus = opt.dataset.status;
+      const badgeEl = document.getElementById(`wst-${code}`), ddEl = document.getElementById(`wstd-${code}`);
       if (!badgeEl || !ddEl) return;
-
       ddEl.classList.remove('open');
-
-      const oldLabel = badgeEl.textContent;
-      badgeEl.textContent = '更新中...';
-
+      const oldLabel = badgeEl.textContent; badgeEl.textContent = '更新中...';
       try {
-        const res = await fetch(`${RENDER_BASE}/api/watchlist/status`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ code, status: newStatus }),
-        });
-        const json = await res.json();
-        if (!json.ok) throw new Error(json.detail ?? json.error);
-
-        // アーカイブにしたらカードを非表示
-        if (newStatus === 'archived') {
-          const card = badgeEl.closest('.watch-card');
-          if (card) card.remove();
-          return;
-        }
-
-        // バッジ更新
+        const res = await fetch(`${RENDER_BASE}/api/watchlist/status`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code, status: newStatus }) });
+        const json = await res.json(); if (!json.ok) throw new Error(json.detail ?? json.error);
+        if (newStatus === 'archived') { const card = badgeEl.closest('.watch-card'); if (card) card.remove(); return; }
         const info = IDX_STATUS_MAP[newStatus];
-        badgeEl.textContent = info.label + ' ▾';
-        badgeEl.className = `wstatus ${info.cls}`;
-        // カードの左ボーダー更新
-        const card = badgeEl.closest('.watch-card');
-        if (card) {
-          card.className = card.className.replace(/status-\w+/, `status-${newStatus}`);
-        }
-        // ドロップダウンのactive更新
-        ddEl.querySelectorAll('.wstatus-option').forEach(o => {
-          o.classList.toggle('active', o.dataset.status === newStatus);
-        });
-
-      } catch (err) {
-        badgeEl.textContent = oldLabel;
-        alert(`ステータス更新に失敗しました: ${err.message}`);
-      }
+        badgeEl.textContent = info.label + ' ▾'; badgeEl.className = `wstatus ${info.cls}`;
+        const card = badgeEl.closest('.watch-card'); if (card) card.className = card.className.replace(/status-\w+/, `status-${newStatus}`);
+        ddEl.querySelectorAll('.wstatus-option').forEach(o => o.classList.toggle('active', o.dataset.status === newStatus));
+      } catch (err) { badgeEl.textContent = oldLabel; alert(`ステータス更新失敗: ${err.message}`); }
     }
 
-
-
-    // ── PER更新 ──────────────────────────────────────────────
+    // ── PER Update ──
     async function onUpdatePer() {
       const btn = document.getElementById('perUpdateBtn');
-      btn.disabled = true;
-      btn.textContent = '⏳ PER取得中...';
-
+      btn.disabled = true; btn.textContent = '⏳ PER取得中...';
       try {
-        const res = await fetch(`${RENDER_BASE}/api/watchlist/update-per`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-        });
-        const json = await res.json();
-        if (!res.ok) throw new Error(json.detail ?? 'PER更新に失敗しました');
-
-        const errCount = json.errors?.length || 0;
-        const updCount = json.updated || 0;
-        if (errCount > 0) {
-          btn.textContent = `⚠️ ${updCount}件更新 / ${errCount}件エラー`;
-          btn.style.background = 'rgba(245,158,11,0.15)';
-          btn.style.color = 'var(--yellow)';
-          btn.style.borderColor = 'rgba(245,158,11,0.3)';
-        } else {
-          btn.textContent = `✅ ${updCount}件更新完了`;
-          btn.style.background = 'rgba(34,197,94,0.15)';
-          btn.style.color = 'var(--green)';
-          btn.style.borderColor = 'rgba(34,197,94,0.3)';
-        }
-
+        const res = await fetch(`${RENDER_BASE}/api/watchlist/update-per`, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+        const json = await res.json(); if (!res.ok) throw new Error(json.detail ?? 'PER更新失敗');
+        const errCnt = json.errors?.length || 0, updCnt = json.updated || 0;
+        if (errCnt > 0) { btn.textContent = `⚠️ ${updCnt}件更新/${errCnt}件エラー`; btn.style.background = 'rgba(245,158,11,.15)'; btn.style.color = 'var(--yellow)'; btn.style.borderColor = 'rgba(245,158,11,.3)'; }
+        else { btn.textContent = `✅ ${updCnt}件更新完了`; btn.style.background = 'rgba(34,197,94,.15)'; btn.style.color = 'var(--green)'; btn.style.borderColor = 'rgba(34,197,94,.3)'; }
         await loadWatchlist();
-
-        setTimeout(() => {
-          btn.disabled = false;
-          btn.textContent = '📊 PER更新';
-          btn.style.background = 'rgba(124,92,252,0.15)';
-          btn.style.color = '#a78bfa';
-          btn.style.borderColor = 'rgba(124,92,252,0.3)';
-        }, 3000);
-
+        setTimeout(() => { btn.disabled = false; btn.textContent = '📊 PER更新'; btn.style.background = ''; btn.style.color = ''; btn.style.borderColor = ''; }, 3000);
       } catch (e) {
-        btn.textContent = '❌ 失敗';
-        btn.style.background = 'rgba(239,68,68,0.15)';
-        btn.style.color = 'var(--red)';
-        btn.style.borderColor = 'rgba(239,68,68,0.3)';
-        setTimeout(() => {
-          btn.disabled = false;
-          btn.textContent = '📊 PER更新';
-          btn.style.background = 'rgba(124,92,252,0.15)';
-          btn.style.color = '#a78bfa';
-          btn.style.borderColor = 'rgba(124,92,252,0.3)';
-        }, 3000);
+        btn.textContent = '❌ 失敗'; btn.style.background = 'rgba(239,68,68,.15)'; btn.style.color = 'var(--red)';
+        setTimeout(() => { btn.disabled = false; btn.textContent = '📊 PER更新'; btn.style.background = ''; btn.style.color = ''; btn.style.borderColor = ''; }, 3000);
       }
     }
 
-    // ── 買い追加モーダル ──────────────────────────────────────
+    // ── Manifest ──
+    async function loadManifest() {
+      const el = document.getElementById('manifestList');
+      try {
+        const data = await fetchRender('/api/manifest');
+        const stocks = data.stocks || [];
+        manifestUrlMap = {};
+        stocks.forEach(s => { if (s.url || s.file) manifestUrlMap[s.code] = s.url ?? s.file; });
+        if (!stocks.length) { el.innerHTML = '<div class="empty-msg">📭 分析レポートなし。KabuMartスクショをClaudeに貼り付けると生成されます。</div>'; return; }
+        const sorted = [...stocks].sort((a, b) => (b.analyzed_date ?? '').localeCompare(a.analyzed_date ?? ''));
+        el.innerHTML = sorted.map(s => `<a class="manifest-card" href="${s.url ?? s.file}" target="_blank" data-code="${s.code}">
+      <div class="mname">${s.name}</div>
+      <div class="mcode">${s.code} ${s.kabumart_rank ? `<span class="badge ${rankBadgeColor(s.kabumart_rank)}" style="font-size:9px">${s.kabumart_rank}</span>` : ''}</div>
+      <div class="mdate">📅 分析日: ${s.analyzed_date ?? '—'}</div>
+    </a>`).join('');
+      } catch (e) { el.innerHTML = `<div class="error-msg">⚠️ 分析レポート読み込み失敗<br><small>${e.message}</small></div>`; }
+    }
+
+    // ── Buy Modal ──
     function onOpenBuyModal() {
-      const overlay = document.createElement('div');
-      overlay.className = 'input-modal-overlay';
-      overlay.innerHTML = `
-    <div class="input-modal">
-      <h3>＋ 保有銘柄を追加</h3>
-      <div class="field">
-        <label>銘柄コード（例：7203）</label>
-        <input id="bm_code" type="text" placeholder="7203" autocomplete="off">
-      </div>
-      <div class="field">
-        <label>企業名</label>
-        <input id="bm_name" type="text" placeholder="トヨタ自動車" autocomplete="off">
-      </div>
-      <div class="field">
-        <label>購入株数</label>
-        <input id="bm_shares" type="number" min="1" placeholder="100">
-      </div>
-      <div class="field">
-        <label>取得単価（円）</label>
-        <input id="bm_price" type="number" min="0" step="0.01" placeholder="2500">
-      </div>
-      <div class="modal-error" id="bm_err"></div>
-      <div class="modal-btns">
-        <button class="modal-btn-cancel" id="bm_cancel">キャンセル</button>
-        <button class="modal-btn-ok" id="bm_ok">追加する</button>
-      </div>
-    </div>`;
-      document.body.appendChild(overlay);
-
-      const close = () => overlay.remove();
-      overlay.querySelector('#bm_cancel').onclick = close;
-      overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
-
-      overlay.querySelector('#bm_ok').onclick = async () => {
-        const code = overlay.querySelector('#bm_code').value.trim().toUpperCase();
-        const name = overlay.querySelector('#bm_name').value.trim();
-        const shares = parseInt(overlay.querySelector('#bm_shares').value, 10);
-        const price = parseFloat(overlay.querySelector('#bm_price').value);
-        const errEl = overlay.querySelector('#bm_err');
-        errEl.textContent = '';
-
-        if (!code) { errEl.textContent = '銘柄コードを入力してください'; return; }
-        if (!name) { errEl.textContent = '企業名を入力してください'; return; }
-        if (!shares || shares <= 0) { errEl.textContent = '株数を正しく入力してください'; return; }
-        if (isNaN(price) || price <= 0) { errEl.textContent = '取得単価を正しく入力してください'; return; }
-
-        const btn = overlay.querySelector('#bm_ok');
-        btn.disabled = true;
-        btn.textContent = '追加中...';
-
+      const ov = document.createElement('div'); ov.className = 'input-modal-overlay';
+      ov.innerHTML = `<div class="input-modal"><h3>＋ 保有銘柄を追加</h3>
+    <div class="field"><label>銘柄コード</label><input id="bm_code" type="text" placeholder="7203"></div>
+    <div class="field"><label>企業名</label><input id="bm_name" type="text" placeholder="トヨタ自動車"></div>
+    <div class="field"><label>購入株数</label><input id="bm_shares" type="number" min="1" placeholder="100"></div>
+    <div class="field"><label>取得単価（円）</label><input id="bm_price" type="number" min="0" step="0.01" placeholder="2500"></div>
+    <div class="modal-error" id="bm_err"></div>
+    <div class="modal-btns"><button class="modal-btn-cancel" id="bm_cancel">キャンセル</button><button class="modal-btn-ok" id="bm_ok">追加する</button></div></div>`;
+      document.body.appendChild(ov);
+      const close = () => ov.remove();
+      ov.querySelector('#bm_cancel').onclick = close;
+      ov.addEventListener('click', e => { if (e.target === ov) close(); });
+      ov.querySelector('#bm_ok').onclick = async () => {
+        const code = ov.querySelector('#bm_code').value.trim().toUpperCase(), name = ov.querySelector('#bm_name').value.trim();
+        const shares = parseInt(ov.querySelector('#bm_shares').value, 10), price = parseFloat(ov.querySelector('#bm_price').value);
+        const err = ov.querySelector('#bm_err'); err.textContent = '';
+        if (!code) { err.textContent = '銘柄コードを入力'; return; } if (!name) { err.textContent = '企業名を入力'; return; }
+        if (!shares || shares <= 0) { err.textContent = '株数を正しく入力'; return; } if (isNaN(price) || price <= 0) { err.textContent = '取得単価を正しく入力'; return; }
+        const btn = ov.querySelector('#bm_ok'); btn.disabled = true; btn.textContent = '追加中...';
         try {
-          const res = await fetch(`${RENDER_BASE}/api/portfolio/buy`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code, name, shares, price }),
-          });
-          const j = await res.json();
-          if (!res.ok) throw new Error(j.detail ?? '追加に失敗しました');
-          close();
-          await loadPortfolio();
-        } catch (e) {
-          errEl.textContent = e.message;
-          btn.disabled = false;
-          btn.textContent = '追加する';
-        }
+          const res = await fetch(`${RENDER_BASE}/api/portfolio/buy`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code, name, shares, price }) });
+          const j = await res.json(); if (!res.ok) throw new Error(j.detail ?? '追加失敗');
+          close(); await loadPortfolio();
+        } catch (e) { err.textContent = e.message; btn.disabled = false; btn.textContent = '追加する'; }
       };
     }
 
-    // ── 売却モーダル ──────────────────────────────────────────
+    // ── Sell Modal ──
     function onOpenSellModal(code, name, maxShares) {
-      const overlay = document.createElement('div');
-      overlay.className = 'input-modal-overlay';
-      overlay.innerHTML = `
-    <div class="input-modal">
-      <h3>📤 ${name}（${code}）</h3>
-      <div class="sell-mode-tabs">
-        <button class="sell-tab active-sell" id="sm_tab_sell">💴 売却として記録</button>
-        <button class="sell-tab" id="sm_tab_delete" style="color:#8892a4">🗑 入力ミスで削除</button>
-      </div>
-      <!-- 売却フォーム -->
-      <div id="sm_sell_form">
-        <div class="field">
-          <label>売却株数（保有: ${maxShares}株）</label>
-          <input id="sm_shares" type="number" min="1" max="${maxShares}" placeholder="${maxShares}" value="${maxShares}">
-        </div>
-        <div class="field">
-          <label>売却単価（円）</label>
-          <input id="sm_price" type="number" min="0" step="0.01" placeholder="0">
-        </div>
-      </div>
-      <!-- 削除確認 -->
-      <div id="sm_delete_form" style="display:none">
-        <p style="font-size:13px; color:#94a3c8; line-height:1.6; margin-bottom:8px;">
-          <strong>${name}</strong> の記録をポートフォリオから完全に削除します。<br>
-          損益は記録されません。
-        </p>
-      </div>
-      <div class="modal-error" id="sm_err"></div>
-      <div class="modal-btns">
-        <button class="modal-btn-cancel" id="sm_cancel">キャンセル</button>
-        <button class="modal-btn-danger" id="sm_ok">売却を記録する</button>
-      </div>
-    </div>`;
-      document.body.appendChild(overlay);
-
-      const close = () => overlay.remove();
-      overlay.querySelector('#sm_cancel').onclick = close;
-      overlay.addEventListener('click', e => { if (e.target === overlay) close(); });
-
-      let mode = 'sell'; // 'sell' | 'delete'
-      const tabSell = overlay.querySelector('#sm_tab_sell');
-      const tabDelete = overlay.querySelector('#sm_tab_delete');
-      const sellForm = overlay.querySelector('#sm_sell_form');
-      const deleteForm = overlay.querySelector('#sm_delete_form');
-      const okBtn = overlay.querySelector('#sm_ok');
-
-      tabSell.onclick = () => {
-        mode = 'sell';
-        tabSell.className = 'sell-tab active-sell';
-        tabDelete.className = 'sell-tab';
-        tabDelete.style.color = '#8892a4';
-        sellForm.style.display = '';
-        deleteForm.style.display = 'none';
-        okBtn.removeAttribute('style'); // インラインスタイルをリセットしてクラスを有効に
-        okBtn.className = 'modal-btn-danger';
-        okBtn.textContent = '売却を記録する';
-      };
-      tabDelete.onclick = () => {
-        mode = 'delete';
-        tabDelete.className = 'sell-tab active-delete';
-        tabSell.className = 'sell-tab';
-        sellForm.style.display = 'none';
-        deleteForm.style.display = '';
-        okBtn.removeAttribute('style');
-        okBtn.className = 'modal-btn-gray'; // グレー用クラスに切り替え
-        okBtn.textContent = 'ポートフォリオから削除';
-      };
-
+      const ov = document.createElement('div'); ov.className = 'input-modal-overlay';
+      ov.innerHTML = `<div class="input-modal"><h3>📤 ${name}（${code}）</h3>
+    <div class="sell-mode-tabs"><button class="sell-tab active-sell" id="sm_tab_sell">💴 売却として記録</button><button class="sell-tab" id="sm_tab_delete" style="color:#8892a4">🗑 入力ミスで削除</button></div>
+    <div id="sm_sell_form"><div class="field"><label>売却株数（保有:${maxShares}株）</label><input id="sm_shares" type="number" min="1" max="${maxShares}" value="${maxShares}"></div><div class="field"><label>売却単価（円）</label><input id="sm_price" type="number" min="0" step="0.01" placeholder="0"></div></div>
+    <div id="sm_delete_form" style="display:none"><p style="font-size:12px;color:#94a3c8;line-height:1.5;margin-bottom:8px"><strong>${name}</strong>の記録をポートフォリオから完全に削除します。<br>損益は記録されません。</p></div>
+    <div class="modal-error" id="sm_err"></div>
+    <div class="modal-btns"><button class="modal-btn-cancel" id="sm_cancel">キャンセル</button><button class="modal-btn-danger" id="sm_ok">売却を記録する</button></div></div>`;
+      document.body.appendChild(ov);
+      const close = () => ov.remove();
+      ov.querySelector('#sm_cancel').onclick = close;
+      ov.addEventListener('click', e => { if (e.target === ov) close(); });
+      let mode = 'sell';
+      const tabSell = ov.querySelector('#sm_tab_sell'), tabDel = ov.querySelector('#sm_tab_delete');
+      const sellForm = ov.querySelector('#sm_sell_form'), delForm = ov.querySelector('#sm_delete_form');
+      const okBtn = ov.querySelector('#sm_ok');
+      tabSell.onclick = () => { mode = 'sell'; tabSell.className = 'sell-tab active-sell'; tabDel.className = 'sell-tab'; tabDel.style.color = '#8892a4'; sellForm.style.display = ''; delForm.style.display = 'none'; okBtn.removeAttribute('style'); okBtn.className = 'modal-btn-danger'; okBtn.textContent = '売却を記録する'; };
+      tabDel.onclick = () => { mode = 'delete'; tabDel.className = 'sell-tab active-delete'; tabSell.className = 'sell-tab'; sellForm.style.display = 'none'; delForm.style.display = ''; okBtn.removeAttribute('style'); okBtn.className = 'modal-btn-gray'; okBtn.textContent = 'ポートフォリオから削除'; };
       okBtn.onclick = async () => {
-        const errEl = overlay.querySelector('#sm_err');
-        errEl.textContent = '';
-        okBtn.disabled = true;
-
+        const err = ov.querySelector('#sm_err'); err.textContent = ''; okBtn.disabled = true;
         try {
           if (mode === 'sell') {
-            const shares = parseInt(overlay.querySelector('#sm_shares').value, 10);
-            const price = parseFloat(overlay.querySelector('#sm_price').value);
-            if (!shares || shares <= 0) { errEl.textContent = '株数を正しく入力してください'; okBtn.disabled = false; return; }
-            if (shares > maxShares) { errEl.textContent = `保有株数（${maxShares}株）を超えています`; okBtn.disabled = false; return; }
-            if (isNaN(price) || price <= 0) { errEl.textContent = '売却単価を正しく入力してください'; okBtn.disabled = false; return; }
-
-            const res = await fetch(`${RENDER_BASE}/api/portfolio/sell`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ code, shares, price }),
-            });
-            const j = await res.json();
-            if (!res.ok) throw new Error(j.detail ?? '売却記録に失敗しました');
+            const shares = parseInt(ov.querySelector('#sm_shares').value, 10), price = parseFloat(ov.querySelector('#sm_price').value);
+            if (!shares || shares <= 0) { err.textContent = '株数を正しく入力'; okBtn.disabled = false; return; }
+            if (shares > maxShares) { err.textContent = `保有株数（${maxShares}株）を超えています`; okBtn.disabled = false; return; }
+            if (isNaN(price) || price <= 0) { err.textContent = '売却単価を正しく入力'; okBtn.disabled = false; return; }
+            const res = await fetch(`${RENDER_BASE}/api/portfolio/sell`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code, shares, price }) });
+            const j = await res.json(); if (!res.ok) throw new Error(j.detail ?? '売却失敗');
           } else {
-            // 入力ミス削除: 全株売却として扱う（price=0は不可なのでAPI側で対応）
             const res = await fetch(`${RENDER_BASE}/api/portfolio/delete/${code}`, { method: 'DELETE' });
-            if (!res.ok) {
-              const j = await res.json().catch(() => ({}));
-              throw new Error(j.detail ?? '削除に失敗しました');
-            }
+            if (!res.ok) { const j = await res.json().catch(() => ({})); throw new Error(j.detail ?? '削除失敗'); }
           }
-          close();
-          await loadPortfolio();
-        } catch (e) {
-          errEl.textContent = e.message;
-          okBtn.disabled = false;
-        }
+          close(); await loadPortfolio();
+        } catch (e) { err.textContent = e.message; okBtn.disabled = false; }
       };
     }
 
-    // ── 初回ロード ────────────────────────────────────────────
+    // ── Init ──
     loadAll();
   </script>
 </body>
