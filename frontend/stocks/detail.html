@@ -908,9 +908,10 @@
       const riskItems = (verdict.risks || []).map(r => `<div class="verdict-item"><span class="icon">${r.icon || '⚠️'}</span><span><strong>${r.title}</strong>：${r.text}</span></div>`).join('');
       const links = (d.links || []).map(l => `<a href="${l.url}" target="_blank" style="color:var(--accent);font-size:11px">${l.label}</a>`).join(' / ');
 
-      // PER metric
-      let perBadge = metricBadge(fin.per, v => v > 0 && v < 15, v => v > 0 && v < 25);
-      if (fin.per != null && fin.per < 0) perBadge = '<span class="metric-badge m-bad">赤字</span>';
+      // PER metric — per_historyの最新値を優先（PER更新後は最新が反映される）
+      const latestPer = wlEntry?.per_history?.length ? wlEntry.per_history[wlEntry.per_history.length - 1].per : fin.per;
+      let perBadge = metricBadge(latestPer, v => v > 0 && v < 15, v => v > 0 && v < 25);
+      if (latestPer != null && latestPer < 0) perBadge = '<span class="metric-badge m-bad">赤字</span>';
 
       const html = `
 <div class="layout">
@@ -939,7 +940,7 @@
     </div>
 
     <div class="card">
-      <div class="metric-row"><span class="metric-label">予想PER</span><span><span class="metric-val">${fin.per != null ? fin.per + '倍' : 'N/A'}</span> ${perBadge}</span></div>
+      <div class="metric-row"><span class="metric-label">予想PER</span><span><span class="metric-val">${latestPer != null ? latestPer + '倍' : 'N/A'}</span> ${perBadge}</span></div>
       <div class="metric-row"><span class="metric-label">ROE</span><span><span class="metric-val">${fin.roe != null ? fin.roe.toFixed(1) + '%' : 'N/A'}</span> ${metricBadge(fin.roe, v => v >= 10, v => v >= 5)}</span></div>
       <div class="metric-row"><span class="metric-label">自己資本比率</span><span><span class="metric-val">${fin.equity_ratio != null ? fin.equity_ratio.toFixed(1) + '%' : 'N/A'}</span> ${metricBadge(fin.equity_ratio, v => v >= 40, v => v >= 20)}</span></div>
       ${price.current ? `<div class="metric-row"><span class="metric-label">現在株価</span><span class="metric-val">¥${price.current.toLocaleString()}</span></div>` : ''}
