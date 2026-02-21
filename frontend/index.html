@@ -36,7 +36,7 @@
       background: var(--bg);
       color: var(--text);
       font-family: 'Hiragino Sans', 'Meiryo', sans-serif;
-      font-size: 16px;
+      font-size: 17px;
       line-height: 1.6
     }
 
@@ -132,7 +132,7 @@
     }
 
     .kpi-val {
-      font-size: 22px;
+      font-size: 24px;
       font-weight: 800;
       color: #fff;
       line-height: 1.2
@@ -1132,10 +1132,8 @@
     <!-- Tab Bar -->
     <div class="tab-bar">
       <button class="tab-btn active" data-tab="portfolio" onclick="switchTab('portfolio')">ポートフォリオ</button>
-      <button class="tab-btn" data-tab="watchlist" onclick="switchTab('watchlist')">ウォッチリスト <span id="watchlistCount"
-          style="font-size:10px;color:var(--muted)"></span></button>
       <button class="tab-btn" data-tab="reports" onclick="switchTab('reports')">分析レポート <span id="reportsCount"
-          style="font-size:10px;color:var(--muted)"></span></button>
+          style="font-size:11px;color:var(--muted)"></span></button>
     </div>
 
     <!-- TAB 1: Portfolio -->
@@ -1203,23 +1201,14 @@
       </div>
     </div>
 
-    <!-- TAB 2: Watchlist -->
-    <div class="tab-content" id="tab-watchlist">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-shrink:0">
-        <span style="font-size:13px;font-weight:700;color:#fff">ウォッチリスト</span>
-        <button class="btn btn-purple" id="perUpdateBtn" onclick="onUpdatePer()">📊 PER更新</button>
-      </div>
-      <div class="wl-grid" id="watchlistGrid">
-        <div class="loading">
-          <div class="spinner"></div>
-        </div>
-      </div>
-    </div>
+
 
     <!-- TAB 3: Reports -->
     <div class="tab-content" id="tab-reports">
-      <div style="margin-bottom:10px;flex-shrink:0"><span style="font-size:13px;font-weight:700;color:#fff">個別銘柄
-          分析レポート</span></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-shrink:0">
+        <span style="font-size:14px;font-weight:700;color:#fff">分析レポート</span>
+        <button class="btn btn-purple" id="perUpdateBtn" onclick="onUpdatePer()">📊 PER更新</button>
+      </div>
       <div class="manifest-list" id="manifestList">
         <div class="loading">
           <div class="spinner"></div>
@@ -1273,7 +1262,7 @@
     async function loadAll() {
       document.getElementById('lastUpdated').textContent = `更新中... ${new Date().toLocaleString('ja-JP')}`;
       await loadManifest();
-      await Promise.all([loadPortfolio(), loadWatchlist()]);
+      await loadPortfolio();
       document.getElementById('lastUpdated').textContent = `最終更新: ${new Date().toLocaleString('ja-JP')}`;
     }
 
@@ -1419,54 +1408,7 @@
       archived: { label: '📦 アーカイブ', cls: 'wstatus-archived' },
     };
 
-    async function loadWatchlist() {
-      const el = document.getElementById('watchlistGrid');
-      const countEl = document.getElementById('watchlistCount');
-      try {
-        const data = await fetchRender('/api/watchlist');
-        const rawList = data.watchlist || [];
-        const list = rawList.filter(w => w.status !== 'archived');
-        watchlistCodesSet = new Set(rawList.map(w => w.code));
-        countEl.textContent = `（${list.length}）`;
-        if (!list.length) { el.innerHTML = '<div class="empty-msg">📭 ウォッチリストは空です。</div>'; return; }
 
-        el.innerHTML = list.map(w => {
-          const reportUrl = manifestUrlMap[w.code];
-          const tag = reportUrl ? 'a' : 'div';
-          const hrefAttr = reportUrl ? `href="${reportUrl}" target="_blank"` : '';
-          const reportBadge = reportUrl ? `<div class="wmeta" style="color:var(--accent);margin-top:4px;font-size:10px">📊 分析レポートあり →</div>` : '';
-          const st = IDX_STATUS_MAP[w.status] ?? IDX_STATUS_MAP['watching'];
-          const statusOptions = Object.entries(IDX_STATUS_MAP).map(([val, info]) =>
-            `<div class="wstatus-option${val === (w.status || 'watching') ? ' active' : ''}" data-code="${w.code}" data-status="${val}" onclick="event.preventDefault();event.stopPropagation();onWatchlistStatusClick(this)">${info.label}</div>`
-          ).join('');
-          const statusBadge = `<span class="wstatus-wrap" id="wstwrap-${w.code}"><span class="wstatus ${st.cls}" id="wst-${w.code}" onclick="event.preventDefault();event.stopPropagation();toggleWatchlistStatusDropdown('${w.code}')">${st.label} ▾</span><div class="wstatus-dropdown" id="wstd-${w.code}">${statusOptions}</div></span>`;
-
-          let perBadge = '';
-          if (w.per == null) { perBadge = `<span class="wper-null">PER —</span>`; }
-          else {
-            const isRed = w.per < 0;
-            const hist = w.per_history || [];
-            let arrow = '', arrowCls = '';
-            if (hist.length >= 2) {
-              const prev = hist[hist.length - 2].per, curr = hist[hist.length - 1].per;
-              if (prev != null && curr != null) {
-                if (isRed || prev < 0) { const ap = Math.abs(prev), ac = Math.abs(curr); if (ac < ap - .05) { arrow = ' ↑'; arrowCls = 'arrow-good'; } else if (ac > ap + .05) { arrow = ' ↓'; arrowCls = 'arrow-bad'; } else { arrow = ' →'; arrowCls = 'arrow-flat'; } }
-                else { if (curr < prev - .05) { arrow = ' ↓'; arrowCls = 'arrow-good'; } else if (curr > prev + .05) { arrow = ' ↑'; arrowCls = 'arrow-bad'; } else { arrow = ' →'; arrowCls = 'arrow-flat'; } }
-              }
-            }
-            perBadge = `<span class="${isRed ? 'wper-red' : 'wper'}">PER ${w.per}倍<span class="${arrowCls}">${arrow}</span></span>`;
-          }
-
-          return `<${tag} class="watch-card status-${w.status ?? 'watching'}" ${hrefAttr} data-code="${w.code}" style="${reportUrl ? 'text-decoration:none' : ''}">
-        <div class="wname">${w.name}</div>
-        <div class="wcode">${w.code} ${w.kabumart_rank ? `<span class="wrank">${w.kabumart_rank}</span>` : ''} ${statusBadge} ${perBadge}</div>
-        ${w.note ? `<div class="wnote">${w.note}</div>` : ''}
-        <div class="wmeta">追加日: ${w.added_date ?? '—'}</div>
-        ${reportBadge}
-      </${tag}>`;
-        }).join('');
-      } catch (e) { el.innerHTML = `<div class="error-msg">⚠️ ウォッチリスト読み込み失敗<br><small>${e.message}</small></div>`; }
-    }
 
     // ── Watchlist Status ──
     function toggleWatchlistStatusDropdown(code) {
@@ -1494,7 +1436,6 @@
       } catch (err) { badgeEl.textContent = oldLabel; alert(`ステータス更新失敗: ${err.message}`); }
     }
 
-    // ── PER Update ──
     async function onUpdatePer() {
       const btn = document.getElementById('perUpdateBtn');
       btn.disabled = true; btn.textContent = '⏳ PER取得中...';
@@ -1504,7 +1445,7 @@
         const errCnt = json.errors?.length || 0, updCnt = json.updated || 0;
         if (errCnt > 0) { btn.textContent = `⚠️ ${updCnt}件更新/${errCnt}件エラー`; btn.style.background = 'rgba(245,158,11,.15)'; btn.style.color = 'var(--yellow)'; btn.style.borderColor = 'rgba(245,158,11,.3)'; }
         else { btn.textContent = `✅ ${updCnt}件更新完了`; btn.style.background = 'rgba(34,197,94,.15)'; btn.style.color = 'var(--green)'; btn.style.borderColor = 'rgba(34,197,94,.3)'; }
-        await loadWatchlist();
+        await loadManifest();
         setTimeout(() => { btn.disabled = false; btn.textContent = '📊 PER更新'; btn.style.background = ''; btn.style.color = ''; btn.style.borderColor = ''; }, 3000);
       } catch (e) {
         btn.textContent = '❌ 失敗'; btn.style.background = 'rgba(239,68,68,.15)'; btn.style.color = 'var(--red)';
@@ -1533,28 +1474,64 @@
     }
     const AXES_LABELS = { growth: '成長性', stability: '安定性', profitability: '収益性', capacity: '余力', innovation: '新規性' };
 
+    function buildPerBadge(w) {
+      if (!w || w.per == null) return `<span class="wper-null">PER —</span>`;
+      const isRed = w.per < 0;
+      const hist = w.per_history || [];
+      let arrow = '', arrowCls = '';
+      if (hist.length >= 2) {
+        const prev = hist[hist.length - 2].per, curr = hist[hist.length - 1].per;
+        if (prev != null && curr != null) {
+          if (isRed || prev < 0) { const ap = Math.abs(prev), ac = Math.abs(curr); if (ac < ap - .05) { arrow = ' ↑'; arrowCls = 'arrow-good'; } else if (ac > ap + .05) { arrow = ' ↓'; arrowCls = 'arrow-bad'; } else { arrow = ' →'; arrowCls = 'arrow-flat'; } }
+          else { if (curr < prev - .05) { arrow = ' ↓'; arrowCls = 'arrow-good'; } else if (curr > prev + .05) { arrow = ' ↑'; arrowCls = 'arrow-bad'; } else { arrow = ' →'; arrowCls = 'arrow-flat'; } }
+        }
+      }
+      return `<span class="${isRed ? 'wper-red' : 'wper'}">PER ${w.per}倍<span class="${arrowCls}">${arrow}</span></span>`;
+    }
+
+    function buildStatusBadge(code, status) {
+      const st = IDX_STATUS_MAP[status] ?? IDX_STATUS_MAP['watching'];
+      const statusOptions = Object.entries(IDX_STATUS_MAP).map(([val, info]) =>
+        `<div class="wstatus-option${val === (status || 'watching') ? ' active' : ''}" data-code="${code}" data-status="${val}" onclick="event.preventDefault();event.stopPropagation();onWatchlistStatusClick(this)">${info.label}</div>`
+      ).join('');
+      return `<span class="wstatus-wrap" id="wstwrap-${code}"><span class="wstatus ${st.cls}" id="wst-${code}" onclick="event.preventDefault();event.stopPropagation();toggleWatchlistStatusDropdown('${code}')">${st.label} ▾</span><div class="wstatus-dropdown" id="wstd-${code}">${statusOptions}</div></span>`;
+    }
+
     async function loadManifest() {
       const el = document.getElementById('manifestList');
       try {
-        const data = await fetchRender('/api/manifest');
-        const stocks = data.stocks || [];
+        // Fetch manifest and watchlist in parallel
+        const [manifestData, watchlistData] = await Promise.all([
+          fetchRender('/api/manifest'),
+          fetchRender('/api/watchlist').catch(() => ({ watchlist: [] }))
+        ]);
+        const stocks = manifestData.stocks || [];
+        const watchlist = watchlistData.watchlist || [];
+        const wlMap = {};
+        watchlist.forEach(w => { wlMap[w.code] = w; });
         manifestUrlMap = {};
         stocks.forEach(s => { if (s.url || s.file) manifestUrlMap[s.code] = s.url ?? s.file; });
+        watchlistCodesSet = new Set(watchlist.map(w => w.code));
         const rcEl = document.getElementById('reportsCount');
         if (rcEl) rcEl.textContent = `（${stocks.length}）`;
         if (!stocks.length) { el.innerHTML = '<div class="empty-msg">📭 分析レポートなし。KabuMartスクショをClaudeに貼り付けると生成されます。</div>'; return; }
         const sorted = [...stocks].sort((a, b) => (b.analyzed_date ?? '').localeCompare(a.analyzed_date ?? ''));
-        // Render skeleton cards first
-        el.innerHTML = sorted.map(s => `<a class="manifest-card" href="${s.url ?? s.file}" data-code="${s.code}" id="mcard-${s.code}">
+        // Render skeleton cards
+        el.innerHTML = sorted.map(s => {
+          const w = wlMap[s.code];
+          const statusHtml = w ? buildStatusBadge(s.code, w.status) : '';
+          const perHtml = w ? buildPerBadge(w) : '';
+          return `<a class="manifest-card" href="${s.url ?? s.file}" data-code="${s.code}" id="mcard-${s.code}">
       <div class="mcard-header">
         <div>
           <div class="mname">${s.name}</div>
-          <div class="mcode">${s.code} ${s.kabumart_rank ? `<span class="badge ${rankBadgeColor(s.kabumart_rank)}" style="font-size:10px">${s.kabumart_rank}</span>` : ''}</div>
+          <div class="mcode">${s.code} ${s.kabumart_rank ? `<span class="badge ${rankBadgeColor(s.kabumart_rank)}" style="font-size:11px">${s.kabumart_rank}</span>` : ''} ${statusHtml} ${perHtml}</div>
         </div>
       </div>
       <div class="mcard-loading"><div class="mini-spinner"></div>分析データを読み込み中…</div>
       <div class="mdate">📅 ${s.analyzed_date ?? '—'}</div>
-    </a>`).join('');
+    </a>`;
+        }).join('');
         // Fetch detail data for each card
         sorted.forEach(s => {
           fetchRender(`/api/stocks/${s.code}/data`).then(d => {
@@ -1565,8 +1542,6 @@
             const biz = d.business || {};
             const comp = d.company || {};
             const totalScore = scores.total_score ?? 0;
-            const totalRank = scores.total_rank ?? '';
-            // Build axes bars
             let axesHtml = '';
             for (const [key, label] of Object.entries(AXES_LABELS)) {
               const a = axes[key];
@@ -1574,27 +1549,16 @@
               const pct = (a.score / 10 * 100).toFixed(0);
               axesHtml += `<div class="maxe-row"><span class="maxe-label">${label}</span><div class="maxe-bar-bg"><div class="maxe-bar-fill" style="width:${pct}%;background:${axeBarColor(a.score)}"></div></div><span class="maxe-val">${a.rank}</span></div>`;
             }
-            // Catchcopy
             let catchHtml = '';
-            if (biz.catchcopy) {
-              catchHtml = `<div class="mcatch">${biz.catchcopy}</div>`;
-            }
-            // Score ring
+            if (biz.catchcopy) catchHtml = `<div class="mcatch">${biz.catchcopy}</div>`;
             const ringHtml = `<div class="mscore-ring" style="background:${scoreGrad(totalScore)}">
               <div class="mscore-ring-inner"><span class="mscore-val">${totalScore}</span><span class="mscore-label">/10</span></div>
             </div>`;
-            // Industry
             const indHtml = comp.industry ? `<div class="mindustry">${comp.industry}</div>` : '';
-            // Update header to include ring
             const headerEl = card.querySelector('.mcard-header');
-            if (headerEl && !headerEl.querySelector('.mscore-ring')) {
-              headerEl.insertAdjacentHTML('beforeend', ringHtml);
-            }
-            // Replace loading with detail
+            if (headerEl && !headerEl.querySelector('.mscore-ring')) headerEl.insertAdjacentHTML('beforeend', ringHtml);
             const loadingEl = card.querySelector('.mcard-loading');
-            if (loadingEl) {
-              loadingEl.outerHTML = `<div class="mcard-detail">${indHtml}${catchHtml}${axesHtml ? `<div class="maxes-grid">${axesHtml}</div>` : ''}</div>`;
-            }
+            if (loadingEl) loadingEl.outerHTML = `<div class="mcard-detail">${indHtml}${catchHtml}${axesHtml ? `<div class="maxes-grid">${axesHtml}</div>` : ''}</div>`;
           }).catch(() => {
             const card = document.getElementById(`mcard-${s.code}`);
             if (!card) return;
