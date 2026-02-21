@@ -18,790 +18,760 @@
       --yellow: #f59e0b;
       --text: #e2e8f0;
       --muted: #8892a4;
-      --border: #2d3252;
+      --border: #2d3252
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
-      padding: 0;
+      padding: 0
+    }
+
+    html,
+    body {
+      height: 100%;
+      overflow: hidden
     }
 
     body {
       background: var(--bg);
       color: var(--text);
       font-family: 'Hiragino Sans', 'Meiryo', sans-serif;
-      font-size: 14px;
-      line-height: 1.6;
+      font-size: 13px;
+      line-height: 1.5
     }
 
-    .container {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 24px 16px;
-    }
-
-    /* 戻るバー */
-    .back-bar {
-      position: sticky;
-      top: 0;
-      z-index: 200;
-      background: rgba(15, 17, 23, 0.95);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid #2d3252;
-      padding: 8px 20px;
+    /* Shell */
+    .shell {
       display: flex;
-      align-items: center;
+      flex-direction: column;
+      height: 100vh;
+      padding: 8px 12px
+    }
+
+    /* Header bar */
+    .top-bar {
+      display: flex;
       justify-content: space-between;
+      align-items: center;
+      padding: 6px 8px;
+      flex-shrink: 0;
+      margin-bottom: 6px
     }
 
     .back-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      color: #4a9eff;
+      color: var(--accent);
       text-decoration: none;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px
     }
 
     .back-btn:hover {
-      opacity: 0.8;
+      opacity: .8
     }
 
-    #backBarStatus {
+    #topBarStatus {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 8px
     }
 
-    /* ヘッダー */
-    .header-card {
-      background: linear-gradient(135deg, #1a1d2e 0%, #0f1a3a 100%);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 28px;
-      margin-bottom: 20px;
-    }
-
-    .header-top {
+    /* 2-column layout */
+    .layout {
       display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      flex-wrap: wrap;
       gap: 12px;
+      flex: 1;
+      min-height: 0
     }
 
-    .company-info h1 {
-      font-size: 28px;
-      font-weight: 700;
+    /* Left panel */
+    .left-panel {
+      width: 280px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      overflow: auto
+    }
+
+    .left-panel .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px
+    }
+
+    .company-name {
+      font-size: 16px;
+      font-weight: 800;
       color: #fff;
-      margin-bottom: 4px;
+      margin-bottom: 2px
     }
 
     .company-meta {
       display: flex;
-      gap: 10px;
       flex-wrap: wrap;
-      margin-top: 8px;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
       gap: 4px;
-      padding: 3px 10px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-    }
-
-    .badge-blue {
-      background: rgba(74, 158, 255, 0.15);
-      color: var(--accent);
-      border: 1px solid rgba(74, 158, 255, 0.3);
-    }
-
-    .badge-purple {
-      background: rgba(124, 92, 252, 0.15);
-      color: #a78bfa;
-      border: 1px solid rgba(124, 92, 252, 0.3);
-    }
-
-    .badge-gray {
-      background: rgba(136, 146, 164, 0.15);
-      color: var(--muted);
-      border: 1px solid rgba(136, 146, 164, 0.3);
-    }
-
-    .badge-green {
-      background: rgba(34, 197, 94, 0.15);
-      color: var(--green);
-      border: 1px solid rgba(34, 197, 94, 0.3);
-    }
-
-    .badge-orange {
-      background: rgba(245, 158, 11, 0.15);
-      color: var(--yellow);
-      border: 1px solid rgba(245, 158, 11, 0.3);
-    }
-
-    .badge-red {
-      background: rgba(239, 68, 68, 0.15);
-      color: var(--red);
-      border: 1px solid rgba(239, 68, 68, 0.3);
+      margin-bottom: 8px
     }
 
     .catchcopy {
-      margin-top: 14px;
-      font-size: 16px;
+      font-size: 11px;
       color: #94a3c8;
       font-style: italic;
+      line-height: 1.5;
+      padding: 8px;
+      background: var(--card2);
+      border-radius: 6px;
+      margin-bottom: 6px
     }
 
-    .catchcopy span {
-      color: var(--accent);
-      font-weight: 600;
-    }
-
-    .data-badges {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-top: 12px;
-    }
-
-    /* セクション共通 */
-    .section-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: #fff;
-      margin-bottom: 16px;
+    /* Score circle (compact) */
+    .score-wrap {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 12px;
+      margin: 6px 0
     }
 
-    .section-title::before {
-      content: '';
-      display: block;
-      width: 4px;
-      height: 20px;
-      background: var(--accent);
-      border-radius: 2px;
+    .score-circle {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0
     }
 
+    .score-inner {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: var(--card);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center
+    }
+
+    .score-val {
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1
+    }
+
+    .score-max {
+      font-size: 9px;
+      color: var(--muted)
+    }
+
+    .score-info .rank-badge {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 4px
+    }
+
+    /* Mini metrics */
+    .metric-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(45, 50, 82, .4);
+      font-size: 12px
+    }
+
+    .metric-row:last-child {
+      border-bottom: none
+    }
+
+    .metric-label {
+      color: var(--muted);
+      font-size: 10px
+    }
+
+    .metric-val {
+      font-weight: 700;
+      font-size: 13px
+    }
+
+    .metric-badge {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 8px;
+      font-size: 9px;
+      font-weight: 700
+    }
+
+    .m-good {
+      background: rgba(34, 197, 94, .1);
+      color: var(--green);
+      border: 1px solid rgba(34, 197, 94, .2)
+    }
+
+    .m-warn {
+      background: rgba(245, 158, 11, .1);
+      color: var(--yellow);
+      border: 1px solid rgba(245, 158, 11, .2)
+    }
+
+    .m-bad {
+      background: rgba(239, 68, 68, .1);
+      color: var(--red);
+      border: 1px solid rgba(239, 68, 68, .2)
+    }
+
+    /* Data source badges */
+    .src-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 6px
+    }
+
+    .src-badge {
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 8px;
+      background: var(--card2);
+      color: var(--muted);
+      border: 1px solid var(--border)
+    }
+
+    /* Right panel */
+    .right-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0
+    }
+
+    /* Tabs */
+    .tab-bar {
+      display: flex;
+      gap: 2px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      margin-bottom: 6px
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+      padding: 7px 14px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all .15s
+    }
+
+    .tab-btn:hover {
+      color: var(--text)
+    }
+
+    .tab-btn.active {
+      color: var(--accent);
+      border-bottom-color: var(--accent)
+    }
+
+    .tab-content {
+      display: none;
+      flex: 1;
+      min-height: 0;
+      overflow: auto;
+      padding: 4px
+    }
+
+    .tab-content.active {
+      display: block
+    }
+
+    /* Cards */
     .card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
-    }
-
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-
-    .grid-3 {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 16px;
-    }
-
-    .section {
-      margin-bottom: 24px;
-    }
-
-    /* ビジネスモデル */
-    .biz-text p {
-      margin-bottom: 12px;
-      color: #cbd5e1;
-    }
-
-    .biz-text p:last-child {
-      margin-bottom: 0;
-    }
-
-    .segment-card {
-      background: var(--card2);
       border-radius: 10px;
       padding: 14px;
-      margin-bottom: 10px;
+      margin-bottom: 8px
     }
 
-    .segment-card h4 {
+    .card-title {
       font-size: 13px;
       font-weight: 700;
-      color: var(--accent);
-      margin-bottom: 6px;
+      color: #fff;
+      margin-bottom: 8px
     }
 
-    .segment-card p {
-      font-size: 12px;
+    /* Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      padding: 2px 8px;
+      border-radius: 14px;
+      font-size: 10px;
+      font-weight: 600
+    }
+
+    .badge-blue {
+      background: rgba(74, 158, 255, .12);
+      color: var(--accent);
+      border: 1px solid rgba(74, 158, 255, .25)
+    }
+
+    .badge-green {
+      background: rgba(34, 197, 94, .12);
+      color: var(--green);
+      border: 1px solid rgba(34, 197, 94, .25)
+    }
+
+    .badge-purple {
+      background: rgba(124, 92, 252, .12);
+      color: #a78bfa;
+      border: 1px solid rgba(124, 92, 252, .25)
+    }
+
+    .badge-gray {
+      background: rgba(136, 146, 164, .12);
       color: var(--muted);
-      line-height: 1.5;
+      border: 1px solid rgba(136, 146, 164, .25)
+    }
+
+    .badge-orange {
+      background: rgba(245, 158, 11, .12);
+      color: var(--yellow);
+      border: 1px solid rgba(245, 158, 11, .25)
+    }
+
+    .badge-red {
+      background: rgba(239, 68, 68, .12);
+      color: var(--red);
+      border: 1px solid rgba(239, 68, 68, .25)
+    }
+
+    /* Biz tab */
+    .biz-text {
+      font-size: 12px;
+      line-height: 1.7;
+      color: #c8cfe0
+    }
+
+    .biz-text p {
+      margin-bottom: 8px
+    }
+
+    .seg-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 8px
+    }
+
+    .seg-card {
+      background: var(--card2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px
+    }
+
+    .seg-card h4 {
+      font-size: 12px;
+      color: #fff;
+      margin-bottom: 4px
+    }
+
+    .seg-card p {
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.5
+    }
+
+    .seg-card.highlight {
+      background: rgba(34, 197, 94, .04);
+      border-color: rgba(34, 197, 94, .2)
+    }
+
+    .seg-card.highlight h4 {
+      color: var(--green)
     }
 
     .tags {
       display: flex;
-      gap: 6px;
       flex-wrap: wrap;
-      margin-top: 12px;
+      gap: 4px;
+      margin-top: 8px
     }
 
-    /* KabuMartスコア */
-    .score-section {
-      display: grid;
-      grid-template-columns: 220px 1fr;
-      gap: 20px;
-      align-items: center;
-    }
-
-    .score-circle-wrap {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .score-circle {
-      width: 140px;
-      height: 140px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+    /* Charts */
+    .chart-container {
       position: relative;
-      margin-bottom: 12px;
+      height: 220px
     }
 
-    .score-circle::after {
-      content: '';
-      position: absolute;
-      width: 110px;
-      height: 110px;
-      border-radius: 50%;
-      background: var(--card);
-    }
-
-    .score-inner {
+    .per-chart-container {
       position: relative;
-      z-index: 1;
-      text-align: center;
+      height: 200px
     }
 
-    .score-val {
-      font-size: 36px;
-      font-weight: 800;
-      color: #fff;
-      line-height: 1;
-    }
-
-    .score-max {
-      font-size: 14px;
-      color: var(--muted);
-    }
-
-    .rank-badge-score {
-      display: inline-block;
-      padding: 4px 16px;
-      border-radius: 20px;
-      font-size: 18px;
-      font-weight: 800;
-      margin-top: 4px;
-    }
-
-    .axis-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .axis-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .axis-label {
-      width: 80px;
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    .axis-bar-wrap {
-      flex: 1;
-      height: 8px;
-      background: var(--card2);
-      border-radius: 4px;
-      overflow: hidden;
-    }
-
-    .axis-bar {
-      height: 100%;
-      border-radius: 4px;
-    }
-
-    .axis-val {
-      width: 30px;
-      font-size: 13px;
-      font-weight: 700;
-      color: #fff;
-      text-align: right;
-    }
-
-    .axis-rank {
-      width: 40px;
-    }
-
-    /* ゲージ */
-    .gauge-wrap {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      width: 100%;
-    }
-
-    .gauge-label {
-      font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 8px;
-      text-align: center;
-      width: 100%;
-    }
-
-    .gauge-svg {
-      width: 120px;
-      height: 70px;
-      display: block;
-      margin: 0 auto;
-    }
-
-    .gauge-val {
-      font-size: 18px;
-      font-weight: 800;
-      color: #fff;
-      text-align: center;
-      margin-top: 4px;
-      width: 100%;
-      display: block;
-    }
-
-    .gauge-note {
-      font-size: 11px;
-      color: var(--muted);
-      text-align: center;
-      margin-top: 2px;
-      width: 100%;
-      display: block;
-    }
-
-    .gauge-tooltip {
-      font-size: 11px;
-      color: #94a3c8;
-      text-align: center;
-      margin-top: 6px;
-      padding: 6px 8px;
-      background: var(--card2);
-      border-radius: 6px;
-      line-height: 1.4;
-      width: 100%;
-    }
-
-    /* バリュエーションテーブル */
+    /* Valuation table */
     .val-table {
       width: 100%;
       border-collapse: collapse;
+      font-size: 11px
     }
 
     .val-table th {
-      font-size: 11px;
-      color: var(--muted);
-      padding: 6px 8px;
+      padding: 5px 8px;
       text-align: left;
       border-bottom: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 10px
     }
 
     .val-table td {
-      font-size: 13px;
-      padding: 7px 8px;
-      border-bottom: 1px solid rgba(45, 50, 82, 0.5);
-    }
-
-    .val-table tr:last-child td {
-      border-bottom: none;
+      padding: 5px 8px;
+      border-bottom: 1px solid rgba(45, 50, 82, .4)
     }
 
     .val-good {
-      color: var(--green);
+      color: var(--green)
     }
 
     .val-warn {
-      color: var(--yellow);
+      color: var(--yellow)
     }
 
     .val-bad {
-      color: var(--red);
+      color: var(--red)
     }
 
-    /* ポジネガ */
-    .posi-nega {
+    /* Posi/Nega */
+    .pn-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 16px;
+      gap: 10px
+    }
+
+    .posi-card,
+    .nega-card {
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 6px
     }
 
     .posi-card {
-      background: rgba(34, 197, 94, 0.06);
-      border: 1px solid rgba(34, 197, 94, 0.2);
-      border-radius: 10px;
-      padding: 14px;
-      margin-bottom: 10px;
+      background: rgba(34, 197, 94, .04);
+      border: 1px solid rgba(34, 197, 94, .15)
     }
 
     .nega-card {
-      background: rgba(239, 68, 68, 0.06);
-      border: 1px solid rgba(239, 68, 68, 0.2);
-      border-radius: 10px;
-      padding: 14px;
-      margin-bottom: 10px;
+      background: rgba(239, 68, 68, .04);
+      border: 1px solid rgba(239, 68, 68, .15)
     }
 
     .pn-title {
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
-      margin-bottom: 6px;
+      margin-bottom: 4px
     }
 
     .posi-card .pn-title {
-      color: var(--green);
+      color: var(--green)
     }
 
     .nega-card .pn-title {
-      color: var(--red);
+      color: var(--red)
     }
 
     .pn-explain {
-      font-size: 12px;
+      font-size: 11px;
       color: #94a3c8;
-      line-height: 1.5;
-      margin-top: 6px;
-      padding: 6px 8px;
-      background: rgba(255, 255, 255, 0.03);
-      border-radius: 6px;
+      line-height: 1.5
     }
 
     .pn-source {
-      font-size: 10px;
+      font-size: 9px;
       color: var(--muted);
-      margin-top: 6px;
+      margin-top: 4px
     }
 
     .impact {
-      display: inline-block;
-      padding: 1px 7px;
-      border-radius: 10px;
-      font-size: 10px;
-      font-weight: 700;
-      margin-left: 6px;
+      font-size: 9px;
+      padding: 1px 5px;
+      border-radius: 6px;
+      margin-left: 4px;
+      font-weight: 700
     }
 
     .impact-high {
-      background: rgba(239, 68, 68, 0.2);
-      color: #f87171;
+      background: rgba(245, 158, 11, .12);
+      color: var(--yellow);
+      border: 1px solid rgba(245, 158, 11, .2)
     }
 
     .impact-mid {
-      background: rgba(245, 158, 11, 0.2);
-      color: #fbbf24;
+      background: rgba(74, 158, 255, .12);
+      color: var(--accent);
+      border: 1px solid rgba(74, 158, 255, .2)
     }
 
     .impact-low {
-      background: rgba(74, 158, 255, 0.2);
-      color: var(--accent);
+      background: rgba(136, 146, 164, .12);
+      color: var(--muted);
+      border: 1px solid rgba(136, 146, 164, .2)
     }
 
-    /* 総合評価 */
+    /* Verdict */
     .verdict-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-bottom: 16px;
+      gap: 10px;
+      margin-bottom: 10px
     }
 
     .verdict-item {
       display: flex;
+      gap: 6px;
       align-items: flex-start;
-      gap: 8px;
-      margin-bottom: 10px;
-      font-size: 13px;
+      margin-bottom: 6px;
+      font-size: 12px;
+      line-height: 1.5
     }
 
     .verdict-item .icon {
-      font-size: 16px;
-      flex-shrink: 0;
-      margin-top: 1px;
+      flex-shrink: 0
     }
 
     .summary-box {
-      background: linear-gradient(135deg, rgba(74, 158, 255, 0.1), rgba(124, 92, 252, 0.1));
-      border: 1px solid rgba(74, 158, 255, 0.3);
-      border-radius: 12px;
-      padding: 18px;
+      background: rgba(74, 158, 255, .06);
+      border: 1px solid rgba(74, 158, 255, .15);
+      border-radius: 8px;
+      padding: 12px;
+      font-size: 12px;
+      line-height: 1.7
     }
 
     .summary-box h4 {
-      color: var(--accent);
-      font-size: 14px;
-      font-weight: 700;
-      margin-bottom: 10px;
-    }
-
-    .summary-box p {
-      color: #cbd5e1;
-      font-size: 13px;
-      line-height: 1.7;
-    }
-
-    /* フッター */
-    .footer {
-      text-align: center;
-      padding: 24px;
-      color: var(--muted);
-      font-size: 11px;
-      border-top: 1px solid var(--border);
-      margin-top: 32px;
-      line-height: 1.8;
-    }
-
-    /* back-bar ウォッチリスト追加ボタン */
-    .wl-add-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 6px 14px;
-      border-radius: 8px;
       font-size: 12px;
-      font-weight: 700;
-      cursor: pointer;
-      border: 1px solid rgba(74, 158, 255, 0.4);
-      background: rgba(74, 158, 255, 0.1);
       color: var(--accent);
-      transition: all 0.2s;
+      margin-bottom: 6px
     }
 
-    .wl-add-btn:hover {
-      background: rgba(74, 158, 255, 0.2);
+    /* Axis bars */
+    .axis-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 4px
     }
 
-    .wl-add-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
+    .axis-label {
+      font-size: 10px;
+      color: var(--muted);
+      width: 36px;
+      text-align: right;
+      flex-shrink: 0
     }
 
-    .wl-add-btn.added {
-      background: rgba(34, 197, 94, 0.15);
-      color: var(--green);
-      border-color: rgba(34, 197, 94, 0.4);
+    .axis-bar-wrap {
+      flex: 1;
+      height: 6px;
+      background: var(--card2);
+      border-radius: 3px;
+      overflow: hidden
     }
 
-    /* ステータスセレクター */
+    .axis-bar {
+      height: 100%;
+      border-radius: 3px;
+      transition: width .6s ease
+    }
+
+    .axis-val {
+      font-size: 10px;
+      font-weight: 700;
+      color: #fff;
+      width: 22px;
+      text-align: right
+    }
+
+    .axis-rank {
+      font-size: 9px;
+      color: var(--muted)
+    }
+
+    /* Status selector */
     .status-selector {
       position: relative;
-      display: inline-flex;
-      align-items: center;
+      display: inline-block
     }
 
     .status-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 14px;
-      border-radius: 10px;
-      font-size: 13px;
-      font-weight: 700;
-      cursor: pointer;
-      border: 1px solid;
-      transition: all 0.2s;
-      background: none;
-    }
-
-    .status-btn.st-watching {
-      color: var(--accent);
-      border-color: rgba(74, 158, 255, 0.4);
-      background: rgba(74, 158, 255, 0.1);
-    }
-
-    .status-btn.st-interested {
-      color: var(--yellow);
-      border-color: rgba(245, 158, 11, 0.4);
-      background: rgba(245, 158, 11, 0.1);
-    }
-
-    .status-btn.st-archived {
-      color: var(--muted);
-      border-color: rgba(136, 146, 164, 0.4);
-      background: rgba(136, 146, 164, 0.1);
+      padding: 3px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--card2);
+      color: var(--text);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer
     }
 
     .status-btn:hover {
-      opacity: 0.8;
+      border-color: var(--accent)
+    }
+
+    .st-interested {
+      background: rgba(245, 158, 11, .1);
+      color: var(--yellow);
+      border-color: rgba(245, 158, 11, .25)
+    }
+
+    .st-watching {
+      background: rgba(74, 158, 255, .1);
+      color: var(--accent);
+      border-color: rgba(74, 158, 255, .25)
+    }
+
+    .st-archived {
+      background: rgba(136, 146, 164, .1);
+      color: var(--muted);
+      border-color: rgba(136, 146, 164, .25)
     }
 
     .status-dropdown {
       position: absolute;
-      top: calc(100% + 8px);
+      top: calc(100% + 3px);
       right: 0;
       background: #1a1d2e;
       border: 1px solid var(--border);
-      border-radius: 10px;
+      border-radius: 8px;
       overflow: hidden;
-      min-width: 150px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      min-width: 120px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, .5);
       display: none;
-      z-index: 300;
+      z-index: 300
     }
 
     .status-dropdown.open {
-      display: block;
+      display: block
     }
 
     .status-option {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 14px;
-      font-size: 13px;
+      padding: 7px 10px;
+      font-size: 10px;
       font-weight: 600;
       cursor: pointer;
-      transition: background 0.15s;
+      transition: background .15s;
+      white-space: nowrap
     }
 
     .status-option:hover {
-      background: rgba(255, 255, 255, 0.06);
+      background: rgba(255, 255, 255, .05)
     }
 
     .status-option.active {
-      background: rgba(74, 158, 255, 0.1);
-    }
-
-    .status-saving {
-      font-size: 11px;
-      color: var(--muted);
+      background: rgba(74, 158, 255, .08)
     }
 
     .status-toast {
-      font-size: 12px;
-      padding: 6px 12px;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 6px
+    }
+
+    .status-saving {
+      background: rgba(74, 158, 255, .1);
+      color: var(--accent)
+    }
+
+    /* Add button */
+    .wl-add-btn {
+      padding: 5px 14px;
       border-radius: 8px;
-      font-weight: 600;
-    }
-
-    .status-toast.ok {
-      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid rgba(34, 197, 94, .3);
+      background: rgba(34, 197, 94, .12);
       color: var(--green);
-      border: 1px solid rgba(34, 197, 94, 0.3);
-    }
-
-    .status-toast.err {
-      background: rgba(239, 68, 68, 0.15);
-      color: var(--red);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-    }
-
-    /* アーカイブボタン（back-bar内） */
-    .watchlist-archive-btn {
-      background: none;
-      border: none;
-      color: var(--muted);
-      font-size: 13px;
+      font-size: 11px;
+      font-weight: 600;
       cursor: pointer;
-      padding: 4px 8px;
-      border-radius: 6px;
-      opacity: 0.6;
-      transition: opacity 0.15s, color 0.15s;
-      line-height: 1;
+      transition: all .15s
     }
 
-    .watchlist-archive-btn:hover {
-      opacity: 1;
-      color: var(--accent);
+    .wl-add-btn:hover {
+      background: rgba(34, 197, 94, .2)
     }
 
-    /* PER推移チャート */
-    .per-chart-container {
-      position: relative;
-      height: 200px;
+    .wl-add-btn.added {
+      background: rgba(34, 197, 94, .15);
+      border-color: rgba(34, 197, 94, .3);
+      cursor: default
     }
 
-    /* ローディング / エラー */
+    /* Loading */
     .loading {
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 60vh;
-      flex-direction: column;
-      gap: 16px;
+      height: 100%;
+      color: var(--muted)
     }
 
     .spinner {
-      width: 40px;
-      height: 40px;
-      border: 3px solid var(--border);
+      width: 24px;
+      height: 24px;
+      border: 2px solid var(--border);
       border-top-color: var(--accent);
       border-radius: 50%;
-      animation: spin 0.8s linear infinite;
+      animation: spin .7s linear infinite;
+      margin-bottom: 8px
     }
 
     @keyframes spin {
       to {
-        transform: rotate(360deg);
+        transform: rotate(360deg)
       }
     }
 
     .error-box {
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      border-radius: 12px;
-      padding: 24px;
       text-align: center;
-      max-width: 480px;
-      margin: 60px auto;
+      padding: 40px;
+      color: var(--muted)
     }
 
     .error-box h2 {
+      font-size: 16px;
       color: var(--red);
-      margin-bottom: 8px;
+      margin-bottom: 8px
     }
 
-    .error-box p {
-      color: var(--muted);
-      font-size: 13px;
-    }
+    /* Responsive */
+    @media(max-width:768px) {
+      .layout {
+        flex-direction: column
+      }
 
-    /* チャート */
-    .chart-container {
-      position: relative;
-      height: 240px;
-    }
+      .left-panel {
+        width: 100%;
+        flex-direction: row;
+        flex-wrap: wrap
+      }
 
-    .radar-container {
-      position: relative;
-      height: 280px;
-      max-width: 320px;
-      margin: 0 auto;
-    }
-
-    /* レスポンシブ */
-    @media (max-width: 768px) {
-
-      .grid-2,
-      .grid-3,
-      .posi-nega,
+      .pn-grid,
       .verdict-grid,
-      .score-section {
-        grid-template-columns: 1fr;
+      .seg-grid {
+        grid-template-columns: 1fr
       }
     }
   </style>
@@ -809,73 +779,53 @@
 
 <body>
 
-  <div class="back-bar">
-    <a class="back-btn" href="../index.html">← ダッシュボードに戻る</a>
-    <div id="backBarStatus"></div>
-  </div>
-
-  <!-- ローディング表示 -->
-  <div id="loading" class="loading">
-    <div class="spinner"></div>
-    <div style="color:var(--muted);">データを読み込んでいます...</div>
-  </div>
-
-  <!-- エラー表示 -->
-  <div id="error" style="display:none;">
-    <div class="error-box">
-      <h2>⚠️ データが見つかりません</h2>
-      <p id="errorMsg">銘柄データの読み込みに失敗しました。</p>
-      <p style="margin-top:12px;"><a href="../index.html" style="color:var(--accent);">← ダッシュボードに戻る</a></p>
+  <div class="shell">
+    <!-- Top bar -->
+    <div class="top-bar">
+      <a href="../index.html" class="back-btn">← ダッシュボード</a>
+      <div id="topBarStatus"></div>
     </div>
+
+    <!-- Loading -->
+    <div id="loading" class="loading">
+      <div class="spinner"></div>
+      <div>データを読み込んでいます...</div>
+    </div>
+
+    <!-- Error -->
+    <div id="error" style="display:none">
+      <div class="error-box">
+        <h2>⚠️ データが見つかりません</h2>
+        <p id="errorMsg"></p>
+        <p style="margin-top:12px"><a href="../index.html" style="color:var(--accent)">← ダッシュボードに戻る</a></p>
+      </div>
+    </div>
+
+    <!-- Main (generated by JS) -->
+    <div id="main" style="display:none"></div>
   </div>
-
-  <!-- メインコンテンツ（JS で生成） -->
-  <div id="main" style="display:none;"></div>
-
 
   <script>
-    // ============================================================
-    // データ取得 & レンダリング
-    // ============================================================
-    // 静的JSON（分析データ）→ stok-analyzer リポジトリの GitHub Raw から取得（push直後に反映）
     const GITHUB_RAW = 'https://raw.githubusercontent.com/bi-al1/stok-analyzer/master';
     const RENDER_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-      ? 'http://localhost:8000'
-      : 'https://stock-dashboard-rif1.onrender.com';
-
-    // URLパラメータから銘柄コードを取得
+      ? 'http://localhost:8000' : 'https://stock-dashboard-rif1.onrender.com';
     const params = new URLSearchParams(location.search);
     const code = params.get('code');
-
-    if (!code) {
-      showError('URLに ?code=XXXX を指定してください。', '');
-    } else {
-      document.title = `${code} 分析ダッシュボード`;
-      loadStock(code);
-    }
+    if (!code) { showError('URLに ?code=XXXX を指定してください。', ''); } else { document.title = `${code} 分析`; loadStock(code); }
 
     async function loadStock(code) {
       try {
         const ts = Date.now();
-        // 分析JSON と watchlist.json を並行取得
         const [stockRes, wlRes] = await Promise.all([
           fetch(`${GITHUB_RAW}/webapp/data/stocks/${code.toUpperCase()}.json?_=${ts}`),
-          fetch(`${RENDER_BASE}/api/watchlist`),  // キャッシュなしで最新を取得
+          fetch(`${RENDER_BASE}/api/watchlist`),
         ]);
         if (!stockRes.ok) throw new Error(`HTTP ${stockRes.status}`);
         const d = await stockRes.json();
-
-        // watchlist エントリを取得（なければ null）
         let wlEntry = null;
-        if (wlRes.ok) {
-          const wl = await wlRes.json();
-          wlEntry = (wl.watchlist || []).find(w => w.code === code.toUpperCase()) ?? null;
-        }
-
+        if (wlRes.ok) { const wl = await wlRes.json(); wlEntry = (wl.watchlist || []).find(w => w.code === code.toUpperCase()) ?? null; }
         render(d, wlEntry);
-      } catch (e) {
-        showError(`銘柄コード "${code}" のデータが見つかりません。`, e.message);
-      }
+      } catch (e) { showError(`銘柄コード "${code}" のデータが見つかりません。`, e.message); }
     }
 
     function showError(msg, detail) {
@@ -884,736 +834,228 @@
       document.getElementById('errorMsg').textContent = msg + (detail ? ` (${detail})` : '');
     }
 
-    // ============================================================
-    // ランクに応じた色
-    // ============================================================
-    function rankColor(rank) {
-      const map = { 'SSS': '#22c55e', 'SS': '#4ade80', 'S': '#86efac', 'A+': '#4a9eff', 'A': '#60a5fa', 'B+': '#a78bfa', 'B': '#c4b5fd', 'C': '#f59e0b', 'D': '#fb923c', 'E': '#ef4444', 'F': '#ef4444' };
-      return map[rank] || '#8892a4';
-    }
+    // ── Helpers ──
+    function rankColor(r) { return { SSS: '#22c55e', SS: '#4ade80', S: '#86efac', 'A+': '#4a9eff', A: '#60a5fa', 'B+': '#a78bfa', B: '#c4b5fd', C: '#f59e0b', D: '#fb923c', E: '#ef4444', F: '#ef4444' }[r] || '#8892a4'; }
+    function axisBarColor(r) { return ['SSS', 'SS', 'S'].includes(r) ? '#22c55e' : ['A+', 'A'].includes(r) ? '#4a9eff' : ['B+', 'B'].includes(r) ? '#a78bfa' : r === 'C' ? '#f59e0b' : '#ef4444'; }
+    function metricBadge(val, good, warn) { if (val == null) return '<span class="metric-badge" style="color:var(--muted)">N/A</span>'; const cls = typeof good === 'function' ? good(val) ? 'm-good' : warn(val) ? 'm-warn' : 'm-bad' : val >= good ? 'm-good' : val >= warn ? 'm-warn' : 'm-bad'; const label = cls === 'm-good' ? '良好' : cls === 'm-warn' ? '注意' : '危険'; return `<span class="metric-badge ${cls}">${label}</span>`; }
+    function switchTab(name) { document.querySelectorAll('.dtab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name)); document.querySelectorAll('.dtab').forEach(t => t.classList.toggle('active', t.id === 'dtab-' + name)); }
 
-    function rankBadgeStyle(rank) {
-      const c = rankColor(rank);
-      return `display:inline-block;padding:4px 16px;border-radius:20px;font-size:18px;font-weight:800;background:${c}22;color:${c};border:1px solid ${c};margin-top:4px;`;
-    }
-
-    // KabuMartスコア（0〜10）を円グラフのdegreeに変換
-    function scoreToDeg(score) {
-      return Math.min((score / 10) * 360, 360);
-    }
-
-    // 軸スコアのバー色
-    function axisBarColor(rank) {
-      if (['SSS', 'SS', 'S'].includes(rank)) return '#22c55e';
-      if (['A+', 'A'].includes(rank)) return '#4a9eff';
-      if (['B+', 'B'].includes(rank)) return '#a78bfa';
-      if (['C'].includes(rank)) return '#f59e0b';
-      return '#ef4444';
-    }
-
-    // ============================================================
-    // PER ゲージ SVG
-    // ============================================================
-    function perGaugeSVG(per) {
-      if (per === null || per === undefined || per < 0) {
-        return `<svg class="gauge-svg" viewBox="0 0 120 70">
-      <path d="M10 60 A 50 50 0 0 1 110 60" stroke="#2d3252" stroke-width="10" fill="none" stroke-linecap="round"/>
-      <path d="M10 60 A 50 50 0 0 1 110 60" stroke="#ef4444" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="0"/>
-      <text x="60" y="52" text-anchor="middle" fill="#ef4444" font-size="10" font-weight="bold">赤字</text>
-    </svg>
-    <div class="gauge-val" style="color:#ef4444;">${per !== null && per !== undefined ? per + '倍' : 'N/A'}</div>
-    <div class="gauge-note">（赤字のため負値）</div>`;
-      }
-      // 目安: 15倍 = 50%, 30倍 = 100%
-      const ratio = Math.min(per / 30, 1);
-      const offset = Math.round(157 * (1 - ratio));
-      const color = per < 15 ? '#22c55e' : per < 25 ? '#f59e0b' : '#ef4444';
-      return `<svg class="gauge-svg" viewBox="0 0 120 70">
-    <path d="M10 60 A 50 50 0 0 1 110 60" stroke="#2d3252" stroke-width="10" fill="none" stroke-linecap="round"/>
-    <path d="M10 60 A 50 50 0 0 1 110 60" stroke="${color}" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="${offset}"/>
-  </svg>
-  <div class="gauge-val" style="color:${color};">${per}倍</div>
-  <div class="gauge-note">目安: 15〜25倍</div>`;
-    }
-
-    function roeGaugeSVG(roe) {
-      if (roe === null || roe === undefined || roe < 0) {
-        return `<svg class="gauge-svg" viewBox="0 0 120 70">
-      <path d="M10 60 A 50 50 0 0 1 110 60" stroke="#2d3252" stroke-width="10" fill="none" stroke-linecap="round"/>
-      <path d="M10 60 A 50 50 0 0 1 110 60" stroke="#ef4444" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="0"/>
-      <text x="60" y="52" text-anchor="middle" fill="#ef4444" font-size="10" font-weight="bold">赤字</text>
-    </svg>
-    <div class="gauge-val" style="color:#ef4444;">${roe !== null && roe !== undefined ? roe.toFixed(1) + '%' : 'N/A'}</div>
-    <div class="gauge-note">目安: 10%以上が優良</div>`;
-      }
-      const ratio = Math.min(roe / 30, 1);
-      const offset = Math.round(157 * (1 - ratio));
-      const color = roe >= 10 ? '#22c55e' : roe >= 5 ? '#f59e0b' : '#ef4444';
-      return `<svg class="gauge-svg" viewBox="0 0 120 70">
-    <path d="M10 60 A 50 50 0 0 1 110 60" stroke="#2d3252" stroke-width="10" fill="none" stroke-linecap="round"/>
-    <path d="M10 60 A 50 50 0 0 1 110 60" stroke="${color}" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="${offset}"/>
-  </svg>
-  <div class="gauge-val" style="color:${color};">${roe.toFixed(1)}%</div>
-  <div class="gauge-note">目安: 10%以上が優良</div>`;
-    }
-
-    function equityRatioGaugeSVG(ratio) {
-      if (ratio === null || ratio === undefined) {
-        return `<svg class="gauge-svg" viewBox="0 0 120 70">
-      <path d="M10 60 A 50 50 0 0 1 110 60" stroke="#2d3252" stroke-width="10" fill="none" stroke-linecap="round"/>
-    </svg>
-    <div class="gauge-val">N/A</div>
-    <div class="gauge-note">目安: 40%以上が安定</div>`;
-      }
-      const r = Math.min(ratio / 100, 1);
-      const offset = Math.round(157 * (1 - r));
-      const color = ratio >= 40 ? '#22c55e' : ratio >= 20 ? '#f59e0b' : '#ef4444';
-      return `<svg class="gauge-svg" viewBox="0 0 120 70">
-    <path d="M10 60 A 50 50 0 0 1 110 60" stroke="#2d3252" stroke-width="10" fill="none" stroke-linecap="round"/>
-    <path d="M10 60 A 50 50 0 0 1 110 60" stroke="${color}" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="${offset}"/>
-  </svg>
-  <div class="gauge-val" style="color:${color};">${ratio.toFixed(1)}%</div>
-  <div class="gauge-note">目安: 40%以上が安定</div>`;
-    }
-
-    // ============================================================
-    // メインレンダリング
-    // ============================================================
+    // ── Main render ──
     function render(d, wlEntry) {
-      const c = d.company;
-      const scores = d.scores;
-      const fin = d.financials;
-      const price = d.price;
-      const biz = d.business;
-      const verdict = d.verdict;
-      const positives = d.positives || [];
-      const negatives = d.negatives || [];
-      const priceHistory = d.price_history || [];
+      const c = d.company, scores = d.scores, fin = d.financials, price = d.price, biz = d.business, verdict = d.verdict;
+      const positives = d.positives || [], negatives = d.negatives || [], priceHistory = d.price_history || [];
+      document.title = `${c.name}（${c.code}）`;
 
-      // タイトル更新
-      document.title = `${c.name}（${c.code}）分析ダッシュボード`;
-
-      // スコアの円グラフ色
       const scoreColor = rankColor(scores.total_rank);
-      const scoreDeg = scoreToDeg(scores.total_score);
-      const scoreConicBg = `conic-gradient(${scoreColor} 0deg ${scoreDeg}deg, #2d3252 ${scoreDeg}deg 360deg)`;
+      const scoreDeg = Math.min((scores.total_score / 10) * 360, 360);
 
-      // ポジネガカード生成
-      function posiCards(items) {
-        return items.map(item => `
-      <div class="posi-card">
-        <div class="pn-title">${item.title} <span class="impact impact-${(item.impact || 'mid').toLowerCase()}">${(item.impact || 'MID').toUpperCase()}</span></div>
-        <div class="pn-explain">💬 <strong>つまり？</strong> ${item.explain || ''}</div>
-        <div class="pn-source">${item.source || ''}</div>
-      </div>`).join('');
-      }
-      function negaCards(items) {
-        return items.map(item => `
-      <div class="nega-card">
-        <div class="pn-title">${item.title} <span class="impact impact-${(item.impact || 'mid').toLowerCase()}">${(item.impact || 'MID').toUpperCase()}</span></div>
-        <div class="pn-explain">💬 <strong>つまり？</strong> ${item.explain || ''}</div>
-        <div class="pn-source">${item.source || ''}</div>
-      </div>`).join('');
-      }
-
-      // 軸バー生成
-      const axisKeys = [
-        { key: 'growth', label: '成長性' },
-        { key: 'stability', label: '安定性' },
-        { key: 'profitability', label: '収益性' },
-        { key: 'capacity', label: '余力' },
-        { key: 'innovation', label: '新規性' },
-      ];
+      // Axis bars
+      const axisKeys = [{ key: 'growth', label: '成長' }, { key: 'stability', label: '安定' }, { key: 'profitability', label: '収益' }, { key: 'capacity', label: '余力' }, { key: 'innovation', label: '新規' }];
       const axisBars = axisKeys.map(ax => {
-        const val = scores.axes?.[ax.key]?.score ?? 0;
-        const rank = scores.axes?.[ax.key]?.rank ?? 'F';
-        const pct = (val / 10 * 100).toFixed(0);
-        const color = axisBarColor(rank);
-        return `<div class="axis-item">
-      <span class="axis-label">${ax.label}</span>
-      <div class="axis-bar-wrap"><div class="axis-bar" style="width:${pct}%;background:${color};"></div></div>
-      <span class="axis-val">${val.toFixed(1)}</span>
-      <span class="axis-rank"><span class="badge badge-gray" style="font-size:10px;">${rank}</span></span>
-    </div>`;
+        const val = scores.axes?.[ax.key]?.score ?? 0, rank = scores.axes?.[ax.key]?.rank ?? 'F';
+        return `<div class="axis-item"><span class="axis-label">${ax.label}</span><div class="axis-bar-wrap"><div class="axis-bar" style="width:${(val / 10 * 100).toFixed(0)}%;background:${axisBarColor(rank)}"></div></div><span class="axis-val">${val.toFixed(1)}</span></div>`;
       }).join('');
 
-      // セグメントカード
-      const segCards = (biz.segments || []).map(s => `
-    <div class="segment-card" style="${s.highlight ? 'background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);' : ''}">
-      <h4 style="${s.highlight ? 'color:var(--green);' : ''}">${s.icon || ''} ${s.name}</h4>
-      <p>${s.description || ''}</p>
-    </div>`).join('');
+      // Source badges
+      const srcBadges = [d.has_yfinance ? '📊 yfinance' : '', d.has_websearch ? '🔍 WebSearch' : '', d.has_kabumart ? '📌 KabuMart' : ''].filter(Boolean).map(s => `<span class="src-badge">${s}</span>`).join('');
 
-      // タグバッジ
+      // Segments
+      const segCards = (biz.segments || []).map(s => `<div class="seg-card${s.highlight ? ' highlight' : ''}">${s.icon ? `<h4>${s.icon} ${s.name}</h4>` : `<h4>${s.name}</h4>`}<p>${s.description || ''}</p></div>`).join('');
       const tagBadges = (biz.tags || []).map(t => `<span class="badge badge-blue">${t}</span>`).join('');
 
-      // バリュエーション行
+      // Valuation table
       const valRows = (fin.valuation_table || []).map(row => {
         const cls = row.status === 'good' ? 'val-good' : row.status === 'warn' ? 'val-warn' : row.status === 'bad' ? 'val-bad' : '';
-        const badgeHtml = row.badge ? `<span class="badge badge-${row.badge_color || 'gray'}">${row.badge}</span>` : '―';
-        return `<tr>
-      <td>${row.label}</td>
-      <td class="${cls}">${row.value}</td>
-      <td>${row.benchmark || '―'}</td>
-      <td>${badgeHtml}</td>
-      <td style="font-size:11px;color:var(--muted);">${row.note || ''}</td>
-    </tr>`;
+        const badgeHtml = row.badge ? `<span class="badge badge-${row.badge_color || 'gray'}" style="font-size:9px">${row.badge}</span>` : '—';
+        return `<tr><td>${row.label}</td><td class="${cls}">${row.value}</td><td>${row.benchmark || '—'}</td><td>${badgeHtml}</td><td style="font-size:10px;color:var(--muted)">${row.note || ''}</td></tr>`;
       }).join('');
 
-      // 強み・懸念
-      const strengthItems = (verdict.strengths || []).map(s => `
-    <div class="verdict-item"><span class="icon">${s.icon || '💪'}</span><span><strong>${s.title}</strong>：${s.text}</span></div>`).join('');
-      const riskItems = (verdict.risks || []).map(r => `
-    <div class="verdict-item"><span class="icon">${r.icon || '⚠️'}</span><span><strong>${r.title}</strong>：${r.text}</span></div>`).join('');
+      // Posi/Nega
+      const posiCards = positives.map(i => `<div class="posi-card"><div class="pn-title">${i.title} <span class="impact impact-${(i.impact || 'mid').toLowerCase()}">${(i.impact || 'MID').toUpperCase()}</span></div><div class="pn-explain">💬 ${i.explain || ''}</div><div class="pn-source">${i.source || ''}</div></div>`).join('');
+      const negaCards = negatives.map(i => `<div class="nega-card"><div class="pn-title">${i.title} <span class="impact impact-${(i.impact || 'mid').toLowerCase()}">${(i.impact || 'MID').toUpperCase()}</span></div><div class="pn-explain">💬 ${i.explain || ''}</div><div class="pn-source">${i.source || ''}</div></div>`).join('');
 
-      // データソースバッジ
-      const sourceBadges = [
-        d.has_yfinance ? '<span class="badge badge-green">📊 yfinance取得済</span>' : '',
-        d.has_websearch ? '<span class="badge badge-blue">🔍 WebSearch調査済</span>' : '',
-        d.has_kabumart ? '<span class="badge badge-purple">📌 KabuMartスコア反映</span>' : '',
-      ].filter(Boolean).join('');
+      // Verdict
+      const strengthItems = (verdict.strengths || []).map(s => `<div class="verdict-item"><span class="icon">${s.icon || '💪'}</span><span><strong>${s.title}</strong>：${s.text}</span></div>`).join('');
+      const riskItems = (verdict.risks || []).map(r => `<div class="verdict-item"><span class="icon">${r.icon || '⚠️'}</span><span><strong>${r.title}</strong>：${r.text}</span></div>`).join('');
+      const links = (d.links || []).map(l => `<a href="${l.url}" target="_blank" style="color:var(--accent);font-size:11px">${l.label}</a>`).join(' / ');
 
-      // リンク
-      const links = (d.links || []).map(l => `<a href="${l.url}" target="_blank" style="color:var(--accent);">${l.label}</a>`).join(' / ');
+      // PER metric
+      let perBadge = metricBadge(fin.per, v => v > 0 && v < 15, v => v > 0 && v < 25);
+      if (fin.per != null && fin.per < 0) perBadge = '<span class="metric-badge m-bad">赤字</span>';
 
       const html = `
-<div class="container">
-
-<!-- ヘッダー -->
-<div class="header-card">
-  <div class="header-top">
-    <div class="company-info">
-      <h1>${c.name}</h1>
+<div class="layout">
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <div class="card">
+      <div class="company-name">${c.name}</div>
       <div class="company-meta">
         <span class="badge badge-blue">${c.code}</span>
         <span class="badge badge-purple">${c.industry || ''}</span>
         <span class="badge badge-gray">${c.market || ''}</span>
         ${c.extra_badge ? `<span class="badge badge-orange">${c.extra_badge}</span>` : ''}
       </div>
-    </div>
-    <div style="text-align:right;">
-      <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">調査日</div>
-      <div style="font-size:16px;font-weight:700;color:#fff;">${c.analyzed_date || ''}</div>
-      ${price.current ? `<div style="font-size:13px;color:var(--accent);margin-top:4px;">現在株価 ¥${price.current.toLocaleString()}</div>` : ''}
-    </div>
-  </div>
-  <div class="catchcopy">
-    ${biz.catchcopy || ''}
-  </div>
-  <div class="data-badges">${sourceBadges}</div>
-</div>
+      ${biz.catchcopy ? `<div class="catchcopy">${biz.catchcopy}</div>` : ''}
 
-<!-- ビジネスモデル -->
-<div class="section">
-  <div class="section-title">この会社は何をしている？</div>
-  <div class="grid-2">
-    <div class="card biz-text">
-      ${(biz.paragraphs || []).map(p => `<p>${p}</p>`).join('')}
-      <div class="tags">${tagBadges}</div>
-    </div>
-    <div>${segCards}</div>
-  </div>
-</div>
-
-<!-- KabuMartスコア -->
-<div class="section">
-  <div class="section-title">KabuMartスコア</div>
-  <div class="card">
-    <div class="score-section">
-      <div class="score-circle-wrap">
-        <div class="score-circle" style="background:${scoreConicBg};">
-          <div class="score-inner">
-            <div class="score-val">${scores.total_score}</div>
-            <div class="score-max">/10</div>
-          </div>
+      <div class="score-wrap">
+        <div class="score-circle" style="background:conic-gradient(${scoreColor} 0deg ${scoreDeg}deg, #2d3252 ${scoreDeg}deg 360deg)">
+          <div class="score-inner"><div class="score-val">${scores.total_score}</div><div class="score-max">/10</div></div>
         </div>
-        <div class="rank-badge-score" style="${rankBadgeStyle(scores.total_rank)}">${scores.total_rank} ランク</div>
-        ${scores.note ? `<div style="font-size:12px;color:var(--muted);margin-top:8px;text-align:center;">${scores.note}</div>` : ''}
-      </div>
-      <div>
-        <div class="radar-container">
-          <canvas id="radarChart"></canvas>
+        <div class="score-info">
+          <div class="rank-badge" style="background:${scoreColor}22;color:${scoreColor};border:1px solid ${scoreColor}">${scores.total_rank}</div>
+          ${scores.note ? `<div style="font-size:10px;color:var(--muted);margin-top:4px">${scores.note}</div>` : ''}
         </div>
-        <div class="axis-list" style="margin-top:16px;">${axisBars}</div>
-        ${scores.interpretation ? `<div style="margin-top:14px;padding:12px;background:var(--card2);border-radius:8px;font-size:12px;color:#94a3c8;line-height:1.6;">💡 <strong style="color:var(--yellow);">スコアの読み方：</strong>${scores.interpretation}</div>` : ''}
+      </div>
+      ${axisBars}
+    </div>
+
+    <div class="card">
+      <div class="metric-row"><span class="metric-label">予想PER</span><span><span class="metric-val">${fin.per != null ? fin.per + '倍' : 'N/A'}</span> ${perBadge}</span></div>
+      <div class="metric-row"><span class="metric-label">ROE</span><span><span class="metric-val">${fin.roe != null ? fin.roe.toFixed(1) + '%' : 'N/A'}</span> ${metricBadge(fin.roe, v => v >= 10, v => v >= 5)}</span></div>
+      <div class="metric-row"><span class="metric-label">自己資本比率</span><span><span class="metric-val">${fin.equity_ratio != null ? fin.equity_ratio.toFixed(1) + '%' : 'N/A'}</span> ${metricBadge(fin.equity_ratio, v => v >= 40, v => v >= 20)}</span></div>
+      ${price.current ? `<div class="metric-row"><span class="metric-label">現在株価</span><span class="metric-val">¥${price.current.toLocaleString()}</span></div>` : ''}
+    </div>
+
+    <div class="card" style="font-size:10px;color:var(--muted)">
+      <div>📅 調査日: ${c.analyzed_date || '—'}</div>
+      <div class="src-badges">${srcBadges}</div>
+      ${links ? `<div style="margin-top:6px">${links}</div>` : ''}
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="tab-bar">
+      <button class="tab-btn dtab-btn active" data-tab="biz" onclick="switchTab('biz')">事業内容</button>
+      <button class="tab-btn dtab-btn" data-tab="fin" onclick="switchTab('fin')">財務・チャート</button>
+      <button class="tab-btn dtab-btn" data-tab="pn" onclick="switchTab('pn')">ポジ・ネガ</button>
+      <button class="tab-btn dtab-btn" data-tab="verdict" onclick="switchTab('verdict')">総合評価</button>
+    </div>
+
+    <!-- Tab: Business -->
+    <div class="tab-content dtab active" id="dtab-biz">
+      <div class="card">
+        <div class="card-title">🏢 この会社は何をしている？</div>
+        <div class="biz-text">${(biz.paragraphs || []).map(p => `<p>${p}</p>`).join('')}</div>
+        <div class="tags">${tagBadges}</div>
+      </div>
+      ${segCards ? `<div class="card"><div class="card-title">📊 事業セグメント</div><div class="seg-grid">${segCards}</div></div>` : ''}
+    </div>
+
+    <!-- Tab: Financials & Charts -->
+    <div class="tab-content dtab" id="dtab-fin">
+      ${valRows ? `<div class="card"><div class="card-title">📊 バリュエーション詳細</div><table class="val-table"><thead><tr><th>指標</th><th>値</th><th>目安</th><th>評価</th><th>つまり？</th></tr></thead><tbody>${valRows}</tbody></table></div>` : ''}
+      ${priceHistory.length > 0 ? `<div class="card"><div class="card-title">📈 株価チャート（過去1年間）${price.current ? ` — 現在 ¥${price.current.toLocaleString()}` : ''}</div><div class="chart-container"><canvas id="priceChart"></canvas></div></div>` : ''}
+      ${wlEntry?.per_history?.length >= 1 ? `<div class="card"><div class="card-title">📉 予想PER 推移</div><div class="per-chart-container"><canvas id="perChart"></canvas></div></div>` : ''}
+    </div>
+
+    <!-- Tab: Posi/Nega -->
+    <div class="tab-content dtab" id="dtab-pn">
+      <div class="pn-grid">
+        <div><div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:8px">✅ ポジティブ要素</div>${posiCards}</div>
+        <div><div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:8px">⚠️ ネガティブ要素</div>${negaCards}</div>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- 主要財務指標 -->
-<div class="section">
-  <div class="section-title">主要財務指標</div>
-  <div class="grid-3" style="margin-bottom:16px;">
-    <div class="card">
-      <div class="gauge-label">予想PER（株価収益率）</div>
-      ${perGaugeSVG(fin.per)}
-      <div class="gauge-tooltip">${fin.per_note || 'PERは「株価÷1株利益」で、企業の利益に対して株価が何倍かを示す指標。'}</div>
-    </div>
-    <div class="card">
-      <div class="gauge-label">ROE（自己資本利益率）</div>
-      ${roeGaugeSVG(fin.roe)}
-      <div class="gauge-tooltip">${fin.roe_note || 'ROEは「株主のお金を使ってどれだけ利益を出せたか」の指標。'}</div>
-    </div>
-    <div class="card">
-      <div class="gauge-label">自己資本比率</div>
-      ${equityRatioGaugeSVG(fin.equity_ratio)}
-      <div class="gauge-tooltip">${fin.equity_ratio_note || '会社の資産のうち、借金でない自己資金の割合。40%以上が安定の目安。'}</div>
+    <!-- Tab: Verdict -->
+    <div class="tab-content dtab" id="dtab-verdict">
+      <div class="verdict-grid">
+        <div class="card"><div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:8px">💪 この会社の強み</div>${strengthItems}</div>
+        <div class="card"><div style="font-size:12px;font-weight:700;color:var(--red);margin-bottom:8px">⚠️ 気をつけたいリスク</div>${riskItems}</div>
+      </div>
+      <div class="summary-box"><h4>📝 初心者向けまとめ</h4><p>${verdict.summary || ''}</p></div>
     </div>
   </div>
-  ${valRows ? `
-  <div class="card">
-    <div style="font-size:14px;font-weight:700;color:#fff;margin-bottom:12px;">📊 バリュエーション詳細（yfinance取得値）</div>
-    <table class="val-table">
-      <thead><tr><th>指標</th><th>値</th><th>目安</th><th>評価</th><th>つまり？</th></tr></thead>
-      <tbody>${valRows}</tbody>
-    </table>
-  </div>` : ''}
-</div>
-
-<!-- PER推移グラフ（ウォッチリスト登録済みかつ履歴1件以上の場合のみ表示） -->
-${wlEntry && wlEntry.per_history && wlEntry.per_history.length >= 1 ? `
-<div class="section" id="perHistorySection">
-  <div class="section-title">予想PER 推移</div>
-  <div class="card">
-    <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;font-size:12px;color:var(--muted);">
-      <span>📊 ヘルスチェックのたびに更新されます</span>
-      <span>赤字期間はマイナス値（絶対値が小さいほど赤字縮小）</span>
-    </div>
-    <div class="per-chart-container"><canvas id="perChart"></canvas></div>
-  </div>
-</div>` : ''}
-
-<!-- 株価チャート -->
-${priceHistory.length > 0 ? `
-<div class="section">
-  <div class="section-title">株価チャート（過去1年間）</div>
-  <div class="card">
-    <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;font-size:13px;">
-      ${price.current ? `<span>現在: <strong style="color:var(--accent);">¥${price.current.toLocaleString()}</strong></span>` : ''}
-      ${price.week52_high ? `<span>52週高値: <strong style="color:var(--green);">¥${price.week52_high.toLocaleString()}</strong></span>` : ''}
-      ${price.week52_low ? `<span>52週安値: <strong style="color:var(--red);">¥${price.week52_low.toLocaleString()}</strong></span>` : ''}
-      ${price.from_high_pct ? `<span style="color:var(--muted);">高値比: ${price.from_high_pct}</span>` : ''}
-    </div>
-    <div class="chart-container"><canvas id="priceChart"></canvas></div>
-    <div style="margin-top:10px;font-size:11px;color:var(--muted);">※ yfinance取得値（遅延データの可能性あり）</div>
-  </div>
-</div>` : ''}
-
-<!-- ポジネガ -->
-<div class="section">
-  <div class="section-title">ポジティブ / ネガティブ要因</div>
-  <div class="posi-nega">
-    <div>
-      <div style="font-size:14px;font-weight:700;color:var(--green);margin-bottom:12px;">✅ ポジティブ要素</div>
-      ${posiCards(positives)}
-    </div>
-    <div>
-      <div style="font-size:14px;font-weight:700;color:var(--red);margin-bottom:12px;">⚠️ ネガティブ要素</div>
-      ${negaCards(negatives)}
-    </div>
-  </div>
-</div>
-
-<!-- 総合評価 -->
-<div class="section">
-  <div class="section-title">総合評価</div>
-  <div class="verdict-grid">
-    <div class="card">
-      <div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:12px;">💪 この会社の強み</div>
-      ${strengthItems}
-    </div>
-    <div class="card">
-      <div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:12px;">⚠️ 気をつけたいリスク</div>
-      ${riskItems}
-    </div>
-  </div>
-  <div class="summary-box">
-    <h4>📝 ふゆさんへ：初心者向けまとめ</h4>
-    <p>${verdict.summary || ''}</p>
-  </div>
-</div>
-
-<!-- フッター -->
-<div class="footer">
-  <p>データソース：KabuMart（スクリーンショット解析）、yfinance、WebSearch（各種公開情報）</p>
-  ${links ? `<p>参考：${links}</p>` : ''}
-  <p style="margin-top:8px;">生成日時: ${d.generated_at || c.analyzed_date} | Powered by Claude + KabuMart Analyzer</p>
-</div>
-
-</div><!-- /container -->
-`;
+</div>`;
 
       document.getElementById('main').innerHTML = html;
       document.getElementById('loading').style.display = 'none';
-      document.getElementById('main').style.display = 'block';
+      document.getElementById('main').style.display = 'flex';
+      document.getElementById('main').style.flex = '1';
+      document.getElementById('main').style.minHeight = '0';
 
-      // ── back-bar: ステータスセレクター or 追加ボタン ──────────
-      if (wlEntry) {
-        // 登録済み → back-barにステータスセレクター + 削除ボタン表示
-        renderStatusSelector(wlEntry, c.code);
-      } else {
-        // 未登録 → back-barに追加ボタンを表示
-        renderAddButton(c, scores, fin);
-      }
+      // Watchlist status
+      if (wlEntry) { renderStatusSelector(wlEntry, c.code); }
+      else { renderAddButton(c, scores, fin); }
 
-      // チャート描画（DOM 生成後）
+      // Draw charts after DOM ready
       requestAnimationFrame(() => {
-        drawRadar(scores);
         if (priceHistory.length > 0) drawPrice(priceHistory, d.ipo_date);
         if (wlEntry?.per_history?.length >= 1) drawPerHistory(wlEntry.per_history);
       });
     }
 
-    // ============================================================
-    // ウォッチリスト追加ボタン（back-bar内・未登録時）
-    // ============================================================
+    // ── Watchlist Add Button ──
     function renderAddButton(company, scores, fin) {
-      const container = document.getElementById('backBarStatus');
+      const container = document.getElementById('topBarStatus');
       const btn = document.createElement('button');
       btn.className = 'wl-add-btn';
       btn.textContent = '＋ ウォッチリストに追加';
       container.appendChild(btn);
-
-      // スコア情報: scores.total_rank / total_score を使う
-      const rank = scores?.total_rank ?? '';
-      const score = scores?.total_score ?? '';
+      const rank = scores?.total_rank ?? '', score = scores?.total_score ?? '';
       const note = rank ? `総合スコア ${rank} (${score}/10)` : '';
       const per = fin?.per ?? null;
-
       btn.onclick = async () => {
-        btn.textContent = '⏳ 追加中...';
-        btn.disabled = true;
+        btn.textContent = '⏳ 追加中...'; btn.disabled = true;
         try {
-          const body = {
-            code: company.code,
-            name: company.name,
-            note,
-            kabumart_rank: rank,
-          };
+          const body = { code: company.code, name: company.name, note, kabumart_rank: rank };
           if (per != null) body.per = per;
-          const res = await fetch(`${RENDER_BASE}/api/watchlist`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body),
-          });
+          const res = await fetch(`${RENDER_BASE}/api/watchlist`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
           const json = await res.json();
-          if (res.status === 409) {
-            btn.textContent = '✅ 登録済み';
-            btn.classList.add('added');
-          } else if (!res.ok) {
-            throw new Error(json.detail ?? 'エラー');
-          } else {
-            btn.textContent = '✅ 追加しました';
-            btn.classList.add('added');
-          }
-          // ステータスセレクター+削除ボタンに切り替え
-          setTimeout(() => {
-            container.innerHTML = '';
-            renderStatusSelector({ status: 'archived' }, company.code);
-          }, 800);
-        } catch (e) {
-          btn.textContent = `⚠️ 失敗`;
-          btn.disabled = false;
-          setTimeout(() => {
-            btn.textContent = '＋ ウォッチリストに追加';
-            btn.classList.remove('added');
-          }, 2000);
-        }
+          if (res.status === 409) { btn.textContent = '✅ 登録済み'; btn.classList.add('added'); }
+          else if (!res.ok) throw new Error(json.detail ?? 'エラー');
+          else { btn.textContent = '✅ 追加しました'; btn.classList.add('added'); }
+          setTimeout(() => { container.innerHTML = ''; renderStatusSelector({ status: 'archived' }, company.code); }, 800);
+        } catch (e) { btn.textContent = '⚠️ 失敗'; btn.disabled = false; setTimeout(() => { btn.textContent = '＋ ウォッチリストに追加'; btn.classList.remove('added'); }, 2000); }
       };
     }
 
-    // ============================================================
-    // ステータスセレクター
-    // ============================================================
-    const STATUS_MAP = {
-      interested: { label: '💛 積極検討', cls: 'st-interested' },
-      watching: { label: '👀 要観察', cls: 'st-watching' },
-      archived: { label: '📦 アーカイブ', cls: 'st-archived' },
-    };
+    // ── Status Selector ──
+    const STATUS_MAP = { interested: { label: '💛 積極検討', cls: 'st-interested' }, watching: { label: '👀 要観察', cls: 'st-watching' }, archived: { label: '📦 アーカイブ', cls: 'st-archived' } };
 
     function renderStatusSelector(wlEntry, code) {
-      const container = document.getElementById('backBarStatus');
+      const container = document.getElementById('topBarStatus');
       let currentStatus = wlEntry.status || 'archived';
-
-      // 既存のセレクターがあれば再利用（追加後の切り替え時）
       let sel = document.getElementById('statusSelector');
       let toastEl = document.getElementById('statusToast');
-      if (!sel) {
-        sel = document.createElement('div');
-        sel.className = 'status-selector';
-        sel.id = 'statusSelector';
-        container.appendChild(sel);
-      }
-      if (!toastEl) {
-        toastEl = document.createElement('span');
-        toastEl.className = 'status-toast';
-        toastEl.id = 'statusToast';
-        toastEl.style.display = 'none';
-        container.appendChild(toastEl);
-      }
-
+      if (!sel) { sel = document.createElement('div'); sel.className = 'status-selector'; sel.id = 'statusSelector'; container.appendChild(sel); }
+      if (!toastEl) { toastEl = document.createElement('span'); toastEl.className = 'status-toast'; toastEl.id = 'statusToast'; toastEl.style.display = 'none'; container.appendChild(toastEl); }
       sel.innerHTML = buildSelectorHTML(currentStatus);
-
-      // ドロップダウン開閉（イベント委譲・一度だけ登録）
       sel.onclick = e => {
-        const btn = e.target.closest('.status-btn');
-        const opt = e.target.closest('.status-option');
-        if (btn) {
-          sel.querySelector('.status-dropdown').classList.toggle('open');
-          return;
-        }
-        if (opt) {
-          sel.querySelector('.status-dropdown').classList.remove('open');
-          const newStatus = opt.dataset.status;
-          if (newStatus === currentStatus) return;
-          currentStatus = newStatus;
-          updateStatus(code, newStatus, sel, toastEl);
-        }
+        const btn = e.target.closest('.status-btn'), opt = e.target.closest('.status-option');
+        if (btn) { sel.querySelector('.status-dropdown').classList.toggle('open'); return; }
+        if (opt) { sel.querySelector('.status-dropdown').classList.remove('open'); const ns = opt.dataset.status; if (ns === currentStatus) return; currentStatus = ns; updateStatus(code, ns, sel, toastEl); }
       };
-
-      // 外クリックで閉じる（一度だけ登録）
-      if (!sel._outsideClickBound) {
-        sel._outsideClickBound = true;
-        document.addEventListener('click', e => {
-          if (!sel.contains(e.target)) {
-            sel.querySelector('.status-dropdown')?.classList.remove('open');
-          }
-        });
-      }
+      if (!sel._outsideClickBound) { sel._outsideClickBound = true; document.addEventListener('click', e => { if (!sel.contains(e.target)) sel.querySelector('.status-dropdown')?.classList.remove('open'); }); }
     }
-
     function buildSelectorHTML(current) {
       const cur = STATUS_MAP[current] || STATUS_MAP.archived;
-      const options = Object.entries(STATUS_MAP).map(([val, info]) => `
-    <div class="status-option${val === current ? ' active' : ''}" data-status="${val}">
-      ${info.label}
-    </div>`).join('');
-      return `
-    <button class="status-btn ${cur.cls}">${cur.label} ▾</button>
-    <div class="status-dropdown">${options}</div>`;
+      const opts = Object.entries(STATUS_MAP).map(([v, i]) => `<div class="status-option${v === current ? ' active' : ''}" data-status="${v}">${i.label}</div>`).join('');
+      return `<button class="status-btn ${cur.cls}">${cur.label} ▾</button><div class="status-dropdown">${opts}</div>`;
     }
-
     async function updateStatus(code, newStatus, selEl, toastEl) {
       selEl.querySelector('.status-dropdown').classList.remove('open');
-      toastEl.className = 'status-toast status-saving';
-      toastEl.textContent = '更新中...';
-      toastEl.style.display = '';
-
+      toastEl.className = 'status-toast status-saving'; toastEl.textContent = '更新中...'; toastEl.style.display = '';
       try {
-        const res = await fetch(`${RENDER_BASE}/api/watchlist/status`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ code, status: newStatus }),
-        });
-        const json = await res.json();
-        if (!json.ok) throw new Error(json.detail ?? json.error);
-
-        // UI更新（onclick は sel.onclick で管理しているので再バインド不要）
-        selEl.innerHTML = buildSelectorHTML(newStatus);
-        toastEl.style.display = 'none';
-
-      } catch (e) {
-        toastEl.className = 'status-toast err';
-        toastEl.textContent = `⚠️ 更新失敗: ${e.message}`;
-        setTimeout(() => { toastEl.style.display = 'none'; }, 3000);
-      }
+        const res = await fetch(`${RENDER_BASE}/api/watchlist/status`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ code, status: newStatus }) });
+        const json = await res.json(); if (!json.ok) throw new Error(json.detail ?? json.error);
+        selEl.innerHTML = buildSelectorHTML(newStatus); toastEl.style.display = 'none';
+      } catch (e) { toastEl.className = 'status-toast err'; toastEl.textContent = `⚠️ ${e.message}`; setTimeout(() => { toastEl.style.display = 'none'; }, 3000); }
     }
 
-
-    // ============================================================
-    // レーダーチャート
-    // ============================================================
-    function drawRadar(scores) {
-      const ctx = document.getElementById('radarChart');
-      if (!ctx) return;
-      const axes = scores.axes || {};
-      const vals = [
-        axes.growth?.score ?? 0,
-        axes.stability?.score ?? 0,
-        axes.profitability?.score ?? 0,
-        axes.capacity?.score ?? 0,
-        axes.innovation?.score ?? 0,
-      ];
-      const ranks = [
-        axes.growth?.rank ?? 'F',
-        axes.stability?.rank ?? 'F',
-        axes.profitability?.rank ?? 'F',
-        axes.capacity?.rank ?? 'F',
-        axes.innovation?.rank ?? 'F',
-      ];
-      const labels = [
-        `成長性\n(${vals[0]}/${ranks[0]})`,
-        `安定性\n(${vals[1]}/${ranks[1]})`,
-        `収益性\n(${vals[2]}/${ranks[2]})`,
-        `余力\n(${vals[3]}/${ranks[3]})`,
-        `新規性\n(${vals[4]}/${ranks[4]})`,
-      ];
-      new Chart(ctx.getContext('2d'), {
-        type: 'radar',
-        data: {
-          labels,
-          datasets: [{
-            label: 'スコア', data: vals,
-            backgroundColor: 'rgba(74,158,255,0.15)', borderColor: '#4a9eff',
-            pointBackgroundColor: '#4a9eff', pointBorderColor: '#fff', pointRadius: 4, borderWidth: 2,
-          }, {
-            label: '平均基準(5.0)', data: [5, 5, 5, 5, 5],
-            backgroundColor: 'transparent', borderColor: 'rgba(255,255,255,0.2)',
-            pointRadius: 0, borderWidth: 1, borderDash: [4, 4],
-          }]
-        },
-        options: {
-          responsive: true, maintainAspectRatio: true,
-          plugins: { legend: { display: false } },
-          scales: {
-            r: {
-              min: 0, max: 10, ticks: { display: false },
-              grid: { color: 'rgba(255,255,255,0.1)' },
-              angleLines: { color: 'rgba(255,255,255,0.1)' },
-              pointLabels: { color: '#94a3c8', font: { size: 10 } }
-            }
-          }
-        }
-      });
-    }
-
-    // ============================================================
-    // PER推移チャート
-    // ============================================================
-    function drawPerHistory(perHistory) {
-      const ctx = document.getElementById('perChart');
-      if (!ctx) return;
-
-      const labels = perHistory.map(h => h.date);
-      const values = perHistory.map(h => h.per);
-
-      // 0ラインとゾーン色：マイナス=赤字期間、プラス=黒字期間
-      const pointColors = values.map(v =>
-        v == null ? 'rgba(136,146,164,0.5)' :
-          v < 0 ? '#ef4444' : '#22c55e'
-      );
-
-      new Chart(ctx.getContext('2d'), {
-        type: 'line',
-        data: {
-          labels,
-          datasets: [{
-            label: '予想PER（倍）',
-            data: values,
-            borderColor: '#4a9eff',
-            backgroundColor: 'rgba(74,158,255,0.08)',
-            fill: true,
-            borderWidth: 2,
-            pointRadius: 5,
-            pointBackgroundColor: pointColors,
-            pointBorderColor: '#fff',
-            pointBorderWidth: 1.5,
-            tension: 0.3,
-            spanGaps: true,
-          }, {
-            // 0ライン（黒字/赤字の境界）
-            label: '黒字転換ライン',
-            data: labels.map(() => 0),
-            borderColor: 'rgba(255,255,255,0.15)',
-            borderWidth: 1,
-            borderDash: [4, 4],
-            pointRadius: 0,
-            fill: false,
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          interaction: { mode: 'index', intersect: false },
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              backgroundColor: '#1a1d2e',
-              borderColor: '#2d3252',
-              borderWidth: 1,
-              titleColor: '#94a3c8',
-              bodyColor: '#e2e8f0',
-              callbacks: {
-                title: ctx => ctx[0].label,
-                label: ctx => {
-                  if (ctx.datasetIndex === 1) return null;
-                  const v = ctx.parsed.y;
-                  if (v == null) return 'データなし';
-                  return v < 0
-                    ? `PER ${v}倍（赤字）`
-                    : `PER ${v}倍`;
-                },
-              }
-            }
-          },
-          scales: {
-            x: {
-              ticks: { color: '#8892a4', maxTicksLimit: 8, maxRotation: 0 },
-              grid: { color: 'rgba(45,50,82,0.5)' }
-            },
-            y: {
-              ticks: {
-                color: '#8892a4',
-                callback: v => v === 0 ? '0（黒字転換）' : `${v}倍`
-              },
-              grid: { color: 'rgba(45,50,82,0.5)' }
-            }
-          }
-        }
-      });
-    }
-
-    // ============================================================
-    // 株価チャート
-    // ============================================================
+    // ── Price Chart ──
     function drawPrice(priceHistory, ipoDate) {
-      const ctx = document.getElementById('priceChart');
-      if (!ctx) return;
-      const labels = priceHistory.map(d => d.date);
-      const closes = priceHistory.map(d => d.close);
-      const ipoIdx = ipoDate ? labels.indexOf(ipoDate) : -1;
-      new Chart(ctx.getContext('2d'), {
-        type: 'line',
-        data: {
-          labels,
-          datasets: [{
-            label: '終値 (円)', data: closes,
-            borderColor: '#4a9eff', backgroundColor: 'rgba(74,158,255,0.08)',
-            fill: true, borderWidth: 2, pointRadius: 0, pointHoverRadius: 5, tension: 0.3,
-          }]
-        },
-        options: {
-          responsive: true, maintainAspectRatio: false,
-          interaction: { mode: 'index', intersect: false },
-          plugins: {
-            legend: { display: false },
-            tooltip: {
-              backgroundColor: '#1a1d2e', borderColor: '#2d3252', borderWidth: 1,
-              titleColor: '#94a3c8', bodyColor: '#e2e8f0',
-              callbacks: { title: ctx => ctx[0].label, label: ctx => `¥${ctx.parsed.y.toLocaleString()}` }
-            },
-            annotation: ipoIdx > 0 ? {
-              annotations: {
-                line1: {
-                  type: 'line', xMin: ipoIdx, xMax: ipoIdx,
-                  borderColor: 'rgba(245,158,11,0.6)', borderWidth: 1, borderDash: [4, 4],
-                  label: { content: '上場', enabled: true, color: '#f59e0b', backgroundColor: 'transparent', font: { size: 10 } }
-                }
-              }
-            } : {}
-          },
-          scales: {
-            x: {
-              ticks: {
-                color: '#8892a4', maxTicksLimit: 8, maxRotation: 0,
-                callback: (v, i) => { const d = labels[i]; return d ? d.slice(2, 7).replace('-', '/') : ''; }
-              }, grid: { color: 'rgba(45,50,82,0.5)' }
-            },
-            y: { ticks: { color: '#8892a4', callback: v => '¥' + v.toLocaleString() }, grid: { color: 'rgba(45,50,82,0.5)' } }
-          }
-        }
-      });
+      const ctx = document.getElementById('priceChart'); if (!ctx) return;
+      const labels = priceHistory.map(d => d.date), closes = priceHistory.map(d => d.close);
+      new Chart(ctx.getContext('2d'), { type: 'line', data: { labels, datasets: [{ label: '終値(円)', data: closes, borderColor: '#4a9eff', backgroundColor: 'rgba(74,158,255,.08)', fill: true, borderWidth: 2, pointRadius: 0, pointHoverRadius: 4, tension: .3 }] }, options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1a1d2e', borderColor: '#2d3252', borderWidth: 1, titleColor: '#94a3c8', bodyColor: '#e2e8f0', callbacks: { label: ctx => `¥${ctx.parsed.y.toLocaleString()}` } } }, scales: { x: { ticks: { color: '#8892a4', maxTicksLimit: 8, maxRotation: 0, callback: (v, i) => { const d = labels[i]; return d ? d.slice(2, 7).replace('-', '/') : ''; } }, grid: { color: 'rgba(45,50,82,.5)' } }, y: { ticks: { color: '#8892a4', callback: v => '¥' + v.toLocaleString() }, grid: { color: 'rgba(45,50,82,.5)' } } } } });
+    }
+
+    // ── PER History Chart ──
+    function drawPerHistory(perHistory) {
+      const ctx = document.getElementById('perChart'); if (!ctx) return;
+      const labels = perHistory.map(h => h.date), values = perHistory.map(h => h.per);
+      const pointColors = values.map(v => v == null ? 'rgba(136,146,164,.5)' : v < 0 ? '#ef4444' : '#22c55e');
+      new Chart(ctx.getContext('2d'), { type: 'line', data: { labels, datasets: [{ label: '予想PER(倍)', data: values, borderColor: '#4a9eff', backgroundColor: 'rgba(74,158,255,.08)', fill: true, borderWidth: 2, pointRadius: 5, pointBackgroundColor: pointColors, pointBorderColor: '#fff', pointBorderWidth: 1.5, tension: .3, spanGaps: true }, { label: '黒字転換ライン', data: labels.map(() => 0), borderColor: 'rgba(255,255,255,.15)', borderWidth: 1, borderDash: [4, 4], pointRadius: 0, fill: false }] }, options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { display: false }, tooltip: { backgroundColor: '#1a1d2e', borderColor: '#2d3252', borderWidth: 1, titleColor: '#94a3c8', bodyColor: '#e2e8f0', callbacks: { label: ctx => { if (ctx.datasetIndex === 1) return null; const v = ctx.parsed.y; return v == null ? 'データなし' : v < 0 ? `PER ${v}倍（赤字）` : `PER ${v}倍`; } } } }, scales: { x: { ticks: { color: '#8892a4', maxTicksLimit: 8, maxRotation: 0 }, grid: { color: 'rgba(45,50,82,.5)' } }, y: { ticks: { color: '#8892a4', callback: v => v === 0 ? '0（黒字転換）' : `${v}倍` }, grid: { color: 'rgba(45,50,82,.5)' } } } } });
     }
   </script>
 </body>
