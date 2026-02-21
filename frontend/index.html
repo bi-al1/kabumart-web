@@ -666,43 +666,207 @@
     /* Manifest */
     .manifest-list {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 10px;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 12px;
       overflow: auto
     }
 
     .manifest-card {
       background: var(--card2);
       border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 12px;
+      border-radius: 12px;
+      padding: 16px;
       text-decoration: none;
       color: var(--text);
-      transition: border-color .2s, transform .1s;
-      display: block
+      transition: border-color .25s, transform .15s, box-shadow .25s;
+      display: block;
+      position: relative;
+      overflow: hidden
+    }
+
+    .manifest-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      opacity: 0;
+      transition: opacity .25s
     }
 
     .manifest-card:hover {
       border-color: var(--accent);
-      transform: translateY(-1px)
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(74, 158, 255, .08)
+    }
+
+    .manifest-card:hover::before {
+      opacity: 1
+    }
+
+    .manifest-card .mcard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px
     }
 
     .manifest-card .mname {
       font-weight: 700;
       color: #fff;
-      font-size: 13px;
-      margin-bottom: 3px
+      font-size: 14px;
+      margin-bottom: 2px;
+      line-height: 1.3
     }
 
     .manifest-card .mcode {
       font-size: 10px;
       color: var(--accent);
-      margin-bottom: 4px
+      margin-bottom: 2px;
+      display: flex;
+      align-items: center;
+      gap: 5px
+    }
+
+    .manifest-card .mindustry {
+      font-size: 10px;
+      color: var(--muted);
+      margin-bottom: 8px
+    }
+
+    .manifest-card .mcatch {
+      font-size: 11px;
+      color: #94a3c8;
+      line-height: 1.5;
+      margin-bottom: 10px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden
+    }
+
+    .manifest-card .mcatch span {
+      color: var(--muted);
+      font-size: 10px
+    }
+
+    /* Score ring */
+    .mscore-ring {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      position: relative
+    }
+
+    .mscore-ring-inner {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      background: var(--card2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column
+    }
+
+    .mscore-val {
+      font-size: 14px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1
+    }
+
+    .mscore-label {
+      font-size: 7px;
+      color: var(--muted);
+      margin-top: 1px
+    }
+
+    /* Axes mini bars */
+    .maxes-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 12px;
+      margin-bottom: 10px
+    }
+
+    .maxe-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px
+    }
+
+    .maxe-label {
+      color: var(--muted);
+      width: 36px;
+      flex-shrink: 0;
+      text-align: right
+    }
+
+    .maxe-bar-bg {
+      flex: 1;
+      height: 4px;
+      background: rgba(255,255,255,.06);
+      border-radius: 2px;
+      overflow: hidden
+    }
+
+    .maxe-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      transition: width .6s ease
+    }
+
+    .maxe-val {
+      font-size: 9px;
+      font-weight: 700;
+      color: #94a3c8;
+      width: 18px;
+      text-align: right
     }
 
     .manifest-card .mdate {
       font-size: 9px;
-      color: var(--muted)
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding-top: 8px;
+      border-top: 1px solid rgba(45, 50, 82, .4)
+    }
+
+    .manifest-card .mcard-loading {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      color: var(--muted);
+      padding: 8px 0
+    }
+
+    .mcard-loading .mini-spinner {
+      width: 12px;
+      height: 12px;
+      border: 1.5px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .7s linear infinite
+    }
+
+    @keyframes mcard-fadein {
+      from { opacity: 0; transform: translateY(6px) }
+      to   { opacity: 1; transform: translateY(0) }
+    }
+
+    .mcard-detail {
+      animation: mcard-fadein .3s ease
     }
 
     /* Loading / Error / Empty */
@@ -1327,6 +1491,26 @@
     }
 
     // ── Manifest ──
+    function scoreColor(s) {
+      if (s >= 8) return 'var(--green)';
+      if (s >= 6) return 'var(--accent)';
+      if (s >= 4) return 'var(--yellow)';
+      return 'var(--red)';
+    }
+    function scoreGrad(s) {
+      if (s >= 8) return 'conic-gradient(var(--green) 0%, var(--green) VAL%, rgba(255,255,255,.08) VAL%)'.replace(/VAL/g, (s/10*100).toFixed(0));
+      if (s >= 6) return 'conic-gradient(var(--accent) 0%, var(--accent) VAL%, rgba(255,255,255,.08) VAL%)'.replace(/VAL/g, (s/10*100).toFixed(0));
+      if (s >= 4) return 'conic-gradient(var(--yellow) 0%, var(--yellow) VAL%, rgba(255,255,255,.08) VAL%)'.replace(/VAL/g, (s/10*100).toFixed(0));
+      return 'conic-gradient(var(--red) 0%, var(--red) VAL%, rgba(255,255,255,.08) VAL%)'.replace(/VAL/g, (s/10*100).toFixed(0));
+    }
+    function axeBarColor(s) {
+      if (s >= 8) return 'var(--green)';
+      if (s >= 5) return 'var(--accent)';
+      if (s >= 3) return 'var(--yellow)';
+      return 'var(--red)';
+    }
+    const AXES_LABELS = { growth: '成長性', stability: '安定性', profitability: '収益性', capacity: '余力', innovation: '新規性' };
+
     async function loadManifest() {
       const el = document.getElementById('manifestList');
       try {
@@ -1338,13 +1522,64 @@
         if (rcEl) rcEl.textContent = `（${stocks.length}）`;
         if (!stocks.length) { el.innerHTML = '<div class="empty-msg">📭 分析レポートなし。KabuMartスクショをClaudeに貼り付けると生成されます。</div>'; return; }
         const sorted = [...stocks].sort((a, b) => (b.analyzed_date ?? '').localeCompare(a.analyzed_date ?? ''));
-        el.innerHTML = sorted.map(s => `<a class="manifest-card" href="${s.url ?? s.file}" data-code="${s.code}">
-      <div class="mname">${s.name}</div>
-      <div class="mcode">${s.code} ${s.kabumart_rank ? `<span class="badge ${rankBadgeColor(s.kabumart_rank)}" style="font-size:10px">${s.kabumart_rank}</span>` : ''}</div>
-      ${s.industry ? `<div style="font-size:11px;color:var(--muted);margin:3px 0">${s.industry}</div>` : ''}
-      ${s.note ? `<div style="font-size:11px;color:#94a3c8;line-height:1.4;margin-bottom:4px">${s.note}</div>` : ''}
-      <div class="mdate">📅 分析日: ${s.analyzed_date ?? '—'}</div>
+        // Render skeleton cards first
+        el.innerHTML = sorted.map(s => `<a class="manifest-card" href="${s.url ?? s.file}" data-code="${s.code}" id="mcard-${s.code}">
+      <div class="mcard-header">
+        <div>
+          <div class="mname">${s.name}</div>
+          <div class="mcode">${s.code} ${s.kabumart_rank ? `<span class="badge ${rankBadgeColor(s.kabumart_rank)}" style="font-size:10px">${s.kabumart_rank}</span>` : ''}</div>
+        </div>
+      </div>
+      <div class="mcard-loading"><div class="mini-spinner"></div>分析データを読み込み中…</div>
+      <div class="mdate">📅 ${s.analyzed_date ?? '—'}</div>
     </a>`).join('');
+        // Fetch detail data for each card
+        sorted.forEach(s => {
+          fetchRender(`/api/stocks/${s.code}/data`).then(d => {
+            const card = document.getElementById(`mcard-${s.code}`);
+            if (!card) return;
+            const scores = d.scores || {};
+            const axes = scores.axes || {};
+            const biz = d.business || {};
+            const comp = d.company || {};
+            const totalScore = scores.total_score ?? 0;
+            const totalRank = scores.total_rank ?? '';
+            // Build axes bars
+            let axesHtml = '';
+            for (const [key, label] of Object.entries(AXES_LABELS)) {
+              const a = axes[key];
+              if (!a) continue;
+              const pct = (a.score / 10 * 100).toFixed(0);
+              axesHtml += `<div class="maxe-row"><span class="maxe-label">${label}</span><div class="maxe-bar-bg"><div class="maxe-bar-fill" style="width:${pct}%;background:${axeBarColor(a.score)}"></div></div><span class="maxe-val">${a.rank}</span></div>`;
+            }
+            // Catchcopy
+            let catchHtml = '';
+            if (biz.catchcopy) {
+              catchHtml = `<div class="mcatch">${biz.catchcopy}</div>`;
+            }
+            // Score ring
+            const ringHtml = `<div class="mscore-ring" style="background:${scoreGrad(totalScore)}">
+              <div class="mscore-ring-inner"><span class="mscore-val">${totalScore}</span><span class="mscore-label">/10</span></div>
+            </div>`;
+            // Industry
+            const indHtml = comp.industry ? `<div class="mindustry">${comp.industry}</div>` : '';
+            // Update header to include ring
+            const headerEl = card.querySelector('.mcard-header');
+            if (headerEl && !headerEl.querySelector('.mscore-ring')) {
+              headerEl.insertAdjacentHTML('beforeend', ringHtml);
+            }
+            // Replace loading with detail
+            const loadingEl = card.querySelector('.mcard-loading');
+            if (loadingEl) {
+              loadingEl.outerHTML = `<div class="mcard-detail">${indHtml}${catchHtml}${axesHtml ? `<div class="maxes-grid">${axesHtml}</div>` : ''}</div>`;
+            }
+          }).catch(() => {
+            const card = document.getElementById(`mcard-${s.code}`);
+            if (!card) return;
+            const loadingEl = card.querySelector('.mcard-loading');
+            if (loadingEl) loadingEl.outerHTML = '';
+          });
+        });
       } catch (e) { el.innerHTML = `<div class="error-msg">⚠️ 分析レポート読み込み失敗<br><small>${e.message}</small></div>`; }
     }
 
