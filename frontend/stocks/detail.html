@@ -897,11 +897,13 @@
       let perBadge = metricBadge(latestPer, v => v > 0 && v < 15, v => v > 0 && v < 25);
       if (latestPer != null && latestPer < 0) perBadge = '<span class="metric-badge m-bad">赤字</span>';
 
-      // Valuation table (PERは左パネルにあるため除外)
-      const valRows = (fin.valuation_table || []).filter(row => !row.label.includes('PER')).map(row => {
+      // Valuation table
+      const valRows = (fin.valuation_table || []).map(row => {
         const cls = row.status === 'good' ? 'val-good' : row.status === 'warn' ? 'val-warn' : row.status === 'bad' ? 'val-bad' : '';
         const badgeHtml = row.badge ? `<span class="badge badge-${row.badge_color || 'gray'}" style="font-size:11px">${row.badge}</span>` : '—';
-        return `<tr><td>${row.label}</td><td class="${cls}">${row.value}</td><td>${row.benchmark || '—'}</td><td>${badgeHtml}</td><td style="font-size:13px;color:var(--muted)">${row.note || ''}</td></tr>`;
+        let valText = row.value;
+        if (row.label.includes('PER')) valText = latestPer != null ? `${latestPer}倍` : 'N/A';
+        return `<tr><td>${row.label}</td><td class="${cls}">${valText}</td><td>${row.benchmark || '—'}</td><td>${badgeHtml}</td><td style="font-size:13px;color:var(--muted)">${row.note || ''}</td></tr>`;
       }).join('');
 
       // Posi/Nega
