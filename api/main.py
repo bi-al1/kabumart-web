@@ -347,7 +347,7 @@ def delete_watchlist(code: str):
 
 @app.post("/api/watchlist/status")
 def update_watchlist_status(req: WatchlistStatusRequest):
-    VALID_STATUSES = {"watching", "interested", "pending"}
+    VALID_STATUSES = {"watching", "interested", "archived"}
     if req.status not in VALID_STATUSES:
         raise HTTPException(status_code=400, detail=f"無効なステータスです: {req.status}")
 

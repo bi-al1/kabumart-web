@@ -138,11 +138,7 @@
   .manifest-card .mcode { font-size: 11px; color: var(--accent); margin-bottom: 6px; }
   .manifest-card .mdate { font-size: 10px; color: var(--muted); }
 
-  /* アーカイブボタン（ウォッチリストカード右上） */
-  .card-archive-btn { position: absolute; top: 10px; right: 10px; background: none; border: none; color: var(--muted); font-size: 14px; cursor: pointer; padding: 2px 4px; border-radius: 4px; line-height: 1; opacity: 0.5; transition: opacity 0.15s, color 0.15s; }
-  .card-archive-btn:hover { opacity: 1; color: var(--accent); }
-  .watch-card { position: relative; }
-  .watch-card .wname { padding-right: 24px; }
+
 
   /* ローディング・エラー */
   .loading { text-align: center; padding: 40px; color: var(--muted); }
@@ -642,7 +638,7 @@ async function loadWatchlist() {
     const data = await fetchRender('/api/watchlist');
     const rawList = data.watchlist || [];
     // アーカイブ済み・即時アーカイブ済みを除外して描画
-    const list = rawList.filter(w => w.status !== 'archived' && !_archivedCodes.has(w.code));
+    const list = rawList.filter(w => w.status !== 'archived');
     watchlistCodesSet = new Set(rawList.map(w => w.code));
     countEl.textContent = `（${list.length} 銘柄）`;
 
@@ -713,7 +709,7 @@ async function loadWatchlist() {
 
       return `
         <${tag} class="watch-card status-${w.status ?? 'watching'}" ${hrefAttr} data-code="${w.code}" style="${reportUrl ? 'text-decoration:none;' : ''}">
-          <button class="card-archive-btn" title="アーカイブ" onclick="event.preventDefault();event.stopPropagation();onArchiveWatchlist('${w.code}')">📦</button>
+
           <div class="wname">${w.name}</div>
           <div class="wcode">
             ${w.code}
@@ -820,7 +816,6 @@ async function onWatchlistStatusClick(opt) {
     if (newStatus === 'archived') {
       const card = badgeEl.closest('.watch-card');
       if (card) card.remove();
-      _archivedCodes.add(code);
       return;
     }
 
@@ -844,28 +839,7 @@ async function onWatchlistStatusClick(opt) {
   }
 }
 
-// ── アーカイブ処理 ──────────────────────────────────────────
-// 即時アーカイブ済みcodeセット（loadAll後にも再除去するためのキャッシュ）
-const _archivedCodes = new Set();
 
-async function onArchiveWatchlist(code) {
-  // カードを即座に非表示
-  const card = document.querySelector(`.watch-card[data-code="${code}"]`);
-  if (card) card.remove();
-  _archivedCodes.add(code);
-
-  try {
-    const res = await fetch(`${RENDER_BASE}/api/watchlist/status`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code, status: 'archived' }),
-    });
-    const json = await res.json();
-    if (!json.ok) throw new Error(json.detail ?? json.error);
-  } catch(e) {
-    alert(`アーカイブ失敗: ${e.message}`);
-  }
-}
 
 // ── PER更新 ──────────────────────────────────────────────
 async function onUpdatePer() {
