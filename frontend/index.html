@@ -688,8 +688,8 @@
     /* Manifest */
     .manifest-list {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+      gap: 14px;
       overflow: auto
     }
 
@@ -697,7 +697,7 @@
       background: var(--card2);
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 16px;
+      padding: 22px;
       text-decoration: none;
       color: var(--text);
       transition: border-color .25s, transform .15s, box-shadow .25s;
@@ -732,52 +732,54 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 8px
+      margin-bottom: 12px
     }
 
     .manifest-card .mname {
       font-weight: 700;
       color: #fff;
-      font-size: 14px;
-      margin-bottom: 2px;
+      font-size: 18px;
+      margin-bottom: 4px;
       line-height: 1.3
     }
 
     .manifest-card .mcode {
-      font-size: 10px;
+      font-size: 12px;
       color: var(--accent);
-      margin-bottom: 2px;
+      margin-bottom: 4px;
       display: flex;
       align-items: center;
-      gap: 5px
+      gap: 6px;
+      flex-wrap: wrap
     }
 
     .manifest-card .mindustry {
-      font-size: 10px;
+      font-size: 12px;
       color: var(--muted);
-      margin-bottom: 8px
+      margin-bottom: 10px
     }
 
     .manifest-card .mcatch {
-      font-size: 11px;
+      font-size: 13px;
       color: #94a3c8;
-      line-height: 1.5;
-      margin-bottom: 10px;
+      line-height: 1.6;
+      margin-bottom: 12px;
       display: -webkit-box;
       -webkit-line-clamp: 2;
+      line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden
     }
 
     .manifest-card .mcatch span {
       color: var(--muted);
-      font-size: 10px
+      font-size: 11px
     }
 
     /* Score ring */
     .mscore-ring {
-      width: 48px;
-      height: 48px;
+      width: 60px;
+      height: 60px;
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -787,8 +789,8 @@
     }
 
     .mscore-ring-inner {
-      width: 38px;
-      height: 38px;
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
       background: var(--card2);
       display: flex;
@@ -798,45 +800,45 @@
     }
 
     .mscore-val {
-      font-size: 14px;
+      font-size: 18px;
       font-weight: 800;
       color: #fff;
       line-height: 1
     }
 
     .mscore-label {
-      font-size: 7px;
+      font-size: 9px;
       color: var(--muted);
-      margin-top: 1px
+      margin-top: 2px
     }
 
     /* Axes mini bars */
     .maxes-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 4px 12px;
-      margin-bottom: 10px
+      gap: 6px 16px;
+      margin-bottom: 12px
     }
 
     .maxe-row {
       display: flex;
       align-items: center;
-      gap: 6px;
-      font-size: 10px
+      gap: 8px;
+      font-size: 12px
     }
 
     .maxe-label {
       color: var(--muted);
-      width: 36px;
+      width: 42px;
       flex-shrink: 0;
       text-align: right
     }
 
     .maxe-bar-bg {
       flex: 1;
-      height: 4px;
+      height: 6px;
       background: rgba(255,255,255,.06);
-      border-radius: 2px;
+      border-radius: 3px;
       overflow: hidden
     }
 
@@ -847,28 +849,28 @@
     }
 
     .maxe-val {
-      font-size: 9px;
+      font-size: 11px;
       font-weight: 700;
       color: #94a3c8;
-      width: 18px;
+      width: 24px;
       text-align: right
     }
 
     .manifest-card .mdate {
-      font-size: 9px;
+      font-size: 11px;
       color: var(--muted);
       display: flex;
       align-items: center;
-      gap: 4px;
-      padding-top: 8px;
+      gap: 5px;
+      padding-top: 10px;
       border-top: 1px solid rgba(45, 50, 82, .4)
     }
 
     .manifest-card .mcard-loading {
       display: flex;
       align-items: center;
-      gap: 6px;
-      font-size: 10px;
+      gap: 8px;
+      font-size: 12px;
       color: var(--muted);
       padding: 8px 0
     }
