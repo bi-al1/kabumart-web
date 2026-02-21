@@ -1297,7 +1297,7 @@
         <td>¥${fmt(t.price)}</td>
         <td>${totalAmt}</td>
         <td>${profitCell}</td>
-        <td><button class="sell-btn" style="font-size:10px;padding:2px 8px;border-color:rgba(136,146,164,0.3);color:var(--muted);" onclick="onDeleteTrade(${t._origIdx},'${t.name}','${t.action === 'buy' ? '買' : '売'}',${t.shares},'${t.date}')">🗑</button></td>
+        <td><button class="sell-btn" data-trade-idx="${t._origIdx}" data-trade-name="${t.name}" data-trade-action="${t.action === 'buy' ? '買' : '売'}" data-trade-shares="${t.shares}" data-trade-date="${t.date}" onclick="onDeleteTrade(this)">削除</button></td>
       </tr>`;
       }).join('');
 
@@ -1312,10 +1312,17 @@
     </table>`;
     }
 
-    async function onDeleteTrade(index, name, action, shares, date) {
+    async function onDeleteTrade(btn) {
+      const idx = btn.dataset.tradeIdx;
+      const name = btn.dataset.tradeName;
+      const action = btn.dataset.tradeAction;
+      const shares = btn.dataset.tradeShares;
+      const date = btn.dataset.tradeDate;
       if (!confirm(`${date} の ${name} ${action}${shares}株 を履歴から削除しますか？\n\n※ 保有銘柄は残りの履歴から自動再計算されます。`)) return;
+      btn.disabled = true;
+      btn.textContent = '...';
       try {
-        const res = await fetch(`${RENDER_BASE}/api/portfolio/trade/${index}`, { method: 'DELETE' });
+        const res = await fetch(`${RENDER_BASE}/api/portfolio/trade/${idx}`, { method: 'DELETE' });
         if (!res.ok) {
           const j = await res.json().catch(() => ({}));
           throw new Error(j.detail ?? '削除に失敗しました');
@@ -1323,6 +1330,8 @@
         await loadPortfolio();
       } catch (e) {
         alert(`削除失敗: ${e.message}`);
+        btn.disabled = false;
+        btn.textContent = '削除';
       }
     }
 
