@@ -956,9 +956,9 @@
 
     .empty-msg {
       color: var(--muted);
-      font-size: 12px;
+      font-size: 15px;
       text-align: center;
-      padding: 20px
+      padding: 24px
     }
 
     /* Modal */
@@ -1224,8 +1224,8 @@
               <button class="btn btn-accent" id="healthRunBtn" onclick="onRunHealthCheck()">🩺 実行</button>
             </div>
             <div id="healthContent" style="overflow:auto;flex:1">
-              <div class="empty-msg" style="font-size:11px">🩺 「実行」ボタンで診断開始<br><span
-                  style="font-size:10px">yfinanceから取得するため少し時間がかかります</span></div>
+              <div class="empty-msg">🩺 「実行」ボタンで診断開始<br><span
+                  style="font-size:13px">yfinanceから取得するため少し時間がかかります</span></div>
             </div>
           </div>
         </div>
@@ -1421,11 +1421,11 @@
             const hName = hUrl ? `<a href="${hUrl}" class="stock-link" style="font-weight:700"><span class="link-icon">🔗</span>${r.name}</a>` : `<strong style="color:#fff">${r.name}</strong>`;
             return `<div class="health-row">
           <div style="display:flex;justify-content:space-between;align-items:center">
-            <div>${hName} <span style="font-size:11px;color:var(--muted)">${r.code}</span></div>
-            <span style="font-weight:700;color:${col};font-size:12px">${r.alert?.label ?? '—'}</span>
+            <div>${hName} <span style="font-size:13px;color:var(--muted)">${r.code}</span></div>
+            <span style="font-weight:700;color:${col};font-size:14px">${r.alert?.label ?? '—'}</span>
           </div>
-          <div style="font-size:10px;color:#94a3c8;margin-top:4px">${r.alert?.reason ?? ''}</div>
-          <div style="display:flex;gap:12px;margin-top:4px;font-size:10px">
+          <div style="font-size:12px;color:#94a3c8;margin-top:4px">${r.alert?.reason ?? ''}</div>
+          <div style="display:flex;gap:12px;margin-top:4px;font-size:12px">
             <span>RSI ${tech.rsi ?? '—'}</span>
             <span>${tech.death_cross ? '💀 DC' : tech.golden_cross ? '✨ GC' : 'SMA —'}</span>
             <span>${r.current_price ? '¥' + fmt(r.current_price) : '—'}</span>
