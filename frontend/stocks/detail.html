@@ -892,6 +892,11 @@
       const segCards = (biz.segments || []).map(s => `<div class="seg-card${s.highlight ? ' highlight' : ''}">${s.icon ? `<h4>${s.icon} ${s.name}</h4>` : `<h4>${s.name}</h4>`}<p>${s.description || ''}</p></div>`).join('');
       const tagBadges = (biz.tags || []).map(t => `<span class="badge badge-blue">${t}</span>`).join('');
 
+      // PER metric — per_historyの最新値を優先（PER更新後は最新が反映される）
+      const latestPer = wlEntry?.per_history?.length ? wlEntry.per_history[wlEntry.per_history.length - 1].per : fin.per;
+      let perBadge = metricBadge(latestPer, v => v > 0 && v < 15, v => v > 0 && v < 25);
+      if (latestPer != null && latestPer < 0) perBadge = '<span class="metric-badge m-bad">赤字</span>';
+
       // Valuation table
       const valRows = (fin.valuation_table || []).map(row => {
         const cls = row.status === 'good' ? 'val-good' : row.status === 'warn' ? 'val-warn' : row.status === 'bad' ? 'val-bad' : '';
@@ -909,11 +914,6 @@
       const strengthItems = (verdict.strengths || []).map(s => `<div class="verdict-item"><span class="icon">${s.icon || '💪'}</span><span><strong>${s.title}</strong>：${s.text}</span></div>`).join('');
       const riskItems = (verdict.risks || []).map(r => `<div class="verdict-item"><span class="icon">${r.icon || '⚠️'}</span><span><strong>${r.title}</strong>：${r.text}</span></div>`).join('');
       const links = (d.links || []).map(l => `<a href="${l.url}" target="_blank" style="color:var(--accent);font-size:11px">${l.label}</a>`).join(' / ');
-
-      // PER metric — per_historyの最新値を優先（PER更新後は最新が反映される）
-      const latestPer = wlEntry?.per_history?.length ? wlEntry.per_history[wlEntry.per_history.length - 1].per : fin.per;
-      let perBadge = metricBadge(latestPer, v => v > 0 && v < 15, v => v > 0 && v < 25);
-      if (latestPer != null && latestPer < 0) perBadge = '<span class="metric-badge m-bad">赤字</span>';
 
       const html = `
 <div class="layout">
