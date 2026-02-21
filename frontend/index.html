@@ -948,7 +948,8 @@
       <button class="tab-btn active" data-tab="portfolio" onclick="switchTab('portfolio')">ポートフォリオ</button>
       <button class="tab-btn" data-tab="watchlist" onclick="switchTab('watchlist')">ウォッチリスト <span id="watchlistCount"
           style="font-size:10px;color:var(--muted)"></span></button>
-      <button class="tab-btn" data-tab="reports" onclick="switchTab('reports')">分析レポート</button>
+      <button class="tab-btn" data-tab="reports" onclick="switchTab('reports')">分析レポート <span id="reportsCount"
+          style="font-size:10px;color:var(--muted)"></span></button>
     </div>
 
     <!-- TAB 1: Portfolio -->
@@ -1072,6 +1073,11 @@
     function fmtPct(n) { return n == null ? '—' : `${n >= 0 ? '+' : ''}${Number(n).toFixed(1)}%`; }
     function gainClass(n) { return n == null ? 'neutral' : n >= 0 ? 'positive' : 'negative'; }
     function rankBadgeColor(r) { return { S: 'badge-green', 'A+': 'badge-green', A: 'badge-green', 'B+': 'badge-blue', B: 'badge-blue', C: 'badge-orange', D: 'badge-red', E: 'badge-red', F: 'badge-red' }[r] || 'badge-gray'; }
+    function stockNameHtml(code, name) {
+      const url = manifestUrlMap[code];
+      if (url) return `<a href="${url}" style="text-decoration:none;color:#fff;display:flex;align-items:center;gap:4px"><span class="stock-name">${name}</span><span style="font-size:9px;color:var(--accent)">📊</span></a><div class="stock-code">${code}</div>`;
+      return `<div class="stock-name">${name}</div><div class="stock-code">${code}</div>`;
+    }
 
     // ── Main Load ──
     let healthData = null;
@@ -1128,7 +1134,7 @@
         const alertLevel = healthData?.results?.find(r => r.code === h.code)?.alert;
         const alertBadge = alertLevel ? `<span class="badge badge-${alertLevel.level === 'green' ? 'green' : alertLevel.level === 'yellow' ? 'orange' : alertLevel.level === 'orange' ? 'orange' : 'red'}" style="font-size:9px">${alertLevel.label}</span>` : '';
         return `<tr>
-      <td><div class="stock-name">${h.name}</div><div class="stock-code">${h.code}</div></td>
+      <td>${stockNameHtml(h.code, h.name)}</td>
       <td>${fmt(h.shares)}株</td><td>¥${fmt(h.avg_cost)}</td>
       <td>${h.current_price ? '¥' + fmt(h.current_price) : '<span style="color:var(--muted)">—</span>'}</td>
       <td class="${gainClass(h.gain_loss)}">${h.gain_loss != null ? (h.gain_loss >= 0 ? '' : '-') + '¥' + fmt(Math.abs(h.gain_loss)) : '—'}</td>
@@ -1154,7 +1160,7 @@
         if (isSell && t.profit != null) { const c = t.profit >= 0 ? 'positive' : 'negative'; profit = `<span class="${c}">${t.profit >= 0 ? '' : '-'}¥${fmt(Math.abs(t.profit))}</span>`; }
         return `<tr>
       <td style="color:var(--muted);font-size:11px">${t.date}</td>
-      <td><div class="stock-name">${t.name}</div><div class="stock-code">${t.code}</div></td>
+      <td>${stockNameHtml(t.code, t.name)}</td>
       <td>${tag}</td><td>${fmt(t.shares)}株</td><td>¥${fmt(t.price)}</td>
       <td>${profit}</td>
       <td><button class="sell-btn" data-trade-idx="${t._origIdx}" data-trade-name="${t.name}" data-trade-action="${isSell ? '売' : '買'}" data-trade-shares="${t.shares}" data-trade-date="${t.date}" onclick="onDeleteTrade(this)">削除</button></td>
@@ -1194,9 +1200,11 @@
           html += data.results.map(r => {
             const tech = r.technical || {};
             const col = { green: 'var(--green)', yellow: 'var(--yellow)', orange: '#fb923c', red: 'var(--red)' }[r.alert?.level] || 'var(--muted)';
+            const hUrl = manifestUrlMap[r.code];
+            const hName = hUrl ? `<a href="${hUrl}" style="text-decoration:none;color:#fff;font-weight:700">${r.name} <span style="font-size:9px;color:var(--accent)">📊</span></a>` : `<strong style="color:#fff">${r.name}</strong>`;
             return `<div class="health-row">
           <div style="display:flex;justify-content:space-between;align-items:center">
-            <div><strong style="color:#fff">${r.name}</strong> <span style="font-size:10px;color:var(--muted)">${r.code}</span></div>
+            <div>${hName} <span style="font-size:10px;color:var(--muted)">${r.code}</span></div>
             <span style="font-weight:700;color:${col};font-size:11px">${r.alert?.label ?? '—'}</span>
           </div>
           <div style="font-size:10px;color:#94a3c8;margin-top:4px">${r.alert?.reason ?? ''}</div>
@@ -1326,11 +1334,15 @@
         const stocks = data.stocks || [];
         manifestUrlMap = {};
         stocks.forEach(s => { if (s.url || s.file) manifestUrlMap[s.code] = s.url ?? s.file; });
+        const rcEl = document.getElementById('reportsCount');
+        if (rcEl) rcEl.textContent = `（${stocks.length}）`;
         if (!stocks.length) { el.innerHTML = '<div class="empty-msg">📭 分析レポートなし。KabuMartスクショをClaudeに貼り付けると生成されます。</div>'; return; }
         const sorted = [...stocks].sort((a, b) => (b.analyzed_date ?? '').localeCompare(a.analyzed_date ?? ''));
-        el.innerHTML = sorted.map(s => `<a class="manifest-card" href="${s.url ?? s.file}" target="_blank" data-code="${s.code}">
+        el.innerHTML = sorted.map(s => `<a class="manifest-card" href="${s.url ?? s.file}" data-code="${s.code}">
       <div class="mname">${s.name}</div>
-      <div class="mcode">${s.code} ${s.kabumart_rank ? `<span class="badge ${rankBadgeColor(s.kabumart_rank)}" style="font-size:9px">${s.kabumart_rank}</span>` : ''}</div>
+      <div class="mcode">${s.code} ${s.kabumart_rank ? `<span class="badge ${rankBadgeColor(s.kabumart_rank)}" style="font-size:10px">${s.kabumart_rank}</span>` : ''}</div>
+      ${s.industry ? `<div style="font-size:11px;color:var(--muted);margin:3px 0">${s.industry}</div>` : ''}
+      ${s.note ? `<div style="font-size:11px;color:#94a3c8;line-height:1.4;margin-bottom:4px">${s.note}</div>` : ''}
       <div class="mdate">📅 分析日: ${s.analyzed_date ?? '—'}</div>
     </a>`).join('');
       } catch (e) { el.innerHTML = `<div class="error-msg">⚠️ 分析レポート読み込み失敗<br><small>${e.message}</small></div>`; }
