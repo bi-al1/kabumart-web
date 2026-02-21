@@ -1,432 +1,1082 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>銘柄分析ダッシュボード</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<style>
-  :root {
-    --bg: #0f1117; --card: #1a1d2e; --card2: #22263a;
-    --accent: #4a9eff; --accent2: #7c5cfc;
-    --green: #22c55e; --red: #ef4444; --yellow: #f59e0b;
-    --text: #e2e8f0; --muted: #8892a4; --border: #2d3252;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: var(--bg); color: var(--text); font-family: 'Hiragino Sans', 'Meiryo', sans-serif; font-size: 14px; line-height: 1.6; }
-  .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
-
-  /* 戻るバー */
-  .back-bar { position: sticky; top: 0; z-index: 200; background: rgba(15,17,23,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid #2d3252; padding: 8px 20px; display: flex; align-items: center; justify-content: space-between; }
-  .back-btn { display: inline-flex; align-items: center; gap: 6px; color: #4a9eff; text-decoration: none; font-size: 13px; font-weight: 600; }
-  .back-btn:hover { opacity: 0.8; }
-  #backBarStatus { display: flex; align-items: center; gap: 8px; }
-
-  /* ヘッダー */
-  .header-card { background: linear-gradient(135deg, #1a1d2e 0%, #0f1a3a 100%); border: 1px solid var(--border); border-radius: 16px; padding: 28px; margin-bottom: 20px; }
-  .header-top { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; }
-  .company-info h1 { font-size: 28px; font-weight: 700; color: #fff; margin-bottom: 4px; }
-  .company-meta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
-  .badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-  .badge-blue   { background: rgba(74,158,255,0.15);  color: var(--accent);  border: 1px solid rgba(74,158,255,0.3); }
-  .badge-purple { background: rgba(124,92,252,0.15);  color: #a78bfa;        border: 1px solid rgba(124,92,252,0.3); }
-  .badge-gray   { background: rgba(136,146,164,0.15); color: var(--muted);   border: 1px solid rgba(136,146,164,0.3); }
-  .badge-green  { background: rgba(34,197,94,0.15);   color: var(--green);   border: 1px solid rgba(34,197,94,0.3); }
-  .badge-orange { background: rgba(245,158,11,0.15);  color: var(--yellow);  border: 1px solid rgba(245,158,11,0.3); }
-  .badge-red    { background: rgba(239,68,68,0.15);   color: var(--red);     border: 1px solid rgba(239,68,68,0.3); }
-  .catchcopy { margin-top: 14px; font-size: 16px; color: #94a3c8; font-style: italic; }
-  .catchcopy span { color: var(--accent); font-weight: 600; }
-  .data-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
-
-  /* セクション共通 */
-  .section-title { font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-  .section-title::before { content: ''; display: block; width: 4px; height: 20px; background: var(--accent); border-radius: 2px; }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
-  .section { margin-bottom: 24px; }
-
-  /* ビジネスモデル */
-  .biz-text p { margin-bottom: 12px; color: #cbd5e1; }
-  .biz-text p:last-child { margin-bottom: 0; }
-  .segment-card { background: var(--card2); border-radius: 10px; padding: 14px; margin-bottom: 10px; }
-  .segment-card h4 { font-size: 13px; font-weight: 700; color: var(--accent); margin-bottom: 6px; }
-  .segment-card p { font-size: 12px; color: var(--muted); line-height: 1.5; }
-  .tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
-
-  /* KabuMartスコア */
-  .score-section { display: grid; grid-template-columns: 220px 1fr; gap: 20px; align-items: center; }
-  .score-circle-wrap { display: flex; flex-direction: column; align-items: center; }
-  .score-circle { width: 140px; height: 140px; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; margin-bottom: 12px; }
-  .score-circle::after { content: ''; position: absolute; width: 110px; height: 110px; border-radius: 50%; background: var(--card); }
-  .score-inner { position: relative; z-index: 1; text-align: center; }
-  .score-val { font-size: 36px; font-weight: 800; color: #fff; line-height: 1; }
-  .score-max { font-size: 14px; color: var(--muted); }
-  .rank-badge-score { display: inline-block; padding: 4px 16px; border-radius: 20px; font-size: 18px; font-weight: 800; margin-top: 4px; }
-  .axis-list { display: flex; flex-direction: column; gap: 10px; }
-  .axis-item { display: flex; align-items: center; gap: 10px; }
-  .axis-label { width: 80px; font-size: 12px; color: var(--muted); }
-  .axis-bar-wrap { flex: 1; height: 8px; background: var(--card2); border-radius: 4px; overflow: hidden; }
-  .axis-bar { height: 100%; border-radius: 4px; }
-  .axis-val { width: 30px; font-size: 13px; font-weight: 700; color: #fff; text-align: right; }
-  .axis-rank { width: 40px; }
-
-  /* ゲージ */
-  .gauge-wrap { display: flex; flex-direction: column; align-items: center; width: 100%; }
-  .gauge-label { font-size: 13px; color: var(--muted); margin-bottom: 8px; text-align: center; width: 100%; }
-  .gauge-svg { width: 120px; height: 70px; display: block; margin: 0 auto; }
-  .gauge-val { font-size: 18px; font-weight: 800; color: #fff; text-align: center; margin-top: 4px; width: 100%; display: block; }
-  .gauge-note { font-size: 11px; color: var(--muted); text-align: center; margin-top: 2px; width: 100%; display: block; }
-  .gauge-tooltip { font-size: 11px; color: #94a3c8; text-align: center; margin-top: 6px; padding: 6px 8px; background: var(--card2); border-radius: 6px; line-height: 1.4; width: 100%; }
-
-  /* バリュエーションテーブル */
-  .val-table { width: 100%; border-collapse: collapse; }
-  .val-table th { font-size: 11px; color: var(--muted); padding: 6px 8px; text-align: left; border-bottom: 1px solid var(--border); }
-  .val-table td { font-size: 13px; padding: 7px 8px; border-bottom: 1px solid rgba(45,50,82,0.5); }
-  .val-table tr:last-child td { border-bottom: none; }
-  .val-good { color: var(--green); } .val-warn { color: var(--yellow); } .val-bad { color: var(--red); }
-
-  /* ポジネガ */
-  .posi-nega { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-  .posi-card { background: rgba(34,197,94,0.06); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 14px; margin-bottom: 10px; }
-  .nega-card { background: rgba(239,68,68,0.06); border: 1px solid rgba(239,68,68,0.2); border-radius: 10px; padding: 14px; margin-bottom: 10px; }
-  .pn-title { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
-  .posi-card .pn-title { color: var(--green); } .nega-card .pn-title { color: var(--red); }
-  .pn-explain { font-size: 12px; color: #94a3c8; line-height: 1.5; margin-top: 6px; padding: 6px 8px; background: rgba(255,255,255,0.03); border-radius: 6px; }
-  .pn-source { font-size: 10px; color: var(--muted); margin-top: 6px; }
-  .impact { display: inline-block; padding: 1px 7px; border-radius: 10px; font-size: 10px; font-weight: 700; margin-left: 6px; }
-  .impact-high { background: rgba(239,68,68,0.2); color: #f87171; }
-  .impact-mid  { background: rgba(245,158,11,0.2); color: #fbbf24; }
-  .impact-low  { background: rgba(74,158,255,0.2); color: var(--accent); }
-
-  /* 総合評価 */
-  .verdict-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
-  .verdict-item { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 10px; font-size: 13px; }
-  .verdict-item .icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
-  .summary-box { background: linear-gradient(135deg, rgba(74,158,255,0.1), rgba(124,92,252,0.1)); border: 1px solid rgba(74,158,255,0.3); border-radius: 12px; padding: 18px; }
-  .summary-box h4 { color: var(--accent); font-size: 14px; font-weight: 700; margin-bottom: 10px; }
-  .summary-box p { color: #cbd5e1; font-size: 13px; line-height: 1.7; }
-
-  /* フッター */
-  .footer { text-align: center; padding: 24px; color: var(--muted); font-size: 11px; border-top: 1px solid var(--border); margin-top: 32px; line-height: 1.8; }
-
-  /* back-bar ウォッチリスト追加ボタン */
-  .wl-add-btn { display: inline-flex; align-items: center; gap: 5px; padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; border: 1px solid rgba(74,158,255,0.4); background: rgba(74,158,255,0.1); color: var(--accent); transition: all 0.2s; }
-  .wl-add-btn:hover { background: rgba(74,158,255,0.2); }
-  .wl-add-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .wl-add-btn.added { background: rgba(34,197,94,0.15); color: var(--green); border-color: rgba(34,197,94,0.4); }
-
-  /* ステータスセレクター */
-  .status-selector { position: relative; display: inline-flex; align-items: center; }
-  .status-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; border: 1px solid; transition: all 0.2s; background: none; }
-  .status-btn.st-watching   { color: var(--accent); border-color: rgba(74,158,255,0.4); background: rgba(74,158,255,0.1); }
-  .status-btn.st-interested { color: var(--yellow); border-color: rgba(245,158,11,0.4); background: rgba(245,158,11,0.1); }
-  .status-btn.st-archived   { color: var(--muted);  border-color: rgba(136,146,164,0.4); background: rgba(136,146,164,0.1); }
-  .status-btn:hover { opacity: 0.8; }
-  .status-dropdown { position: absolute; top: calc(100% + 8px); right: 0; background: #1a1d2e; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; min-width: 150px; box-shadow: 0 8px 24px rgba(0,0,0,0.4); display: none; z-index: 300; }
-  .status-dropdown.open { display: block; }
-  .status-option { display: flex; align-items: center; gap: 8px; padding: 10px 14px; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 0.15s; }
-  .status-option:hover { background: rgba(255,255,255,0.06); }
-  .status-option.active { background: rgba(74,158,255,0.1); }
-  .status-saving { font-size: 11px; color: var(--muted); }
-  .status-toast { font-size: 12px; padding: 6px 12px; border-radius: 8px; font-weight: 600; }
-  .status-toast.ok  { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
-  .status-toast.err { background: rgba(239,68,68,0.15); color: var(--red);   border: 1px solid rgba(239,68,68,0.3); }
-  /* アーカイブボタン（back-bar内） */
-  .watchlist-archive-btn { background: none; border: none; color: var(--muted); font-size: 13px; cursor: pointer; padding: 4px 8px; border-radius: 6px; opacity: 0.6; transition: opacity 0.15s, color 0.15s; line-height: 1; }
-  .watchlist-archive-btn:hover { opacity: 1; color: var(--accent); }
-
-  /* PER推移チャート */
-  .per-chart-container { position: relative; height: 200px; }
-
-  /* ローディング / エラー */
-  .loading { display: flex; align-items: center; justify-content: center; min-height: 60vh; flex-direction: column; gap: 16px; }
-  .spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .error-box { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); border-radius: 12px; padding: 24px; text-align: center; max-width: 480px; margin: 60px auto; }
-  .error-box h2 { color: var(--red); margin-bottom: 8px; }
-  .error-box p { color: var(--muted); font-size: 13px; }
-
-  /* チャート */
-  .chart-container { position: relative; height: 240px; }
-  .radar-container { position: relative; height: 280px; max-width: 320px; margin: 0 auto; }
-
-  /* レスポンシブ */
-  @media (max-width: 768px) {
-    .grid-2, .grid-3, .posi-nega, .verdict-grid, .score-section { grid-template-columns: 1fr; }
-  }
-</style>
-</head>
-<body>
-
-<div class="back-bar">
-  <a class="back-btn" href="../index.html">← ダッシュボードに戻る</a>
-  <div id="backBarStatus"></div>
-</div>
-
-<!-- ローディング表示 -->
-<div id="loading" class="loading">
-  <div class="spinner"></div>
-  <div style="color:var(--muted);">データを読み込んでいます...</div>
-</div>
-
-<!-- エラー表示 -->
-<div id="error" style="display:none;">
-  <div class="error-box">
-    <h2>⚠️ データが見つかりません</h2>
-    <p id="errorMsg">銘柄データの読み込みに失敗しました。</p>
-    <p style="margin-top:12px;"><a href="../index.html" style="color:var(--accent);">← ダッシュボードに戻る</a></p>
-  </div>
-</div>
-
-<!-- メインコンテンツ（JS で生成） -->
-<div id="main" style="display:none;"></div>
-
-
-<script>
-// ============================================================
-// データ取得 & レンダリング
-// ============================================================
-// 静的JSON（分析データ）→ stok-analyzer リポジトリの GitHub Raw から取得（push直後に反映）
-const GITHUB_RAW = 'https://raw.githubusercontent.com/bi-al1/stok-analyzer/master';
-const RENDER_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
-  ? 'http://localhost:8000'
-  : 'https://stock-dashboard-rif1.onrender.com';
-
-// URLパラメータから銘柄コードを取得
-const params = new URLSearchParams(location.search);
-const code = params.get('code');
-
-if (!code) {
-  showError('URLに ?code=XXXX を指定してください。', '');
-} else {
-  document.title = `${code} 分析ダッシュボード`;
-  loadStock(code);
-}
-
-async function loadStock(code) {
-  try {
-    const ts = Date.now();
-    // 分析JSON と watchlist.json を並行取得
-    const [stockRes, wlRes] = await Promise.all([
-      fetch(`${GITHUB_RAW}/webapp/data/stocks/${code.toUpperCase()}.json?_=${ts}`),
-      fetch(`${RENDER_BASE}/api/watchlist`),  // キャッシュなしで最新を取得
-    ]);
-    if (!stockRes.ok) throw new Error(`HTTP ${stockRes.status}`);
-    const d = await stockRes.json();
-
-    // watchlist エントリを取得（なければ null）
-    let wlEntry = null;
-    if (wlRes.ok) {
-      const wl = await wlRes.json();
-      wlEntry = (wl.watchlist || []).find(w => w.code === code.toUpperCase()) ?? null;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>銘柄分析ダッシュボード</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --card: #1a1d2e;
+      --card2: #22263a;
+      --accent: #4a9eff;
+      --accent2: #7c5cfc;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #f59e0b;
+      --text: #e2e8f0;
+      --muted: #8892a4;
+      --border: #2d3252;
     }
 
-    render(d, wlEntry);
-  } catch (e) {
-    showError(`銘柄コード "${code}" のデータが見つかりません。`, e.message);
-  }
-}
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-function showError(msg, detail) {
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('error').style.display = 'block';
-  document.getElementById('errorMsg').textContent = msg + (detail ? ` (${detail})` : '');
-}
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Hiragino Sans', 'Meiryo', sans-serif;
+      font-size: 14px;
+      line-height: 1.6;
+    }
 
-// ============================================================
-// ランクに応じた色
-// ============================================================
-function rankColor(rank) {
-  const map = { 'SSS':'#22c55e','SS':'#4ade80','S':'#86efac','A+':'#4a9eff','A':'#60a5fa','B+':'#a78bfa','B':'#c4b5fd','C':'#f59e0b','D':'#fb923c','E':'#ef4444','F':'#ef4444' };
-  return map[rank] || '#8892a4';
-}
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 24px 16px;
+    }
 
-function rankBadgeStyle(rank) {
-  const c = rankColor(rank);
-  return `display:inline-block;padding:4px 16px;border-radius:20px;font-size:18px;font-weight:800;background:${c}22;color:${c};border:1px solid ${c};margin-top:4px;`;
-}
+    /* 戻るバー */
+    .back-bar {
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      background: rgba(15, 17, 23, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid #2d3252;
+      padding: 8px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
 
-// KabuMartスコア（0〜10）を円グラフのdegreeに変換
-function scoreToDeg(score) {
-  return Math.min((score / 10) * 360, 360);
-}
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: #4a9eff;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+    }
 
-// 軸スコアのバー色
-function axisBarColor(rank) {
-  if (['SSS','SS','S'].includes(rank)) return '#22c55e';
-  if (['A+','A'].includes(rank)) return '#4a9eff';
-  if (['B+','B'].includes(rank)) return '#a78bfa';
-  if (['C'].includes(rank)) return '#f59e0b';
-  return '#ef4444';
-}
+    .back-btn:hover {
+      opacity: 0.8;
+    }
 
-// ============================================================
-// PER ゲージ SVG
-// ============================================================
-function perGaugeSVG(per) {
-  if (per === null || per === undefined || per < 0) {
-    return `<svg class="gauge-svg" viewBox="0 0 120 70">
+    #backBarStatus {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* ヘッダー */
+    .header-card {
+      background: linear-gradient(135deg, #1a1d2e 0%, #0f1a3a 100%);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 20px;
+    }
+
+    .header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .company-info h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .company-meta {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .badge-blue {
+      background: rgba(74, 158, 255, 0.15);
+      color: var(--accent);
+      border: 1px solid rgba(74, 158, 255, 0.3);
+    }
+
+    .badge-purple {
+      background: rgba(124, 92, 252, 0.15);
+      color: #a78bfa;
+      border: 1px solid rgba(124, 92, 252, 0.3);
+    }
+
+    .badge-gray {
+      background: rgba(136, 146, 164, 0.15);
+      color: var(--muted);
+      border: 1px solid rgba(136, 146, 164, 0.3);
+    }
+
+    .badge-green {
+      background: rgba(34, 197, 94, 0.15);
+      color: var(--green);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .badge-orange {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--yellow);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .badge-red {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--red);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .catchcopy {
+      margin-top: 14px;
+      font-size: 16px;
+      color: #94a3c8;
+      font-style: italic;
+    }
+
+    .catchcopy span {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .data-badges {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    /* セクション共通 */
+    .section-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::before {
+      content: '';
+      display: block;
+      width: 4px;
+      height: 20px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+    }
+
+    .section {
+      margin-bottom: 24px;
+    }
+
+    /* ビジネスモデル */
+    .biz-text p {
+      margin-bottom: 12px;
+      color: #cbd5e1;
+    }
+
+    .biz-text p:last-child {
+      margin-bottom: 0;
+    }
+
+    .segment-card {
+      background: var(--card2);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+
+    .segment-card h4 {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+
+    .segment-card p {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .tags {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    /* KabuMartスコア */
+    .score-section {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .score-circle-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .score-circle {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      margin-bottom: 12px;
+    }
+
+    .score-circle::after {
+      content: '';
+      position: absolute;
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      background: var(--card);
+    }
+
+    .score-inner {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+
+    .score-val {
+      font-size: 36px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1;
+    }
+
+    .score-max {
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .rank-badge-score {
+      display: inline-block;
+      padding: 4px 16px;
+      border-radius: 20px;
+      font-size: 18px;
+      font-weight: 800;
+      margin-top: 4px;
+    }
+
+    .axis-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .axis-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .axis-label {
+      width: 80px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .axis-bar-wrap {
+      flex: 1;
+      height: 8px;
+      background: var(--card2);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .axis-bar {
+      height: 100%;
+      border-radius: 4px;
+    }
+
+    .axis-val {
+      width: 30px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      text-align: right;
+    }
+
+    .axis-rank {
+      width: 40px;
+    }
+
+    /* ゲージ */
+    .gauge-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    .gauge-label {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 8px;
+      text-align: center;
+      width: 100%;
+    }
+
+    .gauge-svg {
+      width: 120px;
+      height: 70px;
+      display: block;
+      margin: 0 auto;
+    }
+
+    .gauge-val {
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+      text-align: center;
+      margin-top: 4px;
+      width: 100%;
+      display: block;
+    }
+
+    .gauge-note {
+      font-size: 11px;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 2px;
+      width: 100%;
+      display: block;
+    }
+
+    .gauge-tooltip {
+      font-size: 11px;
+      color: #94a3c8;
+      text-align: center;
+      margin-top: 6px;
+      padding: 6px 8px;
+      background: var(--card2);
+      border-radius: 6px;
+      line-height: 1.4;
+      width: 100%;
+    }
+
+    /* バリュエーションテーブル */
+    .val-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .val-table th {
+      font-size: 11px;
+      color: var(--muted);
+      padding: 6px 8px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .val-table td {
+      font-size: 13px;
+      padding: 7px 8px;
+      border-bottom: 1px solid rgba(45, 50, 82, 0.5);
+    }
+
+    .val-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .val-good {
+      color: var(--green);
+    }
+
+    .val-warn {
+      color: var(--yellow);
+    }
+
+    .val-bad {
+      color: var(--red);
+    }
+
+    /* ポジネガ */
+    .posi-nega {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .posi-card {
+      background: rgba(34, 197, 94, 0.06);
+      border: 1px solid rgba(34, 197, 94, 0.2);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+
+    .nega-card {
+      background: rgba(239, 68, 68, 0.06);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 10px;
+    }
+
+    .pn-title {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .posi-card .pn-title {
+      color: var(--green);
+    }
+
+    .nega-card .pn-title {
+      color: var(--red);
+    }
+
+    .pn-explain {
+      font-size: 12px;
+      color: #94a3c8;
+      line-height: 1.5;
+      margin-top: 6px;
+      padding: 6px 8px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 6px;
+    }
+
+    .pn-source {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .impact {
+      display: inline-block;
+      padding: 1px 7px;
+      border-radius: 10px;
+      font-size: 10px;
+      font-weight: 700;
+      margin-left: 6px;
+    }
+
+    .impact-high {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+    }
+
+    .impact-mid {
+      background: rgba(245, 158, 11, 0.2);
+      color: #fbbf24;
+    }
+
+    .impact-low {
+      background: rgba(74, 158, 255, 0.2);
+      color: var(--accent);
+    }
+
+    /* 総合評価 */
+    .verdict-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .verdict-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 10px;
+      font-size: 13px;
+    }
+
+    .verdict-item .icon {
+      font-size: 16px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .summary-box {
+      background: linear-gradient(135deg, rgba(74, 158, 255, 0.1), rgba(124, 92, 252, 0.1));
+      border: 1px solid rgba(74, 158, 255, 0.3);
+      border-radius: 12px;
+      padding: 18px;
+    }
+
+    .summary-box h4 {
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .summary-box p {
+      color: #cbd5e1;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    /* フッター */
+    .footer {
+      text-align: center;
+      padding: 24px;
+      color: var(--muted);
+      font-size: 11px;
+      border-top: 1px solid var(--border);
+      margin-top: 32px;
+      line-height: 1.8;
+    }
+
+    /* back-bar ウォッチリスト追加ボタン */
+    .wl-add-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid rgba(74, 158, 255, 0.4);
+      background: rgba(74, 158, 255, 0.1);
+      color: var(--accent);
+      transition: all 0.2s;
+    }
+
+    .wl-add-btn:hover {
+      background: rgba(74, 158, 255, 0.2);
+    }
+
+    .wl-add-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .wl-add-btn.added {
+      background: rgba(34, 197, 94, 0.15);
+      color: var(--green);
+      border-color: rgba(34, 197, 94, 0.4);
+    }
+
+    /* ステータスセレクター */
+    .status-selector {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .status-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid;
+      transition: all 0.2s;
+      background: none;
+    }
+
+    .status-btn.st-watching {
+      color: var(--accent);
+      border-color: rgba(74, 158, 255, 0.4);
+      background: rgba(74, 158, 255, 0.1);
+    }
+
+    .status-btn.st-interested {
+      color: var(--yellow);
+      border-color: rgba(245, 158, 11, 0.4);
+      background: rgba(245, 158, 11, 0.1);
+    }
+
+    .status-btn.st-archived {
+      color: var(--muted);
+      border-color: rgba(136, 146, 164, 0.4);
+      background: rgba(136, 146, 164, 0.1);
+    }
+
+    .status-btn:hover {
+      opacity: 0.8;
+    }
+
+    .status-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      background: #1a1d2e;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      min-width: 150px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      display: none;
+      z-index: 300;
+    }
+
+    .status-dropdown.open {
+      display: block;
+    }
+
+    .status-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .status-option:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .status-option.active {
+      background: rgba(74, 158, 255, 0.1);
+    }
+
+    .status-saving {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .status-toast {
+      font-size: 12px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+
+    .status-toast.ok {
+      background: rgba(34, 197, 94, 0.15);
+      color: var(--green);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .status-toast.err {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--red);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    /* アーカイブボタン（back-bar内） */
+    .watchlist-archive-btn {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 13px;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 6px;
+      opacity: 0.6;
+      transition: opacity 0.15s, color 0.15s;
+      line-height: 1;
+    }
+
+    .watchlist-archive-btn:hover {
+      opacity: 1;
+      color: var(--accent);
+    }
+
+    /* PER推移チャート */
+    .per-chart-container {
+      position: relative;
+      height: 200px;
+    }
+
+    /* ローディング / エラー */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .error-box {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      max-width: 480px;
+      margin: 60px auto;
+    }
+
+    .error-box h2 {
+      color: var(--red);
+      margin-bottom: 8px;
+    }
+
+    .error-box p {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    /* チャート */
+    .chart-container {
+      position: relative;
+      height: 240px;
+    }
+
+    .radar-container {
+      position: relative;
+      height: 280px;
+      max-width: 320px;
+      margin: 0 auto;
+    }
+
+    /* レスポンシブ */
+    @media (max-width: 768px) {
+
+      .grid-2,
+      .grid-3,
+      .posi-nega,
+      .verdict-grid,
+      .score-section {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="back-bar">
+    <a class="back-btn" href="../index.html">← ダッシュボードに戻る</a>
+    <div id="backBarStatus"></div>
+  </div>
+
+  <!-- ローディング表示 -->
+  <div id="loading" class="loading">
+    <div class="spinner"></div>
+    <div style="color:var(--muted);">データを読み込んでいます...</div>
+  </div>
+
+  <!-- エラー表示 -->
+  <div id="error" style="display:none;">
+    <div class="error-box">
+      <h2>⚠️ データが見つかりません</h2>
+      <p id="errorMsg">銘柄データの読み込みに失敗しました。</p>
+      <p style="margin-top:12px;"><a href="../index.html" style="color:var(--accent);">← ダッシュボードに戻る</a></p>
+    </div>
+  </div>
+
+  <!-- メインコンテンツ（JS で生成） -->
+  <div id="main" style="display:none;"></div>
+
+
+  <script>
+    // ============================================================
+    // データ取得 & レンダリング
+    // ============================================================
+    // 静的JSON（分析データ）→ stok-analyzer リポジトリの GitHub Raw から取得（push直後に反映）
+    const GITHUB_RAW = 'https://raw.githubusercontent.com/bi-al1/stok-analyzer/master';
+    const RENDER_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? 'http://localhost:8000'
+      : 'https://stock-dashboard-rif1.onrender.com';
+
+    // URLパラメータから銘柄コードを取得
+    const params = new URLSearchParams(location.search);
+    const code = params.get('code');
+
+    if (!code) {
+      showError('URLに ?code=XXXX を指定してください。', '');
+    } else {
+      document.title = `${code} 分析ダッシュボード`;
+      loadStock(code);
+    }
+
+    async function loadStock(code) {
+      try {
+        const ts = Date.now();
+        // 分析JSON と watchlist.json を並行取得
+        const [stockRes, wlRes] = await Promise.all([
+          fetch(`${GITHUB_RAW}/webapp/data/stocks/${code.toUpperCase()}.json?_=${ts}`),
+          fetch(`${RENDER_BASE}/api/watchlist`),  // キャッシュなしで最新を取得
+        ]);
+        if (!stockRes.ok) throw new Error(`HTTP ${stockRes.status}`);
+        const d = await stockRes.json();
+
+        // watchlist エントリを取得（なければ null）
+        let wlEntry = null;
+        if (wlRes.ok) {
+          const wl = await wlRes.json();
+          wlEntry = (wl.watchlist || []).find(w => w.code === code.toUpperCase()) ?? null;
+        }
+
+        render(d, wlEntry);
+      } catch (e) {
+        showError(`銘柄コード "${code}" のデータが見つかりません。`, e.message);
+      }
+    }
+
+    function showError(msg, detail) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('error').style.display = 'block';
+      document.getElementById('errorMsg').textContent = msg + (detail ? ` (${detail})` : '');
+    }
+
+    // ============================================================
+    // ランクに応じた色
+    // ============================================================
+    function rankColor(rank) {
+      const map = { 'SSS': '#22c55e', 'SS': '#4ade80', 'S': '#86efac', 'A+': '#4a9eff', 'A': '#60a5fa', 'B+': '#a78bfa', 'B': '#c4b5fd', 'C': '#f59e0b', 'D': '#fb923c', 'E': '#ef4444', 'F': '#ef4444' };
+      return map[rank] || '#8892a4';
+    }
+
+    function rankBadgeStyle(rank) {
+      const c = rankColor(rank);
+      return `display:inline-block;padding:4px 16px;border-radius:20px;font-size:18px;font-weight:800;background:${c}22;color:${c};border:1px solid ${c};margin-top:4px;`;
+    }
+
+    // KabuMartスコア（0〜10）を円グラフのdegreeに変換
+    function scoreToDeg(score) {
+      return Math.min((score / 10) * 360, 360);
+    }
+
+    // 軸スコアのバー色
+    function axisBarColor(rank) {
+      if (['SSS', 'SS', 'S'].includes(rank)) return '#22c55e';
+      if (['A+', 'A'].includes(rank)) return '#4a9eff';
+      if (['B+', 'B'].includes(rank)) return '#a78bfa';
+      if (['C'].includes(rank)) return '#f59e0b';
+      return '#ef4444';
+    }
+
+    // ============================================================
+    // PER ゲージ SVG
+    // ============================================================
+    function perGaugeSVG(per) {
+      if (per === null || per === undefined || per < 0) {
+        return `<svg class="gauge-svg" viewBox="0 0 120 70">
       <path d="M10 60 A 50 50 0 0 1 110 60" stroke="#2d3252" stroke-width="10" fill="none" stroke-linecap="round"/>
       <path d="M10 60 A 50 50 0 0 1 110 60" stroke="#ef4444" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="0"/>
       <text x="60" y="52" text-anchor="middle" fill="#ef4444" font-size="10" font-weight="bold">赤字</text>
     </svg>
-    <div class="gauge-val" style="color:#ef4444;">${per !== null && per !== undefined ? per+'倍' : 'N/A'}</div>
+    <div class="gauge-val" style="color:#ef4444;">${per !== null && per !== undefined ? per + '倍' : 'N/A'}</div>
     <div class="gauge-note">（赤字のため負値）</div>`;
-  }
-  // 目安: 15倍 = 50%, 30倍 = 100%
-  const ratio = Math.min(per / 30, 1);
-  const offset = Math.round(157 * (1 - ratio));
-  const color = per < 15 ? '#22c55e' : per < 25 ? '#f59e0b' : '#ef4444';
-  return `<svg class="gauge-svg" viewBox="0 0 120 70">
+      }
+      // 目安: 15倍 = 50%, 30倍 = 100%
+      const ratio = Math.min(per / 30, 1);
+      const offset = Math.round(157 * (1 - ratio));
+      const color = per < 15 ? '#22c55e' : per < 25 ? '#f59e0b' : '#ef4444';
+      return `<svg class="gauge-svg" viewBox="0 0 120 70">
     <path d="M10 60 A 50 50 0 0 1 110 60" stroke="#2d3252" stroke-width="10" fill="none" stroke-linecap="round"/>
     <path d="M10 60 A 50 50 0 0 1 110 60" stroke="${color}" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="${offset}"/>
   </svg>
   <div class="gauge-val" style="color:${color};">${per}倍</div>
   <div class="gauge-note">目安: 15〜25倍</div>`;
-}
+    }
 
-function roeGaugeSVG(roe) {
-  if (roe === null || roe === undefined || roe < 0) {
-    return `<svg class="gauge-svg" viewBox="0 0 120 70">
+    function roeGaugeSVG(roe) {
+      if (roe === null || roe === undefined || roe < 0) {
+        return `<svg class="gauge-svg" viewBox="0 0 120 70">
       <path d="M10 60 A 50 50 0 0 1 110 60" stroke="#2d3252" stroke-width="10" fill="none" stroke-linecap="round"/>
       <path d="M10 60 A 50 50 0 0 1 110 60" stroke="#ef4444" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="0"/>
       <text x="60" y="52" text-anchor="middle" fill="#ef4444" font-size="10" font-weight="bold">赤字</text>
     </svg>
-    <div class="gauge-val" style="color:#ef4444;">${roe !== null && roe !== undefined ? roe.toFixed(1)+'%' : 'N/A'}</div>
+    <div class="gauge-val" style="color:#ef4444;">${roe !== null && roe !== undefined ? roe.toFixed(1) + '%' : 'N/A'}</div>
     <div class="gauge-note">目安: 10%以上が優良</div>`;
-  }
-  const ratio = Math.min(roe / 30, 1);
-  const offset = Math.round(157 * (1 - ratio));
-  const color = roe >= 10 ? '#22c55e' : roe >= 5 ? '#f59e0b' : '#ef4444';
-  return `<svg class="gauge-svg" viewBox="0 0 120 70">
+      }
+      const ratio = Math.min(roe / 30, 1);
+      const offset = Math.round(157 * (1 - ratio));
+      const color = roe >= 10 ? '#22c55e' : roe >= 5 ? '#f59e0b' : '#ef4444';
+      return `<svg class="gauge-svg" viewBox="0 0 120 70">
     <path d="M10 60 A 50 50 0 0 1 110 60" stroke="#2d3252" stroke-width="10" fill="none" stroke-linecap="round"/>
     <path d="M10 60 A 50 50 0 0 1 110 60" stroke="${color}" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="${offset}"/>
   </svg>
   <div class="gauge-val" style="color:${color};">${roe.toFixed(1)}%</div>
   <div class="gauge-note">目安: 10%以上が優良</div>`;
-}
+    }
 
-function equityRatioGaugeSVG(ratio) {
-  if (ratio === null || ratio === undefined) {
-    return `<svg class="gauge-svg" viewBox="0 0 120 70">
+    function equityRatioGaugeSVG(ratio) {
+      if (ratio === null || ratio === undefined) {
+        return `<svg class="gauge-svg" viewBox="0 0 120 70">
       <path d="M10 60 A 50 50 0 0 1 110 60" stroke="#2d3252" stroke-width="10" fill="none" stroke-linecap="round"/>
     </svg>
     <div class="gauge-val">N/A</div>
     <div class="gauge-note">目安: 40%以上が安定</div>`;
-  }
-  const r = Math.min(ratio / 100, 1);
-  const offset = Math.round(157 * (1 - r));
-  const color = ratio >= 40 ? '#22c55e' : ratio >= 20 ? '#f59e0b' : '#ef4444';
-  return `<svg class="gauge-svg" viewBox="0 0 120 70">
+      }
+      const r = Math.min(ratio / 100, 1);
+      const offset = Math.round(157 * (1 - r));
+      const color = ratio >= 40 ? '#22c55e' : ratio >= 20 ? '#f59e0b' : '#ef4444';
+      return `<svg class="gauge-svg" viewBox="0 0 120 70">
     <path d="M10 60 A 50 50 0 0 1 110 60" stroke="#2d3252" stroke-width="10" fill="none" stroke-linecap="round"/>
     <path d="M10 60 A 50 50 0 0 1 110 60" stroke="${color}" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset="${offset}"/>
   </svg>
   <div class="gauge-val" style="color:${color};">${ratio.toFixed(1)}%</div>
   <div class="gauge-note">目安: 40%以上が安定</div>`;
-}
+    }
 
-// ============================================================
-// メインレンダリング
-// ============================================================
-function render(d, wlEntry) {
-  const c = d.company;
-  const scores = d.scores;
-  const fin = d.financials;
-  const price = d.price;
-  const biz = d.business;
-  const verdict = d.verdict;
-  const positives = d.positives || [];
-  const negatives = d.negatives || [];
-  const priceHistory = d.price_history || [];
+    // ============================================================
+    // メインレンダリング
+    // ============================================================
+    function render(d, wlEntry) {
+      const c = d.company;
+      const scores = d.scores;
+      const fin = d.financials;
+      const price = d.price;
+      const biz = d.business;
+      const verdict = d.verdict;
+      const positives = d.positives || [];
+      const negatives = d.negatives || [];
+      const priceHistory = d.price_history || [];
 
-  // タイトル更新
-  document.title = `${c.name}（${c.code}）分析ダッシュボード`;
+      // タイトル更新
+      document.title = `${c.name}（${c.code}）分析ダッシュボード`;
 
-  // スコアの円グラフ色
-  const scoreColor = rankColor(scores.total_rank);
-  const scoreDeg = scoreToDeg(scores.total_score);
-  const scoreConicBg = `conic-gradient(${scoreColor} 0deg ${scoreDeg}deg, #2d3252 ${scoreDeg}deg 360deg)`;
+      // スコアの円グラフ色
+      const scoreColor = rankColor(scores.total_rank);
+      const scoreDeg = scoreToDeg(scores.total_score);
+      const scoreConicBg = `conic-gradient(${scoreColor} 0deg ${scoreDeg}deg, #2d3252 ${scoreDeg}deg 360deg)`;
 
-  // ポジネガカード生成
-  function posiCards(items) {
-    return items.map(item => `
+      // ポジネガカード生成
+      function posiCards(items) {
+        return items.map(item => `
       <div class="posi-card">
-        <div class="pn-title">${item.title} <span class="impact impact-${(item.impact||'mid').toLowerCase()}">${(item.impact||'MID').toUpperCase()}</span></div>
+        <div class="pn-title">${item.title} <span class="impact impact-${(item.impact || 'mid').toLowerCase()}">${(item.impact || 'MID').toUpperCase()}</span></div>
         <div class="pn-explain">💬 <strong>つまり？</strong> ${item.explain || ''}</div>
         <div class="pn-source">${item.source || ''}</div>
       </div>`).join('');
-  }
-  function negaCards(items) {
-    return items.map(item => `
+      }
+      function negaCards(items) {
+        return items.map(item => `
       <div class="nega-card">
-        <div class="pn-title">${item.title} <span class="impact impact-${(item.impact||'mid').toLowerCase()}">${(item.impact||'MID').toUpperCase()}</span></div>
+        <div class="pn-title">${item.title} <span class="impact impact-${(item.impact || 'mid').toLowerCase()}">${(item.impact || 'MID').toUpperCase()}</span></div>
         <div class="pn-explain">💬 <strong>つまり？</strong> ${item.explain || ''}</div>
         <div class="pn-source">${item.source || ''}</div>
       </div>`).join('');
-  }
+      }
 
-  // 軸バー生成
-  const axisKeys = [
-    { key: 'growth',      label: '成長性' },
-    { key: 'stability',   label: '安定性' },
-    { key: 'profitability', label: '収益性' },
-    { key: 'capacity',    label: '余力' },
-    { key: 'innovation',  label: '新規性' },
-  ];
-  const axisBars = axisKeys.map(ax => {
-    const val  = scores.axes?.[ax.key]?.score ?? 0;
-    const rank = scores.axes?.[ax.key]?.rank  ?? 'F';
-    const pct  = (val / 10 * 100).toFixed(0);
-    const color = axisBarColor(rank);
-    return `<div class="axis-item">
+      // 軸バー生成
+      const axisKeys = [
+        { key: 'growth', label: '成長性' },
+        { key: 'stability', label: '安定性' },
+        { key: 'profitability', label: '収益性' },
+        { key: 'capacity', label: '余力' },
+        { key: 'innovation', label: '新規性' },
+      ];
+      const axisBars = axisKeys.map(ax => {
+        const val = scores.axes?.[ax.key]?.score ?? 0;
+        const rank = scores.axes?.[ax.key]?.rank ?? 'F';
+        const pct = (val / 10 * 100).toFixed(0);
+        const color = axisBarColor(rank);
+        return `<div class="axis-item">
       <span class="axis-label">${ax.label}</span>
       <div class="axis-bar-wrap"><div class="axis-bar" style="width:${pct}%;background:${color};"></div></div>
       <span class="axis-val">${val.toFixed(1)}</span>
       <span class="axis-rank"><span class="badge badge-gray" style="font-size:10px;">${rank}</span></span>
     </div>`;
-  }).join('');
+      }).join('');
 
-  // セグメントカード
-  const segCards = (biz.segments || []).map(s => `
+      // セグメントカード
+      const segCards = (biz.segments || []).map(s => `
     <div class="segment-card" style="${s.highlight ? 'background:rgba(34,197,94,0.06);border:1px solid rgba(34,197,94,0.2);' : ''}">
       <h4 style="${s.highlight ? 'color:var(--green);' : ''}">${s.icon || ''} ${s.name}</h4>
       <p>${s.description || ''}</p>
     </div>`).join('');
 
-  // タグバッジ
-  const tagBadges = (biz.tags || []).map(t => `<span class="badge badge-blue">${t}</span>`).join('');
+      // タグバッジ
+      const tagBadges = (biz.tags || []).map(t => `<span class="badge badge-blue">${t}</span>`).join('');
 
-  // バリュエーション行
-  const valRows = (fin.valuation_table || []).map(row => {
-    const cls = row.status === 'good' ? 'val-good' : row.status === 'warn' ? 'val-warn' : row.status === 'bad' ? 'val-bad' : '';
-    const badgeHtml = row.badge ? `<span class="badge badge-${row.badge_color||'gray'}">${row.badge}</span>` : '―';
-    return `<tr>
+      // バリュエーション行
+      const valRows = (fin.valuation_table || []).map(row => {
+        const cls = row.status === 'good' ? 'val-good' : row.status === 'warn' ? 'val-warn' : row.status === 'bad' ? 'val-bad' : '';
+        const badgeHtml = row.badge ? `<span class="badge badge-${row.badge_color || 'gray'}">${row.badge}</span>` : '―';
+        return `<tr>
       <td>${row.label}</td>
       <td class="${cls}">${row.value}</td>
       <td>${row.benchmark || '―'}</td>
       <td>${badgeHtml}</td>
       <td style="font-size:11px;color:var(--muted);">${row.note || ''}</td>
     </tr>`;
-  }).join('');
+      }).join('');
 
-  // 強み・懸念
-  const strengthItems = (verdict.strengths || []).map(s => `
-    <div class="verdict-item"><span class="icon">${s.icon||'💪'}</span><span><strong>${s.title}</strong>：${s.text}</span></div>`).join('');
-  const riskItems = (verdict.risks || []).map(r => `
-    <div class="verdict-item"><span class="icon">${r.icon||'⚠️'}</span><span><strong>${r.title}</strong>：${r.text}</span></div>`).join('');
+      // 強み・懸念
+      const strengthItems = (verdict.strengths || []).map(s => `
+    <div class="verdict-item"><span class="icon">${s.icon || '💪'}</span><span><strong>${s.title}</strong>：${s.text}</span></div>`).join('');
+      const riskItems = (verdict.risks || []).map(r => `
+    <div class="verdict-item"><span class="icon">${r.icon || '⚠️'}</span><span><strong>${r.title}</strong>：${r.text}</span></div>`).join('');
 
-  // データソースバッジ
-  const sourceBadges = [
-    d.has_yfinance  ? '<span class="badge badge-green">📊 yfinance取得済</span>' : '',
-    d.has_websearch ? '<span class="badge badge-blue">🔍 WebSearch調査済</span>' : '',
-    d.has_kabumart  ? '<span class="badge badge-purple">📌 KabuMartスコア反映</span>' : '',
-  ].filter(Boolean).join('');
+      // データソースバッジ
+      const sourceBadges = [
+        d.has_yfinance ? '<span class="badge badge-green">📊 yfinance取得済</span>' : '',
+        d.has_websearch ? '<span class="badge badge-blue">🔍 WebSearch調査済</span>' : '',
+        d.has_kabumart ? '<span class="badge badge-purple">📌 KabuMartスコア反映</span>' : '',
+      ].filter(Boolean).join('');
 
-  // リンク
-  const links = (d.links || []).map(l => `<a href="${l.url}" target="_blank" style="color:var(--accent);">${l.label}</a>`).join(' / ');
+      // リンク
+      const links = (d.links || []).map(l => `<a href="${l.url}" target="_blank" style="color:var(--accent);">${l.label}</a>`).join(' / ');
 
-  const html = `
+      const html = `
 <div class="container">
 
 <!-- ヘッダー -->
@@ -542,7 +1192,7 @@ ${priceHistory.length > 0 ? `
     <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:12px;font-size:13px;">
       ${price.current ? `<span>現在: <strong style="color:var(--accent);">¥${price.current.toLocaleString()}</strong></span>` : ''}
       ${price.week52_high ? `<span>52週高値: <strong style="color:var(--green);">¥${price.week52_high.toLocaleString()}</strong></span>` : ''}
-      ${price.week52_low  ? `<span>52週安値: <strong style="color:var(--red);">¥${price.week52_low.toLocaleString()}</strong></span>` : ''}
+      ${price.week52_low ? `<span>52週安値: <strong style="color:var(--red);">¥${price.week52_low.toLocaleString()}</strong></span>` : ''}
       ${price.from_high_pct ? `<span style="color:var(--muted);">高値比: ${price.from_high_pct}</span>` : ''}
     </div>
     <div class="chart-container"><canvas id="priceChart"></canvas></div>
@@ -586,8 +1236,7 @@ ${priceHistory.length > 0 ? `
 
 <!-- フッター -->
 <div class="footer">
-  <p>⚠️ このレポートは投資助言ではありません。掲載情報は公開情報に基づく分析であり、正確性・完全性を保証するものではありません。</p>
-  <p>データソース：KabuMart（スクリーンショット解析）、yfinance（遅延データの可能性あり）、WebSearch（各種公開情報）</p>
+  <p>データソース：KabuMart（スクリーンショット解析）、yfinance、WebSearch（各種公開情報）</p>
   ${links ? `<p>参考：${links}</p>` : ''}
   <p style="margin-top:8px;">生成日時: ${d.generated_at || c.analyzed_date} | Powered by Claude + KabuMart Analyzer</p>
 </div>
@@ -595,368 +1244,378 @@ ${priceHistory.length > 0 ? `
 </div><!-- /container -->
 `;
 
-  document.getElementById('main').innerHTML = html;
-  document.getElementById('loading').style.display = 'none';
-  document.getElementById('main').style.display = 'block';
+      document.getElementById('main').innerHTML = html;
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('main').style.display = 'block';
 
-  // ── back-bar: ステータスセレクター or 追加ボタン ──────────
-  if (wlEntry) {
-    // 登録済み → back-barにステータスセレクター + 削除ボタン表示
-    renderStatusSelector(wlEntry, c.code);
-  } else {
-    // 未登録 → back-barに追加ボタンを表示
-    renderAddButton(c, scores, fin);
-  }
-
-  // チャート描画（DOM 生成後）
-  requestAnimationFrame(() => {
-    drawRadar(scores);
-    if (priceHistory.length > 0) drawPrice(priceHistory, d.ipo_date);
-    if (wlEntry?.per_history?.length >= 1) drawPerHistory(wlEntry.per_history);
-  });
-}
-
-// ============================================================
-// ウォッチリスト追加ボタン（back-bar内・未登録時）
-// ============================================================
-function renderAddButton(company, scores, fin) {
-  const container = document.getElementById('backBarStatus');
-  const btn = document.createElement('button');
-  btn.className = 'wl-add-btn';
-  btn.textContent = '＋ ウォッチリストに追加';
-  container.appendChild(btn);
-
-  // スコア情報: scores.total_rank / total_score を使う
-  const rank = scores?.total_rank ?? '';
-  const score = scores?.total_score ?? '';
-  const note = rank ? `総合スコア ${rank} (${score}/10)` : '';
-  const per = fin?.per ?? null;
-
-  btn.onclick = async () => {
-    btn.textContent = '⏳ 追加中...';
-    btn.disabled = true;
-    try {
-      const body = {
-        code: company.code,
-        name: company.name,
-        note,
-        kabumart_rank: rank,
-      };
-      if (per != null) body.per = per;
-      const res = await fetch(`${RENDER_BASE}/api/watchlist`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-      const json = await res.json();
-      if (res.status === 409) {
-        btn.textContent = '✅ 登録済み';
-        btn.classList.add('added');
-      } else if (!res.ok) {
-        throw new Error(json.detail ?? 'エラー');
+      // ── back-bar: ステータスセレクター or 追加ボタン ──────────
+      if (wlEntry) {
+        // 登録済み → back-barにステータスセレクター + 削除ボタン表示
+        renderStatusSelector(wlEntry, c.code);
       } else {
-        btn.textContent = '✅ 追加しました';
-        btn.classList.add('added');
+        // 未登録 → back-barに追加ボタンを表示
+        renderAddButton(c, scores, fin);
       }
-      // ステータスセレクター+削除ボタンに切り替え
-      setTimeout(() => {
-        container.innerHTML = '';
-        renderStatusSelector({ status: 'archived' }, company.code);
-      }, 800);
-    } catch(e) {
-      btn.textContent = `⚠️ 失敗`;
-      btn.disabled = false;
-      setTimeout(() => {
-        btn.textContent = '＋ ウォッチリストに追加';
-        btn.classList.remove('added');
-      }, 2000);
+
+      // チャート描画（DOM 生成後）
+      requestAnimationFrame(() => {
+        drawRadar(scores);
+        if (priceHistory.length > 0) drawPrice(priceHistory, d.ipo_date);
+        if (wlEntry?.per_history?.length >= 1) drawPerHistory(wlEntry.per_history);
+      });
     }
-  };
-}
 
-// ============================================================
-// ステータスセレクター
-// ============================================================
-const STATUS_MAP = {
-  interested: { label: '💛 積極検討', cls: 'st-interested' },
-  watching:   { label: '👀 要観察',   cls: 'st-watching'   },
-  archived:   { label: '📦 アーカイブ', cls: 'st-archived'  },
-};
+    // ============================================================
+    // ウォッチリスト追加ボタン（back-bar内・未登録時）
+    // ============================================================
+    function renderAddButton(company, scores, fin) {
+      const container = document.getElementById('backBarStatus');
+      const btn = document.createElement('button');
+      btn.className = 'wl-add-btn';
+      btn.textContent = '＋ ウォッチリストに追加';
+      container.appendChild(btn);
 
-function renderStatusSelector(wlEntry, code) {
-  const container = document.getElementById('backBarStatus');
-  let currentStatus = wlEntry.status || 'archived';
+      // スコア情報: scores.total_rank / total_score を使う
+      const rank = scores?.total_rank ?? '';
+      const score = scores?.total_score ?? '';
+      const note = rank ? `総合スコア ${rank} (${score}/10)` : '';
+      const per = fin?.per ?? null;
 
-  // 既存のセレクターがあれば再利用（追加後の切り替え時）
-  let sel = document.getElementById('statusSelector');
-  let toastEl = document.getElementById('statusToast');
-  if (!sel) {
-    sel = document.createElement('div');
-    sel.className = 'status-selector';
-    sel.id = 'statusSelector';
-    container.appendChild(sel);
-  }
-  if (!toastEl) {
-    toastEl = document.createElement('span');
-    toastEl.className = 'status-toast';
-    toastEl.id = 'statusToast';
-    toastEl.style.display = 'none';
-    container.appendChild(toastEl);
-  }
-
-  sel.innerHTML = buildSelectorHTML(currentStatus);
-
-  // ドロップダウン開閉（イベント委譲・一度だけ登録）
-  sel.onclick = e => {
-    const btn = e.target.closest('.status-btn');
-    const opt = e.target.closest('.status-option');
-    if (btn) {
-      sel.querySelector('.status-dropdown').classList.toggle('open');
-      return;
+      btn.onclick = async () => {
+        btn.textContent = '⏳ 追加中...';
+        btn.disabled = true;
+        try {
+          const body = {
+            code: company.code,
+            name: company.name,
+            note,
+            kabumart_rank: rank,
+          };
+          if (per != null) body.per = per;
+          const res = await fetch(`${RENDER_BASE}/api/watchlist`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+          });
+          const json = await res.json();
+          if (res.status === 409) {
+            btn.textContent = '✅ 登録済み';
+            btn.classList.add('added');
+          } else if (!res.ok) {
+            throw new Error(json.detail ?? 'エラー');
+          } else {
+            btn.textContent = '✅ 追加しました';
+            btn.classList.add('added');
+          }
+          // ステータスセレクター+削除ボタンに切り替え
+          setTimeout(() => {
+            container.innerHTML = '';
+            renderStatusSelector({ status: 'archived' }, company.code);
+          }, 800);
+        } catch (e) {
+          btn.textContent = `⚠️ 失敗`;
+          btn.disabled = false;
+          setTimeout(() => {
+            btn.textContent = '＋ ウォッチリストに追加';
+            btn.classList.remove('added');
+          }, 2000);
+        }
+      };
     }
-    if (opt) {
-      sel.querySelector('.status-dropdown').classList.remove('open');
-      const newStatus = opt.dataset.status;
-      if (newStatus === currentStatus) return;
-      currentStatus = newStatus;
-      updateStatus(code, newStatus, sel, toastEl);
-    }
-  };
 
-  // 外クリックで閉じる（一度だけ登録）
-  if (!sel._outsideClickBound) {
-    sel._outsideClickBound = true;
-    document.addEventListener('click', e => {
-      if (!sel.contains(e.target)) {
-        sel.querySelector('.status-dropdown')?.classList.remove('open');
+    // ============================================================
+    // ステータスセレクター
+    // ============================================================
+    const STATUS_MAP = {
+      interested: { label: '💛 積極検討', cls: 'st-interested' },
+      watching: { label: '👀 要観察', cls: 'st-watching' },
+      archived: { label: '📦 アーカイブ', cls: 'st-archived' },
+    };
+
+    function renderStatusSelector(wlEntry, code) {
+      const container = document.getElementById('backBarStatus');
+      let currentStatus = wlEntry.status || 'archived';
+
+      // 既存のセレクターがあれば再利用（追加後の切り替え時）
+      let sel = document.getElementById('statusSelector');
+      let toastEl = document.getElementById('statusToast');
+      if (!sel) {
+        sel = document.createElement('div');
+        sel.className = 'status-selector';
+        sel.id = 'statusSelector';
+        container.appendChild(sel);
       }
-    });
-  }
-}
+      if (!toastEl) {
+        toastEl = document.createElement('span');
+        toastEl.className = 'status-toast';
+        toastEl.id = 'statusToast';
+        toastEl.style.display = 'none';
+        container.appendChild(toastEl);
+      }
 
-function buildSelectorHTML(current) {
-  const cur = STATUS_MAP[current] || STATUS_MAP.archived;
-  const options = Object.entries(STATUS_MAP).map(([val, info]) => `
+      sel.innerHTML = buildSelectorHTML(currentStatus);
+
+      // ドロップダウン開閉（イベント委譲・一度だけ登録）
+      sel.onclick = e => {
+        const btn = e.target.closest('.status-btn');
+        const opt = e.target.closest('.status-option');
+        if (btn) {
+          sel.querySelector('.status-dropdown').classList.toggle('open');
+          return;
+        }
+        if (opt) {
+          sel.querySelector('.status-dropdown').classList.remove('open');
+          const newStatus = opt.dataset.status;
+          if (newStatus === currentStatus) return;
+          currentStatus = newStatus;
+          updateStatus(code, newStatus, sel, toastEl);
+        }
+      };
+
+      // 外クリックで閉じる（一度だけ登録）
+      if (!sel._outsideClickBound) {
+        sel._outsideClickBound = true;
+        document.addEventListener('click', e => {
+          if (!sel.contains(e.target)) {
+            sel.querySelector('.status-dropdown')?.classList.remove('open');
+          }
+        });
+      }
+    }
+
+    function buildSelectorHTML(current) {
+      const cur = STATUS_MAP[current] || STATUS_MAP.archived;
+      const options = Object.entries(STATUS_MAP).map(([val, info]) => `
     <div class="status-option${val === current ? ' active' : ''}" data-status="${val}">
       ${info.label}
     </div>`).join('');
-  return `
+      return `
     <button class="status-btn ${cur.cls}">${cur.label} ▾</button>
     <div class="status-dropdown">${options}</div>`;
-}
-
-async function updateStatus(code, newStatus, selEl, toastEl) {
-  selEl.querySelector('.status-dropdown').classList.remove('open');
-  toastEl.className = 'status-toast status-saving';
-  toastEl.textContent = '更新中...';
-  toastEl.style.display = '';
-
-  try {
-    const res = await fetch(`${RENDER_BASE}/api/watchlist/status`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ code, status: newStatus }),
-    });
-    const json = await res.json();
-    if (!json.ok) throw new Error(json.detail ?? json.error);
-
-    // UI更新（onclick は sel.onclick で管理しているので再バインド不要）
-    selEl.innerHTML = buildSelectorHTML(newStatus);
-    toastEl.style.display = 'none';
-
-  } catch(e) {
-    toastEl.className = 'status-toast err';
-    toastEl.textContent = `⚠️ 更新失敗: ${e.message}`;
-    setTimeout(() => { toastEl.style.display = 'none'; }, 3000);
-  }
-}
-
-
-// ============================================================
-// レーダーチャート
-// ============================================================
-function drawRadar(scores) {
-  const ctx = document.getElementById('radarChart');
-  if (!ctx) return;
-  const axes = scores.axes || {};
-  const vals = [
-    axes.growth?.score       ?? 0,
-    axes.stability?.score    ?? 0,
-    axes.profitability?.score?? 0,
-    axes.capacity?.score     ?? 0,
-    axes.innovation?.score   ?? 0,
-  ];
-  const ranks = [
-    axes.growth?.rank       ?? 'F',
-    axes.stability?.rank    ?? 'F',
-    axes.profitability?.rank?? 'F',
-    axes.capacity?.rank     ?? 'F',
-    axes.innovation?.rank   ?? 'F',
-  ];
-  const labels = [
-    `成長性\n(${vals[0]}/${ranks[0]})`,
-    `安定性\n(${vals[1]}/${ranks[1]})`,
-    `収益性\n(${vals[2]}/${ranks[2]})`,
-    `余力\n(${vals[3]}/${ranks[3]})`,
-    `新規性\n(${vals[4]}/${ranks[4]})`,
-  ];
-  new Chart(ctx.getContext('2d'), {
-    type: 'radar',
-    data: {
-      labels,
-      datasets: [{
-        label: 'スコア', data: vals,
-        backgroundColor: 'rgba(74,158,255,0.15)', borderColor: '#4a9eff',
-        pointBackgroundColor: '#4a9eff', pointBorderColor: '#fff', pointRadius: 4, borderWidth: 2,
-      }, {
-        label: '平均基準(5.0)', data: [5,5,5,5,5],
-        backgroundColor: 'transparent', borderColor: 'rgba(255,255,255,0.2)',
-        pointRadius: 0, borderWidth: 1, borderDash: [4,4],
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: true,
-      plugins: { legend: { display: false } },
-      scales: { r: {
-        min: 0, max: 10, ticks: { display: false },
-        grid: { color: 'rgba(255,255,255,0.1)' },
-        angleLines: { color: 'rgba(255,255,255,0.1)' },
-        pointLabels: { color: '#94a3c8', font: { size: 10 } }
-      }}
     }
-  });
-}
 
-// ============================================================
-// PER推移チャート
-// ============================================================
-function drawPerHistory(perHistory) {
-  const ctx = document.getElementById('perChart');
-  if (!ctx) return;
+    async function updateStatus(code, newStatus, selEl, toastEl) {
+      selEl.querySelector('.status-dropdown').classList.remove('open');
+      toastEl.className = 'status-toast status-saving';
+      toastEl.textContent = '更新中...';
+      toastEl.style.display = '';
 
-  const labels = perHistory.map(h => h.date);
-  const values = perHistory.map(h => h.per);
+      try {
+        const res = await fetch(`${RENDER_BASE}/api/watchlist/status`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code, status: newStatus }),
+        });
+        const json = await res.json();
+        if (!json.ok) throw new Error(json.detail ?? json.error);
 
-  // 0ラインとゾーン色：マイナス=赤字期間、プラス=黒字期間
-  const pointColors = values.map(v =>
-    v == null ? 'rgba(136,146,164,0.5)' :
-    v < 0     ? '#ef4444' : '#22c55e'
-  );
+        // UI更新（onclick は sel.onclick で管理しているので再バインド不要）
+        selEl.innerHTML = buildSelectorHTML(newStatus);
+        toastEl.style.display = 'none';
 
-  new Chart(ctx.getContext('2d'), {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [{
-        label: '予想PER（倍）',
-        data: values,
-        borderColor: '#4a9eff',
-        backgroundColor: 'rgba(74,158,255,0.08)',
-        fill: true,
-        borderWidth: 2,
-        pointRadius: 5,
-        pointBackgroundColor: pointColors,
-        pointBorderColor: '#fff',
-        pointBorderWidth: 1.5,
-        tension: 0.3,
-        spanGaps: true,
-      }, {
-        // 0ライン（黒字/赤字の境界）
-        label: '黒字転換ライン',
-        data: labels.map(() => 0),
-        borderColor: 'rgba(255,255,255,0.15)',
-        borderWidth: 1,
-        borderDash: [4, 4],
-        pointRadius: 0,
-        fill: false,
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: { mode: 'index', intersect: false },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: '#1a1d2e',
-          borderColor: '#2d3252',
-          borderWidth: 1,
-          titleColor: '#94a3c8',
-          bodyColor: '#e2e8f0',
-          callbacks: {
-            title: ctx => ctx[0].label,
-            label: ctx => {
-              if (ctx.datasetIndex === 1) return null;
-              const v = ctx.parsed.y;
-              if (v == null) return 'データなし';
-              return v < 0
-                ? `PER ${v}倍（赤字）`
-                : `PER ${v}倍`;
-            },
+      } catch (e) {
+        toastEl.className = 'status-toast err';
+        toastEl.textContent = `⚠️ 更新失敗: ${e.message}`;
+        setTimeout(() => { toastEl.style.display = 'none'; }, 3000);
+      }
+    }
+
+
+    // ============================================================
+    // レーダーチャート
+    // ============================================================
+    function drawRadar(scores) {
+      const ctx = document.getElementById('radarChart');
+      if (!ctx) return;
+      const axes = scores.axes || {};
+      const vals = [
+        axes.growth?.score ?? 0,
+        axes.stability?.score ?? 0,
+        axes.profitability?.score ?? 0,
+        axes.capacity?.score ?? 0,
+        axes.innovation?.score ?? 0,
+      ];
+      const ranks = [
+        axes.growth?.rank ?? 'F',
+        axes.stability?.rank ?? 'F',
+        axes.profitability?.rank ?? 'F',
+        axes.capacity?.rank ?? 'F',
+        axes.innovation?.rank ?? 'F',
+      ];
+      const labels = [
+        `成長性\n(${vals[0]}/${ranks[0]})`,
+        `安定性\n(${vals[1]}/${ranks[1]})`,
+        `収益性\n(${vals[2]}/${ranks[2]})`,
+        `余力\n(${vals[3]}/${ranks[3]})`,
+        `新規性\n(${vals[4]}/${ranks[4]})`,
+      ];
+      new Chart(ctx.getContext('2d'), {
+        type: 'radar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'スコア', data: vals,
+            backgroundColor: 'rgba(74,158,255,0.15)', borderColor: '#4a9eff',
+            pointBackgroundColor: '#4a9eff', pointBorderColor: '#fff', pointRadius: 4, borderWidth: 2,
+          }, {
+            label: '平均基準(5.0)', data: [5, 5, 5, 5, 5],
+            backgroundColor: 'transparent', borderColor: 'rgba(255,255,255,0.2)',
+            pointRadius: 0, borderWidth: 1, borderDash: [4, 4],
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: true,
+          plugins: { legend: { display: false } },
+          scales: {
+            r: {
+              min: 0, max: 10, ticks: { display: false },
+              grid: { color: 'rgba(255,255,255,0.1)' },
+              angleLines: { color: 'rgba(255,255,255,0.1)' },
+              pointLabels: { color: '#94a3c8', font: { size: 10 } }
+            }
           }
         }
-      },
-      scales: {
-        x: {
-          ticks: { color: '#8892a4', maxTicksLimit: 8, maxRotation: 0 },
-          grid: { color: 'rgba(45,50,82,0.5)' }
-        },
-        y: {
-          ticks: {
-            color: '#8892a4',
-            callback: v => v === 0 ? '0（黒字転換）' : `${v}倍`
-          },
-          grid: { color: 'rgba(45,50,82,0.5)' }
-        }
-      }
+      });
     }
-  });
-}
 
-// ============================================================
-// 株価チャート
-// ============================================================
-function drawPrice(priceHistory, ipoDate) {
-  const ctx = document.getElementById('priceChart');
-  if (!ctx) return;
-  const labels = priceHistory.map(d => d.date);
-  const closes = priceHistory.map(d => d.close);
-  const ipoIdx = ipoDate ? labels.indexOf(ipoDate) : -1;
-  new Chart(ctx.getContext('2d'), {
-    type: 'line',
-    data: {
-      labels,
-      datasets: [{
-        label: '終値 (円)', data: closes,
-        borderColor: '#4a9eff', backgroundColor: 'rgba(74,158,255,0.08)',
-        fill: true, borderWidth: 2, pointRadius: 0, pointHoverRadius: 5, tension: 0.3,
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      interaction: { mode: 'index', intersect: false },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: '#1a1d2e', borderColor: '#2d3252', borderWidth: 1,
-          titleColor: '#94a3c8', bodyColor: '#e2e8f0',
-          callbacks: { title: ctx => ctx[0].label, label: ctx => `¥${ctx.parsed.y.toLocaleString()}` }
+    // ============================================================
+    // PER推移チャート
+    // ============================================================
+    function drawPerHistory(perHistory) {
+      const ctx = document.getElementById('perChart');
+      if (!ctx) return;
+
+      const labels = perHistory.map(h => h.date);
+      const values = perHistory.map(h => h.per);
+
+      // 0ラインとゾーン色：マイナス=赤字期間、プラス=黒字期間
+      const pointColors = values.map(v =>
+        v == null ? 'rgba(136,146,164,0.5)' :
+          v < 0 ? '#ef4444' : '#22c55e'
+      );
+
+      new Chart(ctx.getContext('2d'), {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: '予想PER（倍）',
+            data: values,
+            borderColor: '#4a9eff',
+            backgroundColor: 'rgba(74,158,255,0.08)',
+            fill: true,
+            borderWidth: 2,
+            pointRadius: 5,
+            pointBackgroundColor: pointColors,
+            pointBorderColor: '#fff',
+            pointBorderWidth: 1.5,
+            tension: 0.3,
+            spanGaps: true,
+          }, {
+            // 0ライン（黒字/赤字の境界）
+            label: '黒字転換ライン',
+            data: labels.map(() => 0),
+            borderColor: 'rgba(255,255,255,0.15)',
+            borderWidth: 1,
+            borderDash: [4, 4],
+            pointRadius: 0,
+            fill: false,
+          }]
         },
-        annotation: ipoIdx > 0 ? { annotations: { line1: {
-          type: 'line', xMin: ipoIdx, xMax: ipoIdx,
-          borderColor: 'rgba(245,158,11,0.6)', borderWidth: 1, borderDash: [4,4],
-          label: { content: '上場', enabled: true, color: '#f59e0b', backgroundColor: 'transparent', font: { size: 10 } }
-        }}} : {}
-      },
-      scales: {
-        x: { ticks: { color: '#8892a4', maxTicksLimit: 8, maxRotation: 0,
-          callback: (v, i) => { const d = labels[i]; return d ? d.slice(2,7).replace('-','/') : ''; }
-        }, grid: { color: 'rgba(45,50,82,0.5)' }},
-        y: { ticks: { color: '#8892a4', callback: v => '¥'+v.toLocaleString() }, grid: { color: 'rgba(45,50,82,0.5)' }}
-      }
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#1a1d2e',
+              borderColor: '#2d3252',
+              borderWidth: 1,
+              titleColor: '#94a3c8',
+              bodyColor: '#e2e8f0',
+              callbacks: {
+                title: ctx => ctx[0].label,
+                label: ctx => {
+                  if (ctx.datasetIndex === 1) return null;
+                  const v = ctx.parsed.y;
+                  if (v == null) return 'データなし';
+                  return v < 0
+                    ? `PER ${v}倍（赤字）`
+                    : `PER ${v}倍`;
+                },
+              }
+            }
+          },
+          scales: {
+            x: {
+              ticks: { color: '#8892a4', maxTicksLimit: 8, maxRotation: 0 },
+              grid: { color: 'rgba(45,50,82,0.5)' }
+            },
+            y: {
+              ticks: {
+                color: '#8892a4',
+                callback: v => v === 0 ? '0（黒字転換）' : `${v}倍`
+              },
+              grid: { color: 'rgba(45,50,82,0.5)' }
+            }
+          }
+        }
+      });
     }
-  });
-}
-</script>
+
+    // ============================================================
+    // 株価チャート
+    // ============================================================
+    function drawPrice(priceHistory, ipoDate) {
+      const ctx = document.getElementById('priceChart');
+      if (!ctx) return;
+      const labels = priceHistory.map(d => d.date);
+      const closes = priceHistory.map(d => d.close);
+      const ipoIdx = ipoDate ? labels.indexOf(ipoDate) : -1;
+      new Chart(ctx.getContext('2d'), {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [{
+            label: '終値 (円)', data: closes,
+            borderColor: '#4a9eff', backgroundColor: 'rgba(74,158,255,0.08)',
+            fill: true, borderWidth: 2, pointRadius: 0, pointHoverRadius: 5, tension: 0.3,
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#1a1d2e', borderColor: '#2d3252', borderWidth: 1,
+              titleColor: '#94a3c8', bodyColor: '#e2e8f0',
+              callbacks: { title: ctx => ctx[0].label, label: ctx => `¥${ctx.parsed.y.toLocaleString()}` }
+            },
+            annotation: ipoIdx > 0 ? {
+              annotations: {
+                line1: {
+                  type: 'line', xMin: ipoIdx, xMax: ipoIdx,
+                  borderColor: 'rgba(245,158,11,0.6)', borderWidth: 1, borderDash: [4, 4],
+                  label: { content: '上場', enabled: true, color: '#f59e0b', backgroundColor: 'transparent', font: { size: 10 } }
+                }
+              }
+            } : {}
+          },
+          scales: {
+            x: {
+              ticks: {
+                color: '#8892a4', maxTicksLimit: 8, maxRotation: 0,
+                callback: (v, i) => { const d = labels[i]; return d ? d.slice(2, 7).replace('-', '/') : ''; }
+              }, grid: { color: 'rgba(45,50,82,0.5)' }
+            },
+            y: { ticks: { color: '#8892a4', callback: v => '¥' + v.toLocaleString() }, grid: { color: 'rgba(45,50,82,0.5)' } }
+          }
+        }
+      });
+    }
+  </script>
 </body>
+
 </html>
